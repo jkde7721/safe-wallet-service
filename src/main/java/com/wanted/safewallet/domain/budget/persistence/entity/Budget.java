@@ -1,9 +1,11 @@
 package com.wanted.safewallet.domain.budget.persistence.entity;
 
+import com.wanted.safewallet.domain.budget.persistence.converter.YearMonthAttributeConverter;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.audit.BaseTime;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -41,6 +43,7 @@ public class Budget extends BaseTime {
     @Column(nullable = false)
     private Long amount;
 
+    @Convert(converter = YearMonthAttributeConverter.class)
     @Column(nullable = false)
     private YearMonth budgetYearMonth;
 }
