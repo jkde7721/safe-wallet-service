@@ -59,6 +59,24 @@ class BudgetControllerTest {
         then(budgetService).should(times(1))
             .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
     }
-    
-    //TODO: validation 실패 테스트 작성
+
+    @DisplayName("월별 예산 설정 컨트롤러 테스트 : 실패")
+    @Test
+    void setUpBudget_validation_fail() throws Exception {
+        //given
+        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(
+            YearMonth.now().minusMonths(1), List.of());
+
+        //when, then
+        mockMvc.perform(post("/api/budgets")
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.budgetYearMonth").exists())
+            .andExpect(jsonPath("$.budgetList").exists())
+            .andDo(print());
+        then(budgetService).should(times(0))
+            .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
+    }
 }
