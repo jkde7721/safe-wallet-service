@@ -1,6 +1,7 @@
 package com.wanted.safewallet.domain.budget.web.dto.request;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.global.dto.request.format.CustomYearMonthFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
@@ -18,7 +19,8 @@ public class BudgetSetUpRequestDto {
 
     @FutureOrPresent(message = "{budget.setup.futureOrPresent}")
     @NotNull(message = "{budget.setup.notNull}")
-    private YearMonth budgetYearMonth; //TODO: 날짜 매핑
+    @CustomYearMonthFormat
+    private YearMonth budgetYearMonth;
 
     @Valid
     @NotEmpty(message = "{budget.setup.notEmpty}")
