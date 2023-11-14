@@ -1,5 +1,7 @@
 package com.wanted.safewallet.domain.budget.business.service;
 
+import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_BUDGET;
+
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
@@ -8,6 +10,7 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
+import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +42,7 @@ public class BudgetService {
         categoryService.validateCategory(categoryValidDtoList);
         if (budgetRepository.existsByUserIdAndBudgetYearMonthAndInCategories(
             userId, requestDto.getBudgetYearMonth(), categoryIds)) {
-            throw new RuntimeException("해당 월, 해당 카테고리의 예산 설정이 이미 존재합니다.");
+            throw new BusinessException(ALREADY_EXISTS_BUDGET);
         }
     }
 }
