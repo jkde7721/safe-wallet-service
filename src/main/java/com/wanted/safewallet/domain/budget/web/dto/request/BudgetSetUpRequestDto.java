@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BudgetSetUpRequestDto {
 
-    @FutureOrPresent
-    @NotNull
+    @FutureOrPresent(message = "{budget.setup.futureOrPresent}")
+    @NotNull(message = "{budget.setup.notNull}")
     private YearMonth budgetYearMonth; //TODO: 날짜 매핑
 
     @Valid
-    @NotEmpty
+    @NotEmpty(message = "{budget.setup.notEmpty}")
     private List<BudgetByCategory> budgetList;
 
     @Getter
@@ -29,13 +29,13 @@ public class BudgetSetUpRequestDto {
     @AllArgsConstructor
     public static class BudgetByCategory {
 
-        @NotNull
+        @NotNull(message = "{budget.setup.notNull}")
         private Long categoryId;
 
-        @NotNull
+        @NotNull(message = "{budget.setup.notNull}")
         private CategoryType type; //TODO: Enum 매핑
 
-        @NotNull
+        @NotNull(message = "{budget.setup.notNull}")
         private Long amount;
     }
 }
