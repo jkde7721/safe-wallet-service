@@ -7,9 +7,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.YearMonth;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class BudgetSetUpRequestDto {
 
     @FutureOrPresent
@@ -21,6 +25,8 @@ public class BudgetSetUpRequestDto {
     private List<BudgetByCategory> budgetList;
 
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BudgetByCategory {
 
         @NotNull
