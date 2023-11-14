@@ -35,7 +35,7 @@ public class BudgetSetUpRequestDto {
         private Long categoryId;
 
         @NotNull(message = "{budget.setup.notNull}")
-        private CategoryType type; //TODO: Enum 매핑
+        private CategoryType type;
 
         @NotNull(message = "{budget.setup.notNull}")
         private Long amount;
