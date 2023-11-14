@@ -35,17 +35,22 @@ class CategoryServiceTest {
     @Test
     void getCategoryList() {
         //given
-        List<Category> categoryList = List.of(Category.builder().type(CategoryType.FOOD).build(),
-            Category.builder().type(CategoryType.TRAFFIC).build());
+        List<Category> categoryList = List.of(Category.builder().id(1L).type(CategoryType.FOOD).build(),
+            Category.builder().id(2L).type(CategoryType.TRAFFIC).build());
         given(categoryRepository.findAll()).willReturn(categoryList);
 
         //when
-        CategoryListResponseDto dto = categoryService.getCategoryList();
+        CategoryListResponseDto responseDto = categoryService.getCategoryList();
 
         //then
         then(categoryRepository).should(times(1)).findAll();
         then(categoryMapper).should(times(1)).toDto(categoryList);
-        assertThat(dto.getCategoryList()).hasSize(2);
-        assertThat(dto.getCategoryList()).contains(CategoryType.FOOD.name(), CategoryType.TRAFFIC.name());
+        assertThat(responseDto.getCategoryList()).hasSize(2);
+        assertThat(responseDto.getCategoryList())
+            .extracting("categoryId")
+            .contains(1L, 2L);
+        assertThat(responseDto.getCategoryList())
+            .extracting("type")
+            .contains(CategoryType.FOOD, CategoryType.TRAFFIC);
     }
 }

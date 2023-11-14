@@ -17,7 +17,7 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<CategoryListResponseDto> getCategoryList() {
-        CategoryListResponseDto dto = categoryService.getCategoryList();
-        return ResponseEntity.ok(dto);
+        CategoryListResponseDto responseDto = categoryService.getCategoryList();
+        return ResponseEntity.ok(responseDto);
     }
 }
