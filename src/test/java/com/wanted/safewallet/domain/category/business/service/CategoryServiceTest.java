@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.category.business.service;
 
+import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_CATEGORY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -12,6 +13,7 @@ import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.category.persistence.repository.CategoryRepository;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
+import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +74,8 @@ class CategoryServiceTest {
 
         //then
         assertThatThrownBy(() -> categoryService.validateCategory(categoryValidRequestDtoList))
-            .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode").isEqualTo(NOT_FOUND_CATEGORY);
         then(categoryRepository).should(times(1)).findAllMap();
     }
 }
