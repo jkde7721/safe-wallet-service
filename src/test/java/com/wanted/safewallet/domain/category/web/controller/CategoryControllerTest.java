@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
+import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto.CategoryResponseDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,8 @@ class CategoryControllerTest {
     void getCategoryList() throws Exception {
         //given
         CategoryListResponseDto dto = new CategoryListResponseDto(
-            List.of(CategoryType.FOOD.name(), CategoryType.TRAFFIC.name()));
+            List.of(new CategoryResponseDto(1L, CategoryType.FOOD),
+                new CategoryResponseDto(2L, CategoryType.TRAFFIC)));
         given(categoryService.getCategoryList()).willReturn(dto);
 
         //when, then
