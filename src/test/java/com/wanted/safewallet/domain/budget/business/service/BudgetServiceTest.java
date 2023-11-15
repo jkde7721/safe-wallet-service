@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.budget.business.service;
 
+import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_BUDGET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +17,7 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.YearMonth;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -83,7 +85,8 @@ class BudgetServiceTest {
 
         //then
         assertThatThrownBy(() -> budgetService.setUpBudget(userId, requestDto))
-                .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode").isEqualTo(ALREADY_EXISTS_BUDGET);
         then(categoryService).should(times(1)).validateCategory(anyList());
         then(budgetRepository).should(times(1))
             .existsByUserIdAndBudgetYearMonthAndInCategories(anyString(), any(YearMonth.class), anyList());

@@ -44,7 +44,7 @@ class CategoryControllerTest {
         mockMvc.perform(get("/api/categories")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.categoryList", hasSize(2)))
+            .andExpect(jsonPath("$.data.categoryList", hasSize(2)))
             .andDo(print());
         then(categoryService).should(times(1)).getCategoryList();
     }
