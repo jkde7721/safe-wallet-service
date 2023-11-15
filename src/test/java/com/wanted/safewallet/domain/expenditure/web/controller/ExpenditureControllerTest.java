@@ -3,11 +3,13 @@ package com.wanted.safewallet.domain.expenditure.web.controller;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import java.time.LocalDate;
 import org.hamcrest.core.AllOf;
@@ -73,5 +76,25 @@ class ExpenditureControllerTest {
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
         then(expenditureService).should(times(0)).createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class));
+    }
+
+    @DisplayName("지출 내역 수정 컨트롤러 테스트 : 실패")
+    @Test
+    void updateExpenditure_validation_fail() throws Exception {
+        //given
+        ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
+            null, -1L, 1L, CategoryType.FOOD, "");
+
+        //when, then
+        mockMvc.perform(put("/api/expenditures/1")
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", AllOf.allOf(
+                containsString("expenditureDate"), containsString("amount"))))
+            .andDo(print());
+        then(expenditureService).should(times(0)).updateExpenditure(
+            anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
     }
 }
