@@ -12,19 +12,13 @@ import java.util.List;
 
 public class CustomYearMonthDeserializer extends JsonDeserializer<YearMonth> {
 
-    private static final String HYPHEN_PATTERN = "yyyy-MM";
-    private static final String SLASH_PATTERN = "yyyy/MM";
-    private static final String DOT_PATTERN = "yyyy.MM";
-    private static final String HYPHEN_PATTERN_NON_ZERO = "yyyy-M";
-    private static final String SLASH_PATTERN_NON_ZERO = "yyyy/M";
-    private static final String DOT_PATTERN_NON_ZERO = "yyyy.M";
+    private static final String HYPHEN_PATTERN = "yyyy-M";
+    private static final String SLASH_PATTERN = "yyyy/M";
+    private static final String DOT_PATTERN = "yyyy.M";
     private static final List<DateTimeFormatter> formatters = List.of(
         DateTimeFormatter.ofPattern(HYPHEN_PATTERN),
         DateTimeFormatter.ofPattern(SLASH_PATTERN),
-        DateTimeFormatter.ofPattern(DOT_PATTERN),
-        DateTimeFormatter.ofPattern(HYPHEN_PATTERN_NON_ZERO),
-        DateTimeFormatter.ofPattern(SLASH_PATTERN_NON_ZERO),
-        DateTimeFormatter.ofPattern(DOT_PATTERN_NON_ZERO));
+        DateTimeFormatter.ofPattern(DOT_PATTERN));
 
     @Override
     public YearMonth deserialize(JsonParser parser, DeserializationContext context)
@@ -37,7 +31,6 @@ public class CustomYearMonthDeserializer extends JsonDeserializer<YearMonth> {
             }
         }
         throw new JsonParseException(parser, "Unable to parse date: [" + parser.getValueAsString()
-            + "]. Supported formats: " + List.of(HYPHEN_PATTERN, SLASH_PATTERN, DOT_PATTERN,
-            HYPHEN_PATTERN_NON_ZERO, SLASH_PATTERN_NON_ZERO, DOT_PATTERN_NON_ZERO));
+            + "]. Supported formats: " + List.of(HYPHEN_PATTERN, SLASH_PATTERN, DOT_PATTERN));
     }
 }
