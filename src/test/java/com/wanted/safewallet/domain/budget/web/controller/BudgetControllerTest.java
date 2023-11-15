@@ -2,6 +2,7 @@ package com.wanted.safewallet.domain.budget.web.controller;
 
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -19,6 +20,7 @@ import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseD
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import java.time.YearMonth;
 import java.util.List;
+import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,7 @@ class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.budgetList", hasSize(2)))
+            .andExpect(jsonPath("$.data.budgetList", hasSize(2)))
             .andDo(print());
         then(budgetService).should(times(1))
             .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
@@ -73,8 +75,8 @@ class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.budgetYearMonth").exists())
-            .andExpect(jsonPath("$.budgetList").exists())
+            .andExpect(jsonPath("$.message", AllOf.allOf(
+                containsString("budgetYearMonth"), containsString("budgetList"))))
             .andDo(print());
         then(budgetService).should(times(0))
             .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
