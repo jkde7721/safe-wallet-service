@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,5 +38,10 @@ public class ExpenditureController {
     public void updateExpenditure(@PathVariable Long expenditureId,
         @RequestBody @Valid ExpenditureUpdateRequestDto requestDto) {
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
+    }
+
+    @DeleteMapping("/{expenditureId}")
+    public void deleteExpenditure(@PathVariable Long expenditureId) {
+        expenditureService.deleteExpenditure(userId, expenditureId);
     }
 }
