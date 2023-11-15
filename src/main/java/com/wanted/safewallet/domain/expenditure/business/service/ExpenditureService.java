@@ -25,8 +25,8 @@ public class ExpenditureService {
         ExpenditureCreateRequestDto requestDto) {
         validateRequest(requestDto);
         Expenditure expenditure = expenditureMapper.toEntity(userId, requestDto);
-        expenditureRepository.save(expenditure);
-        return expenditureMapper.toDto(expenditure);
+        Expenditure savedExpenditure = expenditureRepository.save(expenditure);
+        return expenditureMapper.toDto(savedExpenditure);
     }
 
     private void validateRequest(ExpenditureCreateRequestDto requestDto) {
