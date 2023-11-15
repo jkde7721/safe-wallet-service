@@ -43,6 +43,12 @@ public class ExpenditureService {
             requestDto.getAmount(), requestDto.getNote());
     }
 
+    @Transactional
+    public void deleteExpenditure(String userId, Long expenditureId) {
+        Expenditure expenditure = getValidExpenditure(userId, expenditureId);
+        expenditure.softDelete();
+    }
+
     public Expenditure getValidExpenditure(String userId, Long expenditureId) {
         Expenditure expenditure = getExpenditure(expenditureId);
         if (Objects.equals(expenditure.getUser().getId(), userId)) {
