@@ -13,9 +13,9 @@ Spring Boot, Querydsl, MySQL, Redis, JWT
 
 <br/>
 
-### DB 설계 
+### DB 설계
 
-<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/1d5c979a-8a84-459d-bf43-2641e32b0d2b" width="80%"/>
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/e3acb62d-ddde-40eb-92ef-dcf64fb16de0" width="60%"/>
 
 <br/>
 
@@ -27,3 +27,11 @@ Spring Boot, Querydsl, MySQL, Redis, JWT
 
 | 고려사항 | 정리 블로그 |
 | ------- | ------------ |
+
+<br/>
+
+### 프로젝트 관리 Jira 칸반 보드
+
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/140741b6-2a11-4f5f-8d1d-ba3a7ee6bb66" width="80%"/>
+
+<br/>
