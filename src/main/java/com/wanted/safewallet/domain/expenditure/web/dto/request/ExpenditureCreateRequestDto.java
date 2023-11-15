@@ -11,17 +11,17 @@ import lombok.Getter;
 public class ExpenditureCreateRequestDto {
 
     @CustomLocalDateFormat
-    @NotNull
+    @NotNull(message = "{expenditure.create.notNull}")
     private LocalDate expenditureDate;
 
-    @Min(0)
-    @NotNull
+    @Min(value = 0, message = "{expenditure.create.min.zero}")
+    @NotNull(message = "{expenditure.create.notNull}")
     private Long amount;
 
-    @NotNull
+    @NotNull(message = "{expenditure.create.notNull}")
     private Long categoryId;
 
-    @NotNull
+    @NotNull(message = "{expenditure.create.notNull}")
     private CategoryType type;
 
     private String note = "";
