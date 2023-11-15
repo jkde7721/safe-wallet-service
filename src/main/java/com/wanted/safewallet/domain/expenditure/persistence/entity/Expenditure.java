@@ -17,7 +17,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
+@DynamicUpdate
+@DynamicInsert
 @Getter
 @Builder
 @AllArgsConstructor
@@ -47,10 +52,19 @@ public class Expenditure extends BaseTime {
     @Column(nullable = false, length = 500)
     private String note;
 
+    @Builder.Default
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Boolean deleted = Boolean.FALSE;
+
     public void update(Long categoryId, LocalDate expenditureDate, Long amount, String note) {
         this.category = Category.builder().id(categoryId).build();
         this.expenditureDate = expenditureDate;
         this.amount = amount;
         this.note = note;
+    }
+
+    public void softDelete() {
+        this.deleted = Boolean.TRUE;
     }
 }
