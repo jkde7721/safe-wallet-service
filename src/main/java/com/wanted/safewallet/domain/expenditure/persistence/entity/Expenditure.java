@@ -11,7 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +39,7 @@ public class Expenditure extends BaseTime {
     private Category category;
 
     @Column(nullable = false)
-    private LocalDateTime expenditureDate;
+    private LocalDate expenditureDate;
 
     @Column(nullable = false)
     private Long amount;

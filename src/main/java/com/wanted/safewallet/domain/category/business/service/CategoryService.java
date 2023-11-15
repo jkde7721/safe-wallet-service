@@ -27,9 +27,16 @@ public class CategoryService {
         return categoryMapper.toDto(categoryList);
     }
 
-    public void validateCategory(List<CategoryValidRequestDto> requestDtoList) {
+    public void validateCategory(CategoryValidRequestDto category) {
         Map<Long, Category> categoryMap = categoryRepository.findAllMap();
-        requestDtoList.forEach(category -> {
+        if (!existsCategory(categoryMap, category)) {
+            throw new BusinessException(NOT_FOUND_CATEGORY);
+        }
+    }
+
+    public void validateCategory(List<CategoryValidRequestDto> categoryList) {
+        Map<Long, Category> categoryMap = categoryRepository.findAllMap();
+        categoryList.forEach(category -> {
             if (!existsCategory(categoryMap, category)) {
                 throw new BusinessException(NOT_FOUND_CATEGORY);
             }
