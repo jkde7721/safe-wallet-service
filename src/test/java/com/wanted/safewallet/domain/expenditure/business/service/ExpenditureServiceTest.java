@@ -125,4 +125,24 @@ class ExpenditureServiceTest {
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_EXPENDITURE);
     }
+
+    @DisplayName("지출 내역 삭제 서비스 테스트 : 성공")
+    @Test
+    void deleteExpenditure() {
+        //given
+        String userId = "testUserId";
+        Long expenditureId = 1L;
+        Expenditure expenditure = Expenditure.builder().id(expenditureId)
+            .user(User.builder().id(userId).build())
+            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
+            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+        given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
+
+        //when
+        expenditureService.deleteExpenditure(userId, expenditureId);
+
+        //then
+        then(expenditureRepository).should(times(1)).findById(anyLong());
+        assertThat(expenditure.getDeleted()).isTrue();
+    }
 }
