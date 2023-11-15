@@ -15,17 +15,17 @@ import lombok.NoArgsConstructor;
 public class ExpenditureUpdateRequestDto {
 
     @CustomLocalDateFormat
-    @NotNull
+    @NotNull(message = "{expenditure.update.notNull}")
     private LocalDate expenditureDate;
 
-    @Min(0)
-    @NotNull
+    @Min(value = 0, message = "{expenditure.update.min.zero}")
+    @NotNull(message = "{expenditure.update.notNull}")
     private Long amount;
 
-    @NotNull
+    @NotNull(message = "{expenditure.update.notNull}")
     private Long categoryId;
 
-    @NotNull
+    @NotNull(message = "{expenditure.update.notNull}")
     private CategoryType type;
 
     private String note = "";
