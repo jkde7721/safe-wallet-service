@@ -46,4 +46,11 @@ public class Expenditure extends BaseTime {
 
     @Column(nullable = false, length = 500)
     private String note;
+
+    public void update(Long categoryId, LocalDate expenditureDate, Long amount, String note) {
+        this.category = Category.builder().id(categoryId).build();
+        this.expenditureDate = expenditureDate;
+        this.amount = amount;
+        this.note = note;
+    }
 }
