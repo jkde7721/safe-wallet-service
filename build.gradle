@@ -41,6 +41,9 @@ dependencies {
 
 	//Jackson jsr310 의존성
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	//Passay 의존성
+	implementation 'org.passay:passay:1.6.4'
 }
 
 tasks.named('bootBuildImage') {
