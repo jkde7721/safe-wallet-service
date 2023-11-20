@@ -9,13 +9,10 @@ import java.util.List;
 import org.passay.CharacterRule;
 import org.passay.DictionaryRule;
 import org.passay.EnglishCharacterData;
-import org.passay.EnglishSequenceData;
 import org.passay.IllegalRegexRule;
-import org.passay.IllegalSequenceRule;
 import org.passay.LengthRule;
 import org.passay.PasswordData;
 import org.passay.PasswordValidator;
-import org.passay.RepeatCharacterRegexRule;
 import org.passay.ResourceBundleMessageResolver;
 import org.passay.RuleResult;
 import org.passay.UsernameRule;
@@ -44,10 +41,6 @@ public class PasswordConstraintValidator implements
             new IllegalRegexRule(KOREAN_REGEX, false),
             new WhitespaceRule(),
             new UsernameRule(),
-            new RepeatCharacterRegexRule(5, false),
-            new IllegalSequenceRule(EnglishSequenceData.Alphabetical, 5, false),
-            new IllegalSequenceRule(EnglishSequenceData.Numerical, 5, false),
-            new IllegalSequenceRule(EnglishSequenceData.USQwerty, 5, false),
             new DictionaryRule(wordListDictionary)
         ));
     }
