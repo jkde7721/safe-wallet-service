@@ -23,7 +23,7 @@ public class User extends BaseTime {
     @Column(name = "user_id", updatable = false)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
