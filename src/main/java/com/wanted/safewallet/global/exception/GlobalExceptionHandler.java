@@ -1,8 +1,10 @@
 package com.wanted.safewallet.global.exception;
 
+import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.wanted.safewallet.global.dto.response.CommonResponse;
+import java.util.stream.Stream;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +28,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        StringBuilder sb = new StringBuilder();
-        e.getBindingResult().getFieldErrors().forEach(f ->
-            sb.append("[").append(f.getField()).append(": ").append(f.getDefaultMessage()).append("] "));
+        String errorMessage = getErrorMessage(e);
         return ResponseEntity.status(BAD_REQUEST)
             .body(new CommonResponse<>(BAD_REQUEST.value(), BAD_REQUEST.name(),
-                sb.toString(), null));
+                errorMessage, null));
+    }
+
+    private String getErrorMessage(MethodArgumentNotValidException e) {
+        return Stream.concat(getObjectErrorMessages(e), getFieldErrorMessages(e))
+            .collect(joining(", "));
+    }
+
+    private Stream<String> getObjectErrorMessages(MethodArgumentNotValidException e) {
+        return e.getBindingResult().getGlobalErrors().stream()
+            .map(err -> String.format("[%s]", err.getDefaultMessage()));
+    }
+
+    private Stream<String> getFieldErrorMessages(MethodArgumentNotValidException e) {
+        return e.getFieldErrors().stream()
+            .map(err -> String.format("[%s: %s]", err.getField(), err.getDefaultMessage()));
     }
 }
