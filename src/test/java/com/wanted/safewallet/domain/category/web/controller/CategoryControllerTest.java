@@ -13,15 +13,20 @@ import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto.CategoryResponseDto;
+import com.wanted.safewallet.global.config.SecurityConfig;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+@WithMockUser
+@Import(SecurityConfig.class)
 @WebMvcTest(CategoryController.class)
 class CategoryControllerTest {
 
