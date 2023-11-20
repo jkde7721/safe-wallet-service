@@ -44,6 +44,11 @@ dependencies {
 
 	//Passay 의존성
 	implementation 'org.passay:passay:1.6.4'
+
+	//JWT 의존성
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 }
 
 tasks.named('bootBuildImage') {
