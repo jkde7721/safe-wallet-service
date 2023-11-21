@@ -1,9 +1,5 @@
 package com.wanted.safewallet.domain.auth.utils;
 
-import static com.wanted.safewallet.global.exception.ErrorCode.EXPIRED_JWT_TOKEN;
-import static com.wanted.safewallet.global.exception.ErrorCode.INVALID_JWT_TOKEN;
-
-import com.wanted.safewallet.global.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -71,7 +67,7 @@ public class JwtUtils {
         try {
             getClaims(token);
             return true;
-        } catch (BusinessException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
@@ -80,8 +76,10 @@ public class JwtUtils {
         try {
             getClaims(token);
             return true;
-        } catch (BusinessException e) {
-            return e.getErrorCode() == EXPIRED_JWT_TOKEN;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException e) {
+            return false;
         }
     }
 
@@ -95,10 +93,10 @@ public class JwtUtils {
                 .getPayload();
         } catch (ExpiredJwtException e) {
             log.error("JWT token is expired: {}", e.getMessage());
-            throw new BusinessException(EXPIRED_JWT_TOKEN);
+            throw e;
         } catch (JwtException e) {
             log.error("JWT token is invalid: {}", e.getMessage());
-            throw new BusinessException(INVALID_JWT_TOKEN);
+            throw e;
         }
     }
 
