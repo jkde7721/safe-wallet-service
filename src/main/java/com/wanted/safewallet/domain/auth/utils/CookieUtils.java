@@ -13,15 +13,12 @@ import org.springframework.stereotype.Component;
 public class CookieUtils {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
-    private static final String REFRESH_TOKEN_COOKIE_PATH = "/api/auth/refresh";
+    private static final String REFRESH_TOKEN_COOKIE_PATH = "/api/auth";
     private final JwtProperties jwtProperties;
 
     public String getToken(HttpServletRequest request) {
-        Cookie cookie = Arrays.stream(getCookies(request))
-            .filter(c -> c.getName().equals(REFRESH_TOKEN_COOKIE_NAME))
-            .findFirst()
-            .orElse(new Cookie(REFRESH_TOKEN_COOKIE_NAME, null));
-        return cookie.getValue();
+        Cookie tokenCookie = getTokenCookie(request);
+        return tokenCookie.getValue();
     }
 
     public void setToken(HttpServletResponse response, String token) {
@@ -31,6 +28,19 @@ public class CookieUtils {
         cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
         cookie.setSecure(false);
         response.addCookie(cookie);
+    }
+
+    public void deleteToken(HttpServletRequest request, HttpServletResponse response) {
+        Cookie tokenCookie = getTokenCookie(request);
+        tokenCookie.setMaxAge(0);
+        response.addCookie(tokenCookie);
+    }
+
+    private Cookie getTokenCookie(HttpServletRequest request) {
+        return Arrays.stream(getCookies(request))
+            .filter(c -> c.getName().equals(REFRESH_TOKEN_COOKIE_NAME))
+            .findFirst()
+            .orElse(new Cookie(REFRESH_TOKEN_COOKIE_NAME, null));
     }
 
     //HttpServletRequest의 getCookies 메소드가 null을 반환할 수 있기 때문
