@@ -23,6 +23,6 @@ public class HeaderUtils {
     }
 
     public void setToken(HttpServletResponse response, String token) {
-        response.setHeader(AUTHORIZATION_HEADER_NAME, token);
+        response.setHeader(AUTHORIZATION_HEADER_NAME, jwtProperties.prefix() + token);
     }
 }
