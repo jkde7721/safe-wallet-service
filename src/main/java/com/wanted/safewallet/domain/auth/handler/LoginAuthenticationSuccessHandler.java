@@ -1,6 +1,7 @@
 package com.wanted.safewallet.domain.auth.handler;
 
 import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.utils.CookieUtils;
 import com.wanted.safewallet.domain.auth.utils.HeaderUtils;
 import com.wanted.safewallet.domain.auth.utils.JwtUtils;
@@ -21,6 +22,7 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
     private final JwtUtils jwtUtils;
     private final HeaderUtils headerUtils;
     private final CookieUtils cookieUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -31,8 +33,7 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
             userDetails.getUserId(), authorities);
         String refreshToken = jwtUtils.generateRefreshToken(userDetails.getUsername());
 
-        //TODO: RT Redis 저장
-
+        refreshTokenService.saveToken(refreshToken);
         headerUtils.setToken(response, accessToken);
         cookieUtils.setToken(response, refreshToken);
     }
