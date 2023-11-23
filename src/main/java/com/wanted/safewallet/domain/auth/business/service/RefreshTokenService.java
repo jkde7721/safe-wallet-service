@@ -18,4 +18,9 @@ public class RefreshTokenService {
             .token(token).ttl(jwtProperties.refreshTokenExpirySec()).build();
         refreshTokenRepository.save(refreshToken);
     }
+
+    public void deleteToken(String token) {
+        refreshTokenRepository.findByToken(token)
+            .ifPresent(refreshTokenRepository::delete);
+    }
 }
