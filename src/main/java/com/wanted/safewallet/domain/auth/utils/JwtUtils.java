@@ -51,15 +51,15 @@ public class JwtUtils {
     }
 
     public String getUsername(String token) {
-        return getClaims(token).getSubject();
+        return getExpiredTokenClaims(token).getSubject();
     }
 
     public String getUserId(String token) {
-        return getClaims(token).get(USER_ID_CLAIM_NAME, String.class);
+        return getExpiredTokenClaims(token).get(USER_ID_CLAIM_NAME, String.class);
     }
 
     public List<GrantedAuthority> getAuthorities(String token) {
-        String authorities = getClaims(token).get(AUTHORITIES_CLAIM_NAME, String.class);
+        String authorities = getExpiredTokenClaims(token).get(AUTHORITIES_CLAIM_NAME, String.class);
         return AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
     }
 
@@ -97,6 +97,14 @@ public class JwtUtils {
         } catch (JwtException e) {
             log.error("JWT token is invalid: {}", e.getMessage());
             throw e;
+        }
+    }
+
+    private Claims getExpiredTokenClaims(String token) {
+        try {
+            return getClaims(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
         }
     }
 
