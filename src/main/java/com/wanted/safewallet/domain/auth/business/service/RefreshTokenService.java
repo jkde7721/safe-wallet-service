@@ -23,4 +23,13 @@ public class RefreshTokenService {
         refreshTokenRepository.findByToken(token)
             .ifPresent(refreshTokenRepository::delete);
     }
+
+    public boolean validateToken(String token) {
+        return refreshTokenRepository.findByToken(token).isPresent();
+    }
+
+    public void replaceToken(String originToken, String newToken) {
+        deleteToken(originToken);
+        saveToken(newToken);
+    }
 }
