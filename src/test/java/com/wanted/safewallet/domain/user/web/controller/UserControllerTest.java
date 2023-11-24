@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -15,17 +16,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequestDto;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponseDto;
-import com.wanted.safewallet.global.config.SecurityConfig;
+import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@Import(SecurityConfig.class)
+@WithMockCustomUser
 @WebMvcTest(UserController.class)
 class UserControllerTest {
 
@@ -64,7 +64,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("계정명이 공백일 수 없습니다.")))
             .andDo(print());
@@ -82,7 +83,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("비밀번호는 최소 10자 이상이어야 합니다.")))
             .andDo(print());
@@ -100,7 +102,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("특수 문자를 1개 이상 포함해야 합니다.")))
             .andDo(print());
@@ -118,7 +121,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("비밀번호에 한글을 포함할 수 없습니다.")))
             .andDo(print());
@@ -136,7 +140,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("비밀번호에 공백을 포함할 수 없습니다.")))
             .andDo(print());
@@ -154,7 +159,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("비밀번호에 계정명을 포함할 수 없습니다.")))
             .andDo(print());
@@ -172,7 +178,8 @@ class UserControllerTest {
         mockMvc.perform(post("/api/users")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("취약한 비밀번호는 사용 불가합니다.")))
             .andDo(print());

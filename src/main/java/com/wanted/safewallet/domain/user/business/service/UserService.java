@@ -1,6 +1,7 @@
 package com.wanted.safewallet.domain.user.business.service;
 
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_USERNAME;
+import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_USER;
 
 import com.wanted.safewallet.domain.user.business.mapper.UserMapper;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
@@ -40,5 +41,10 @@ public class UserService {
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ALREADY_EXISTS_USERNAME);
         }
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
     }
 }

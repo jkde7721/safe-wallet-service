@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -19,7 +20,7 @@ import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureServ
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
-import com.wanted.safewallet.global.config.SecurityConfig;
+import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.DisplayName;
@@ -27,13 +28,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WithMockUser
-@Import(SecurityConfig.class)
+@WithMockCustomUser
 @WebMvcTest(ExpenditureController.class)
 class ExpenditureControllerTest {
 
@@ -57,7 +55,8 @@ class ExpenditureControllerTest {
         mockMvc.perform(post("/api/expenditures")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.expenditureId").exists())
             .andDo(print());
@@ -75,7 +74,8 @@ class ExpenditureControllerTest {
         mockMvc.perform(post("/api/expenditures")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("expenditureDate"), containsString("amount"))))
@@ -94,7 +94,8 @@ class ExpenditureControllerTest {
         mockMvc.perform(put("/api/expenditures/1")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("expenditureDate"), containsString("amount"))))
