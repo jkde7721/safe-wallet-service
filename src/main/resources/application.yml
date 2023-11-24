@@ -22,9 +22,6 @@ logging:
     org.hibernate.sql: info
     org.hibernate.type.descriptor.sql: trace
 
-temporary:
-  userId: ${USER_ID}
-
 jwt:
   prefix: 'Bearer '
   secret-key: ${JWT_SECRET_KEY}
