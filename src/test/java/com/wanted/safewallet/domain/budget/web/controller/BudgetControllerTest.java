@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +19,6 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.global.config.SecurityConfig;
 import java.time.YearMonth;
 import java.util.List;
 import org.hamcrest.core.AllOf;
@@ -27,13 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WithMockUser
-@Import(SecurityConfig.class)
 @WebMvcTest(BudgetController.class)
 class BudgetControllerTest {
 
@@ -59,7 +57,8 @@ class BudgetControllerTest {
         mockMvc.perform(post("/api/budgets")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.budgetList", hasSize(2)))
             .andDo(print());
@@ -78,7 +77,8 @@ class BudgetControllerTest {
         mockMvc.perform(post("/api/budgets")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("budgetYearMonth"), containsString("budgetList"))))
