@@ -7,6 +7,8 @@ import com.wanted.safewallet.domain.auth.handler.LoginAuthenticationFailureHandl
 import com.wanted.safewallet.domain.auth.handler.JwtAuthenticationFailureHandler;
 import com.wanted.safewallet.domain.auth.handler.JwtLogoutSuccessHandler;
 import com.wanted.safewallet.domain.auth.handler.LoginAuthenticationSuccessHandler;
+import com.wanted.safewallet.domain.auth.utils.HeaderUtils;
+import com.wanted.safewallet.domain.auth.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +24,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtUtils jwtutils;
+    private final HeaderUtils headerUtils;
     private final LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler;
     private final LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
     private final JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
@@ -63,6 +66,7 @@ public class SecurityConfig {
             loginAuthenticationFilter.setAuthenticationManager(authenticationManager);
             loginAuthenticationFilter.setAuthenticationSuccessHandler(loginAuthenticationSuccessHandler);
             loginAuthenticationFilter.setAuthenticationFailureHandler(loginAuthenticationFailureHandler);
+            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtutils, headerUtils);
 
             http.addFilter(loginAuthenticationFilter)
                 .addFilterAfter(jwtAuthenticationFilter, LoginAuthenticationFilter.class);
