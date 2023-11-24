@@ -19,6 +19,7 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.YearMonth;
 import java.util.List;
 import org.hamcrest.core.AllOf;
@@ -28,10 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WithMockUser
+@WithMockCustomUser
 @WebMvcTest(BudgetController.class)
 class BudgetControllerTest {
 
