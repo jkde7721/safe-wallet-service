@@ -67,7 +67,7 @@ public class JwtUtils {
         try {
             getClaims(token);
             return true;
-        } catch (JwtException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -78,7 +78,7 @@ public class JwtUtils {
             return true;
         } catch (ExpiredJwtException e) {
             return true;
-        } catch (JwtException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -96,6 +96,9 @@ public class JwtUtils {
             throw e;
         } catch (JwtException e) {
             log.error("JWT token is invalid: {}", e.getMessage());
+            throw e;
+        } catch (IllegalArgumentException e) {
+            log.error("JWT token must not be blank: {}", e.getMessage());
             throw e;
         }
     }
