@@ -40,9 +40,10 @@ public class ExpenditureService {
 
     public ExpenditureListResponseDto getExpenditureList(String userId,
         ExpenditureSearchCond searchCond, Pageable pageable) {
+        long totalAmount = expenditureRepository.getTotalAmount(userId, searchCond);
         List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
         Page<Expenditure> expenditurePage = expenditureRepository.findAllFetch(userId, searchCond, pageable);
-        return expenditureMapper.toListDto(statsByCategory, expenditurePage);
+        return expenditureMapper.toListDto(totalAmount, statsByCategory, expenditurePage);
     }
 
     @Transactional

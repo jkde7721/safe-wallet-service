@@ -47,13 +47,10 @@ public class ExpenditureMapper {
             .note(expenditure.getNote()).build();
     }
 
-    public ExpenditureListResponseDto toListDto(List<StatsByCategoryResponseDto> statsByCategory,
-        Page<Expenditure> expenditurePage) {
-        long totalAmount = statsByCategory.stream()
-            .mapToLong(StatsByCategoryResponseDto::getTotalAmount).sum();
+    public ExpenditureListResponseDto toListDto(long totalAmount,
+        List<StatsByCategoryResponseDto> statsByCategory, Page<Expenditure> expenditurePage) {
         Map<LocalDate, List<Expenditure>> expenditureListByDate = expenditurePage.getContent().stream()
             .collect(groupingBy(Expenditure::getExpenditureDate, toList()));
-
         return ExpenditureListResponseDto.builder()
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
