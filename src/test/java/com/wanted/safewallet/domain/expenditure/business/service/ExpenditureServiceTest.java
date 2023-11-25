@@ -11,6 +11,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
@@ -20,6 +21,7 @@ import com.wanted.safewallet.domain.expenditure.persistence.repository.Expenditu
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
@@ -64,9 +66,10 @@ class ExpenditureServiceTest {
         ExpenditureCreateResponseDto responseDto = expenditureService.createExpenditure(userId, requestDto);
 
         //then
+        then(categoryService).should(times(1)).validateCategory(any(CategoryValidRequestDto.class));
         then(expenditureMapper).should(times(1)).toEntity(anyString(), any(ExpenditureCreateRequestDto.class));
         then(expenditureRepository).should(times(1)).save(any(Expenditure.class));
-        then(expenditureMapper).should(times(1)).toDto(any(Expenditure.class));
+        then(expenditureMapper).should(times(1)).toCreateDto(any(Expenditure.class));
         assertThat(responseDto.getExpenditureId()).isEqualTo(1L);
     }
 
@@ -88,6 +91,7 @@ class ExpenditureServiceTest {
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
 
         //then
+        then(categoryService).should(times(1)).validateCategory(any(CategoryValidRequestDto.class));
         then(expenditureRepository).should(times(1)).findById(anyLong());
         assertThat(expenditure.getExpenditureDate()).isEqualTo(requestDto.getExpenditureDate());
         assertThat(expenditure.getAmount()).isEqualTo(requestDto.getAmount());
@@ -144,5 +148,58 @@ class ExpenditureServiceTest {
         //then
         then(expenditureRepository).should(times(1)).findById(anyLong());
         assertThat(expenditure.getDeleted()).isTrue();
+    }
+
+    @DisplayName("지출 내역 상세 조회 서비스 테스트 : 성공")
+    @Test
+    void getExpenditureDetails() {
+        //given
+        String userId = "testUserId";
+        Long expenditureId = 1L;
+        Expenditure expenditure = Expenditure.builder().id(expenditureId)
+            .user(User.builder().id(userId).build())
+            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
+            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+        given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
+
+        //when
+        ExpenditureDetailsResponseDto responseDto = expenditureService.getExpenditureDetails(
+            userId, expenditureId);
+
+        //then
+        then(expenditureRepository).should(times(1)).findByIdFetch(anyLong());
+        assertThat(responseDto).isNotNull();
+    }
+
+    @DisplayName("현재 로그인한 사용자의 유효한 지출 내역 조회 테스트 with 카테고리 : 실패 - 접근 권한 없는 지출 내역")
+    @Test
+    void getValidExpenditureWithCategory() {
+        //given
+        String userId = "testUserId";
+        Long expenditureId = 1L;
+        Expenditure expenditure = Expenditure.builder().id(expenditureId)
+            .user(User.builder().id(userId).build())
+            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
+            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+        given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
+
+        //when, then
+        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategory(
+            "wrong " + userId, expenditureId))
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode").isEqualTo(FORBIDDEN_EXPENDITURE);
+    }
+
+    @DisplayName("해당 지출 내역 식별자로 조회 테스트 with 카테고리 : 실패 - 해당 지출 내역 존재하지 않음")
+    @Test
+    void getExpenditureWithCategory() {
+        //given
+        Long expenditureId = 1L;
+        given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.empty());
+
+        //when, then
+        assertThatThrownBy(() -> expenditureService.getExpenditureWithCategory(expenditureId))
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode").isEqualTo(NOT_FOUND_EXPENDITURE);
     }
 }
