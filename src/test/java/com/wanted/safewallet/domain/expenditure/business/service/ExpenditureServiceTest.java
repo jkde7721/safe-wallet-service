@@ -11,6 +11,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
@@ -65,6 +66,7 @@ class ExpenditureServiceTest {
         ExpenditureCreateResponseDto responseDto = expenditureService.createExpenditure(userId, requestDto);
 
         //then
+        then(categoryService).should(times(1)).validateCategory(any(CategoryValidRequestDto.class));
         then(expenditureMapper).should(times(1)).toEntity(anyString(), any(ExpenditureCreateRequestDto.class));
         then(expenditureRepository).should(times(1)).save(any(Expenditure.class));
         then(expenditureMapper).should(times(1)).toCreateDto(any(Expenditure.class));
@@ -89,6 +91,7 @@ class ExpenditureServiceTest {
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
 
         //then
+        then(categoryService).should(times(1)).validateCategory(any(CategoryValidRequestDto.class));
         then(expenditureRepository).should(times(1)).findById(anyLong());
         assertThat(expenditure.getExpenditureDate()).isEqualTo(requestDto.getExpenditureDate());
         assertThat(expenditure.getAmount()).isEqualTo(requestDto.getAmount());
