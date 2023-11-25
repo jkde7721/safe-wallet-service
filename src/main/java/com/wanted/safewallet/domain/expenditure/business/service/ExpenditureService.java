@@ -15,6 +15,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdat
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureExceptsResponseDto;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import java.util.Objects;
@@ -44,6 +45,13 @@ public class ExpenditureService {
         List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
         Page<Expenditure> expenditurePage = expenditureRepository.findAllFetch(userId, searchCond, pageable);
         return expenditureMapper.toListDto(totalAmount, statsByCategory, expenditurePage);
+    }
+
+    public ExpenditureExceptsResponseDto getExpenditureExcepts(String userId,
+        ExpenditureSearchCond searchCond) {
+        long totalAmount = expenditureRepository.getTotalAmount(userId, searchCond);
+        List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
+        return expenditureMapper.toExceptsDto(totalAmount, statsByCategory);
     }
 
     @Transactional
