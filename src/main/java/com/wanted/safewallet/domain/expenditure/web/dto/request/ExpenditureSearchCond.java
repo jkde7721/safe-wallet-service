@@ -23,11 +23,11 @@ public class ExpenditureSearchCond {
 
     private List<Long> categories = List.of();
 
-    @Min(0)
+    @Min(value = 0, message = "{expenditure.search.amount.min}")
     private Long minAmount = 0L;
 
-    @Max(100000000)
-    private Long maxAmount = 1000000L;
+    @Max(value = 100_000_000, message = "{expenditure.search.amount.max}")
+    private Long maxAmount = 1000_000L;
 
     private List<Long> excepts = List.of(); //지출 id 리스트
 }
