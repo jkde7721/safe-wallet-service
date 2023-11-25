@@ -7,6 +7,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdat
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureExceptsResponseDto;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import jakarta.validation.Valid;
@@ -41,6 +42,12 @@ public class ExpenditureController {
     public ExpenditureListResponseDto getExpenditureList(@CurrentUserId String userId,
         @ModelAttribute ExpenditureSearchCond searchCond, Pageable pageable) {
         return expenditureService.getExpenditureList(userId, searchCond, pageable);
+    }
+
+    @GetMapping("/excepts")
+    public ExpenditureExceptsResponseDto getExpenditureExcepts(@CurrentUserId String userId,
+        @ModelAttribute ExpenditureSearchCond searchCond) {
+        return expenditureService.getExpenditureExcepts(userId, searchCond);
     }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
