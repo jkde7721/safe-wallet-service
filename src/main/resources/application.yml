@@ -17,6 +17,11 @@ spring:
   redis:
     host: ${REDIS_URL}
     port: 6379
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+
 logging:
   level:
     org.hibernate.sql: info
