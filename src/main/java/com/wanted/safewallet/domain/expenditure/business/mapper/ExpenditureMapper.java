@@ -4,6 +4,7 @@ import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -21,5 +22,14 @@ public class ExpenditureMapper {
 
     public ExpenditureCreateResponseDto toCreateDto(Expenditure expenditure) {
         return new ExpenditureCreateResponseDto(expenditure.getId());
+    }
+
+    public ExpenditureDetailsResponseDto toDetailsDto(Expenditure expenditure) {
+        return ExpenditureDetailsResponseDto.builder()
+            .expenditureDate(expenditure.getExpenditureDate())
+            .amount(expenditure.getAmount())
+            .categoryId(expenditure.getCategory().getId())
+            .type(expenditure.getCategory().getType())
+            .note(expenditure.getNote()).build();
     }
 }
