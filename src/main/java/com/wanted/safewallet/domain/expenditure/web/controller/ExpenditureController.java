@@ -40,13 +40,13 @@ public class ExpenditureController {
 
     @GetMapping
     public ExpenditureListResponseDto getExpenditureList(@CurrentUserId String userId,
-        @ModelAttribute ExpenditureSearchCond searchCond, Pageable pageable) {
+        @ModelAttribute @Valid ExpenditureSearchCond searchCond, Pageable pageable) {
         return expenditureService.getExpenditureList(userId, searchCond, pageable);
     }
 
     @GetMapping("/excepts")
     public ExpenditureExceptsResponseDto getExpenditureExcepts(@CurrentUserId String userId,
-        @ModelAttribute ExpenditureSearchCond searchCond) {
+        @ModelAttribute @Valid ExpenditureSearchCond searchCond) {
         return expenditureService.getExpenditureExcepts(userId, searchCond);
     }
 

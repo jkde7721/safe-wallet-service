@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.expenditure.web.dto.request;
 
+import com.wanted.safewallet.domain.expenditure.web.validation.ValidSearchPeriod;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
@@ -9,13 +10,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@ValidSearchPeriod
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpenditureSearchCond {
 
-    //TODO: 조회 날짜 기간은 최대 1년
     private LocalDate startDate = LocalDate.now().minusMonths(1);
 
     private LocalDate endDate = LocalDate.now();
