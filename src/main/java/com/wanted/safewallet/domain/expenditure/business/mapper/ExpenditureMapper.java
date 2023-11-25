@@ -12,6 +12,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDeta
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -56,6 +57,14 @@ public class ExpenditureMapper {
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
             .expenditureListByDate(toListByDateDto(expenditureListByDate))
             .paging(new PageResponse(expenditurePage)).build();
+    }
+
+    public ExpenditureExceptsResponseDto toExceptsDto(long totalAmount,
+        List<StatsByCategoryResponseDto> statsByCategory) {
+        return ExpenditureExceptsResponseDto.builder()
+            .totalAmount(totalAmount)
+            .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
+            .build();
     }
 
     private List<TotalAmountByCategoryResponseDto> toListByCategoryDto(
