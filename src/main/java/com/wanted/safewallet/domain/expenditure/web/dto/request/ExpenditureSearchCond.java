@@ -27,4 +27,6 @@ public class ExpenditureSearchCond {
 
     @Max(100000000)
     private Long maxAmount = 1000000L;
+
+    private List<Long> excepts = List.of(); //지출 id 리스트
 }
