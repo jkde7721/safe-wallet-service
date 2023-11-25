@@ -6,15 +6,21 @@ import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_EXPENDI
 import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
 import com.wanted.safewallet.global.exception.BusinessException;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +36,13 @@ public class ExpenditureService {
     public ExpenditureDetailsResponseDto getExpenditureDetails(String userId, Long expenditureId) {
         Expenditure expenditure = getValidExpenditureWithCategory(userId, expenditureId);
         return expenditureMapper.toDetailsDto(expenditure);
+    }
+
+    public ExpenditureListResponseDto getExpenditureList(String userId,
+        ExpenditureSearchCond searchCond, Pageable pageable) {
+        List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
+        Page<Expenditure> expenditurePage = expenditureRepository.findAllFetch(userId, searchCond, pageable);
+        return expenditureMapper.toListDto(statsByCategory, expenditurePage);
     }
 
     @Transactional
