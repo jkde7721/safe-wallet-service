@@ -56,10 +56,7 @@ public class PasswordConstraintValidator implements
 
     @Override
     public boolean isValid(UserJoinRequestDto requestDto, ConstraintValidatorContext context) {
-        String username = requestDto.getUsername();
-        String password = requestDto.getPassword();
-        PasswordData passwordData = new PasswordData(password);
-        passwordData.setUsername(username);
+        PasswordData passwordData = new PasswordData(requestDto.getUsername(), requestDto.getPassword());
         RuleResult result = validator.validate(passwordData);
         if (result.isValid()) {
             return true;
