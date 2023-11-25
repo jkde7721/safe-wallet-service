@@ -13,6 +13,7 @@ import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,16 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public long getTotalAmount(String userId, ExpenditureSearchCond searchCond) {
+        return Optional.ofNullable(queryFactory.select(expenditure.amount.sum())
+                .from(expenditure)
+                .where(expenditureSearchExpression(userId, searchCond),
+                    expenditureIdNotIn(searchCond.getExcepts()))
+                .fetchOne())
+            .orElse(0L);
+    }
+
+    @Override
     public List<StatsByCategoryResponseDto> getStatsByCategory(String userId, ExpenditureSearchCond searchCond) {
         return queryFactory.select(
             constructor(StatsByCategoryResponseDto.class,
@@ -33,7 +44,8 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
                 expenditure.amount.sum()
             ))
             .from(expenditure)
-            .where(expenditureSearchExpression(userId, searchCond))
+            .where(expenditureSearchExpression(userId, searchCond),
+                expenditureIdNotIn(searchCond.getExcepts()))
             .join(expenditure.category, category)
             .groupBy(category.id)
             .fetch();
@@ -77,6 +89,10 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
 
     private BooleanExpression amountBetween(Long minAmount, Long maxAmount) {
         return expenditure.amount.between(minAmount, maxAmount);
+    }
+
+    private BooleanExpression expenditureIdNotIn(List<Long> excepts) {
+        return CollectionUtils.isEmpty(excepts) ? null : expenditure.id.notIn(excepts);
     }
 
     private BooleanExpression alwaysFalse() {

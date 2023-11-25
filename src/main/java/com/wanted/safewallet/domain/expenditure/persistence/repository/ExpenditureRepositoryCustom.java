@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface ExpenditureRepositoryCustom {
 
+    long getTotalAmount(String userId, ExpenditureSearchCond searchCond);
+
     List<StatsByCategoryResponseDto> getStatsByCategory(String userId, ExpenditureSearchCond searchCond);
 
     Page<Expenditure> findAllFetch(String userId, ExpenditureSearchCond searchCond, Pageable pageable);
