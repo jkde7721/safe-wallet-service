@@ -66,7 +66,7 @@ class ExpenditureServiceTest {
         //then
         then(expenditureMapper).should(times(1)).toEntity(anyString(), any(ExpenditureCreateRequestDto.class));
         then(expenditureRepository).should(times(1)).save(any(Expenditure.class));
-        then(expenditureMapper).should(times(1)).toDto(any(Expenditure.class));
+        then(expenditureMapper).should(times(1)).toCreateDto(any(Expenditure.class));
         assertThat(responseDto.getExpenditureId()).isEqualTo(1L);
     }
 

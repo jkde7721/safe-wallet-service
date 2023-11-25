@@ -19,7 +19,7 @@ public class ExpenditureMapper {
             .note(requestDto.getNote()).build();
     }
 
-    public ExpenditureCreateResponseDto toDto(Expenditure expenditure) {
+    public ExpenditureCreateResponseDto toCreateDto(Expenditure expenditure) {
         return new ExpenditureCreateResponseDto(expenditure.getId());
     }
 }
