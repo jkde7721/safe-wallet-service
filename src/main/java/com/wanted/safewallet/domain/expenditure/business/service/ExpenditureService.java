@@ -11,6 +11,7 @@ import com.wanted.safewallet.domain.expenditure.persistence.repository.Expenditu
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,18 @@ public class ExpenditureService {
     private final CategoryService categoryService;
     private final ExpenditureRepository expenditureRepository;
 
+    public ExpenditureDetailsResponseDto getExpenditureDetails(String userId, Long expenditureId) {
+        Expenditure expenditure = getValidExpenditureWithCategory(userId, expenditureId);
+        return expenditureMapper.toDetailsDto(expenditure);
+    }
+
     @Transactional
     public ExpenditureCreateResponseDto createExpenditure(String userId,
         ExpenditureCreateRequestDto requestDto) {
         validateRequest(requestDto);
         Expenditure expenditure = expenditureMapper.toEntity(userId, requestDto);
         Expenditure savedExpenditure = expenditureRepository.save(expenditure);
-        return expenditureMapper.toDto(savedExpenditure);
+        return expenditureMapper.toCreateDto(savedExpenditure);
     }
 
     @Transactional
@@ -57,8 +63,21 @@ public class ExpenditureService {
         throw new BusinessException(FORBIDDEN_EXPENDITURE);
     }
 
+    public Expenditure getValidExpenditureWithCategory(String userId, Long expenditureId) {
+        Expenditure expenditure = getExpenditureWithCategory(expenditureId);
+        if (Objects.equals(expenditure.getUser().getId(), userId)) {
+            return expenditure;
+        }
+        throw new BusinessException(FORBIDDEN_EXPENDITURE);
+    }
+
     public Expenditure getExpenditure(Long expenditureId) {
         return expenditureRepository.findById(expenditureId)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
+    }
+
+    public Expenditure getExpenditureWithCategory(Long expenditureId) {
+        return expenditureRepository.findByIdFetch(expenditureId)
             .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
 
