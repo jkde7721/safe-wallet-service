@@ -4,12 +4,14 @@ import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureServ
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExpenditureController {
 
     private final ExpenditureService expenditureService;
+
+    @GetMapping("/{expenditureId}")
+    public ExpenditureDetailsResponseDto getExpenditureDetails(@PathVariable Long expenditureId,
+        @CurrentUserId String userId) {
+        return expenditureService.getExpenditureDetails(userId, expenditureId);
+    }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
