@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,6 +41,43 @@ class ExpenditureControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 실패 - 가능한 검색 기간 초과")
+    @Test
+    void searchExpenditure() throws Exception {
+        //given
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusMonths(13);
+
+        //when, then
+        mockMvc.perform(get("/api/expenditures")
+                .param("startDate", startDate.toString())
+                .param("endDate", endDate.toString())
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("조회 가능 기간은 최대 1년입니다.")))
+            .andDo(print());
+    }
+
+    @DisplayName("지출 내역 목록 조회 시 합계 제외 컨트롤러 테스트 : 실패 - 검색 지출 금액 validation 실패")
+    @Test
+    void searchExpenditureExcepts() throws Exception {
+        //given
+        Long minAmount = -1L;
+        Long maxAmount = 1000_000_000L;
+
+        //when, then
+        mockMvc.perform(get("/api/expenditures")
+                .param("minAmount", String.valueOf(minAmount))
+                .param("maxAmount", String.valueOf(maxAmount))
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", AllOf.allOf(
+                containsString("검색 지출 금액은 0원 이상이어야 합니다."),
+                containsString("검색 지출 금액은 100000000원 이하이어야 합니다.")
+            )))
+            .andDo(print());
+    }
 
     @DisplayName("지출 내역 생성 컨트롤러 테스트 : 성공")
     @Test
