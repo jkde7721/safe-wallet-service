@@ -11,8 +11,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCrea
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureExceptsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -48,20 +48,20 @@ public class ExpenditureMapper {
             .note(expenditure.getNote()).build();
     }
 
-    public ExpenditureListResponseDto toListDto(long totalAmount,
+    public ExpenditureSearchResponseDto toSearchDto(long totalAmount,
         List<StatsByCategoryResponseDto> statsByCategory, Page<Expenditure> expenditurePage) {
         Map<LocalDate, List<Expenditure>> expenditureListByDate = expenditurePage.getContent().stream()
             .collect(groupingBy(Expenditure::getExpenditureDate, toList()));
-        return ExpenditureListResponseDto.builder()
+        return ExpenditureSearchResponseDto.builder()
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
             .expenditureListByDate(toListByDateDto(expenditureListByDate))
             .paging(new PageResponse(expenditurePage)).build();
     }
 
-    public ExpenditureExceptsResponseDto toExceptsDto(long totalAmount,
+    public ExpenditureSearchExceptsResponseDto toSearchExceptsDto(long totalAmount,
         List<StatsByCategoryResponseDto> statsByCategory) {
-        return ExpenditureExceptsResponseDto.builder()
+        return ExpenditureSearchExceptsResponseDto.builder()
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
             .build();

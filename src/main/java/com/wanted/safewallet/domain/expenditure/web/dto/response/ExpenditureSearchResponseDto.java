@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureListResponseDto {
+public class ExpenditureSearchResponseDto {
 
     private Long totalAmount;
 

@@ -6,8 +6,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearc
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureExceptsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import jakarta.validation.Valid;
@@ -39,15 +39,15 @@ public class ExpenditureController {
     }
 
     @GetMapping
-    public ExpenditureListResponseDto getExpenditureList(@CurrentUserId String userId,
+    public ExpenditureSearchResponseDto searchExpenditure(@CurrentUserId String userId,
         @ModelAttribute @Valid ExpenditureSearchCond searchCond, Pageable pageable) {
-        return expenditureService.getExpenditureList(userId, searchCond, pageable);
+        return expenditureService.searchExpenditure(userId, searchCond, pageable);
     }
 
     @GetMapping("/excepts")
-    public ExpenditureExceptsResponseDto getExpenditureExcepts(@CurrentUserId String userId,
+    public ExpenditureSearchExceptsResponseDto searchExpenditureExcepts(@CurrentUserId String userId,
         @ModelAttribute @Valid ExpenditureSearchCond searchCond) {
-        return expenditureService.getExpenditureExcepts(userId, searchCond);
+        return expenditureService.searchExpenditureExcepts(userId, searchCond);
     }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
