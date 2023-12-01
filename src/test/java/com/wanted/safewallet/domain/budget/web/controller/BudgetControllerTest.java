@@ -51,7 +51,7 @@ class BudgetControllerTest {
         given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequestDto.class))).willReturn(responseDto);
 
         //when, then
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
+        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.now(),
             List.of(new BudgetSetUpRequestDto.BudgetByCategory(1L, CategoryType.FOOD, 10000L),
                 new BudgetSetUpRequestDto.BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
         mockMvc.perform(post("/api/budgets")
