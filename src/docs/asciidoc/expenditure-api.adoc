@@ -1,9 +1,13 @@
 == 지출 API
-
-=== 지출 생성 API
-==== `POST /api/expenditures`
 :operation-request-body-title: Request Body
 :operation-request-fields-title: Request Fields
 :operation-response-body-title: Response Body
 :operation-response-fields-data-title: Response Fields
+
+=== 지출 생성 API
+==== `POST /api/expenditures`
 operation::expenditure-controller-test/create-expenditure[snippets="request-body,request-fields,response-body,response-fields-data"]
+
+=== 지출 수정 API
+==== `PUT /api/expenditures/{expenditureId}`
+operation::expenditure-controller-test/update-expenditure[snippets="request-body,request-fields,response-body"]

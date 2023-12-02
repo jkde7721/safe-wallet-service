@@ -107,7 +107,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.data.expenditureId").exists())
             .andDo(restDocs.document(
                 requestFields(
-                    fieldWithPath("expenditureDate").description("지출 생성 년월일")
+                    fieldWithPath("expenditureDate").description("지출 발생 년월일")
                         .attributes(key("formats").value("yyyy-M-d 또는 yyyy/M/d 또는 yyyy.M.d")),
                     fieldWithPath("amount").description("지출 금액")
                         .attributes(key("constraints").value("0원 이상")),
@@ -139,6 +139,34 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
         then(expenditureService).should(times(0)).createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class));
+    }
+
+    @DisplayName("지출 내역 수정 컨트롤러 테스트 : 성공")
+    @Test
+    void updateExpenditure() throws Exception {
+        //given
+        ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
+            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+
+        //when, then
+        restDocsMockMvc.perform(put("/api/expenditures/1")
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("expenditureDate").description("지출 발생 년월일")
+                        .attributes(key("formats").value("yyyy-M-d 또는 yyyy/M/d 또는 yyyy.M.d")),
+                    fieldWithPath("amount").description("지출 금액")
+                        .attributes(key("constraints").value("0원 이상")),
+                    fieldWithPath("categoryId").description("카테고리 id"),
+                    fieldWithPath("type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("note").description("지출 관련 메모").optional())));
+        then(expenditureService).should(times(1)).updateExpenditure(
+            anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
     }
 
     @DisplayName("지출 내역 수정 컨트롤러 테스트 : 실패")
