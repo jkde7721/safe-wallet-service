@@ -8,6 +8,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
@@ -34,7 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WithMockCustomUser
 @WebMvcTest(ExpenditureController.class)
-class ExpenditureControllerTest {
+class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @MockBean
     ExpenditureService expenditureService;
@@ -89,15 +97,27 @@ class ExpenditureControllerTest {
 
         //when, then
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            LocalDate.now(), 10000L, 1L, CategoryType.FOOD, "");
-        mockMvc.perform(post("/api/expenditures")
+            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+        restDocsMockMvc.perform(post("/api/expenditures")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.expenditureId").exists())
-            .andDo(print());
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("expenditureDate").description("지출 생성 년월일")
+                        .attributes(key("formats").value("yyyy-M-d 또는 yyyy/M/d 또는 yyyy.M.d")),
+                    fieldWithPath("amount").description("지출 금액")
+                        .attributes(key("constraints").value("0원 이상")),
+                    fieldWithPath("categoryId").description("카테고리 id"),
+                    fieldWithPath("type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("note").description("지출 관련 메모").optional()),
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("expenditureId").description("생성된 지출 id"))));
         then(expenditureService).should(times(1)).createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class));
     }
 
