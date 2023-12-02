@@ -24,12 +24,12 @@ public abstract class AbstractRestDocsTest {
     protected RestDocumentationResultHandler restDocs;
 
     @Autowired
-    protected MockMvc mockMvc;
+    protected MockMvc restDocsMockMvc;
 
     @BeforeEach
     void init(final WebApplicationContext context,
         final RestDocumentationContextProvider provider) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+        this.restDocsMockMvc = MockMvcBuilders.webAppContextSetup(context)
             .apply(documentationConfiguration(provider))
             .alwaysDo(print())
             .alwaysDo(restDocs)

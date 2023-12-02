@@ -43,7 +43,7 @@ class CategoryControllerTest extends AbstractRestDocsTest {
         given(categoryService.getCategoryList()).willReturn(dto);
 
         //when, then
-        mockMvc.perform(get("/api/categories")
+        restDocsMockMvc.perform(get("/api/categories")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.categoryList", hasSize(2)))

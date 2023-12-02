@@ -20,7 +20,7 @@ class CommonResponseControllerTest extends AbstractRestDocsTest {
     @DisplayName("공통 응답 필드 문서화하기 위한 테스트")
     @Test
     void getCommonResponse() throws Exception {
-        mockMvc.perform(get("/commonResponse")
+        restDocsMockMvc.perform(get("/commonResponse")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(restDocs.document(

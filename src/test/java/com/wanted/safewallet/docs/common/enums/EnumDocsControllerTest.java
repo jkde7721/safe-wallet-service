@@ -34,7 +34,7 @@ class EnumDocsControllerTest extends AbstractRestDocsTest {
     @DisplayName("Enum 클래스 문서화하기 위한 테스트")
     @Test
     void getEnums() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/enums")
+        ResultActions resultActions = restDocsMockMvc.perform(get("/enums")
             .accept(MediaType.APPLICATION_JSON));
         EnumDocs enumDocs = getData(resultActions.andReturn());
 
