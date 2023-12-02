@@ -14,6 +14,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -217,5 +218,17 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andDo(print());
         then(expenditureService).should(times(0)).updateExpenditure(
             anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
+    }
+
+    @DisplayName("지출 내역 삭제 컨트롤러 테스트 : 성공")
+    @Test
+    void deleteExpenditure() throws Exception {
+        //given
+        //when, then
+        restDocsMockMvc.perform(delete("/api/expenditures/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").doesNotExist());
+        then(expenditureService).should(times(1))
+            .deleteExpenditure(anyString(), anyLong());
     }
 }

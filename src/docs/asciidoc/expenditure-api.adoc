@@ -15,3 +15,7 @@ operation::expenditure-controller-test/update-expenditure[snippets="request-body
 === 지출 상세 조회 API
 ==== `GET /api/expenditures/{expenditureId}`
 operation::expenditure-controller-test/get-expenditure-details[snippets="response-body,response-fields-data"]
+
+=== 지출 삭제 API
+==== `DELETE /api/expenditures/{expenditureId}`
+operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
