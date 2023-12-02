@@ -1,1 +1,9 @@
 == 예산 API
+
+=== 월별 예산 설정 API
+==== `POST /api/budgets`
+:operation-request-body-title: Request Body
+:operation-request-fields-title: Request Fields
+:operation-response-body-title: Response Body
+:operation-response-fields-data-title: Response Fields
+operation::budget-controller-test/set-up-budget[snippets="request-body,request-fields,response-body,response-fields-data"]
