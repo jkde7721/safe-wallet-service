@@ -29,6 +29,7 @@ import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureServ
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
 import org.hamcrest.core.AllOf;
@@ -49,6 +50,34 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @DisplayName("지출 내역 상세 조회 컨트롤러 테스트 : 성공")
+    @Test
+    void getExpenditureDetails() throws Exception {
+        //given
+        ExpenditureDetailsResponseDto responseDto = new ExpenditureDetailsResponseDto(
+            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+        given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").exists())
+            .andDo(restDocs.document(
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("expenditureDate").description("지출 발생 년월일"),
+                    fieldWithPath("amount").description("지출 금액"),
+                    fieldWithPath("categoryId").description("카테고리 id"),
+                    fieldWithPath("type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("note").description("지출 관련 메모")
+                )
+            ));
+        then(expenditureService).should(times(1))
+            .getExpenditureDetails(anyString(), anyLong());
+    }
 
     @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 실패 - 가능한 검색 기간 초과")
     @Test

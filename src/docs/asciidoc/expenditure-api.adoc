@@ -11,3 +11,7 @@ operation::expenditure-controller-test/create-expenditure[snippets="request-body
 === 지출 수정 API
 ==== `PUT /api/expenditures/{expenditureId}`
 operation::expenditure-controller-test/update-expenditure[snippets="request-body,request-fields,response-body"]
+
+=== 지출 상세 조회 API
+==== `GET /api/expenditures/{expenditureId}`
+operation::expenditure-controller-test/get-expenditure-details[snippets="response-body,response-fields-data"]
