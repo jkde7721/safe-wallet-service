@@ -3,6 +3,7 @@
 :operation-request-fields-title: Request Fields
 :operation-response-body-title: Response Body
 :operation-response-fields-data-title: Response Fields
+:operation-query-parameters-title: Query Parameters
 
 === 지출 생성 API
 ==== `POST /api/expenditures`
@@ -19,3 +20,7 @@ operation::expenditure-controller-test/get-expenditure-details[snippets="respons
 === 지출 삭제 API
 ==== `DELETE /api/expenditures/{expenditureId}`
 operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
+
+=== 지출 목록 조회 API
+==== `GET /api/expenditures`
+operation::expenditure-controller-test/search-expenditure[snippets="query-parameters,response-body,response-fields-data"]

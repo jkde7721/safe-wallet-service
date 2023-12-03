@@ -12,6 +12,9 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.beneathP
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -21,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
@@ -28,17 +32,26 @@ import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.global.dto.response.PageResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
+import java.util.List;
 import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -80,9 +93,117 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .getExpenditureDetails(anyString(), anyLong());
     }
 
-    @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 실패 - 가능한 검색 기간 초과")
+    @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 성공")
     @Test
     void searchExpenditure() throws Exception {
+        //given
+        ExpenditureSearchResponseDto responseDto = ExpenditureSearchResponseDto.builder()
+            .totalAmount(30000L)
+            .totalAmountListByCategory(List.of(
+                TotalAmountByCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
+                    .totalAmount(25000L).build(),
+                TotalAmountByCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
+                    .totalAmount(5000L).build()))
+            .expenditureListByDate(List.of(
+                ExpenditureListByDateResponseDto.builder()
+                    .expenditureDate(LocalDate.of(2023, 11, 17))
+                    .expenditureList(List.of(
+                        ExpenditureResponseDto.builder().expenditureId(3L).amount(5000L)
+                            .categoryId(2L).type(CategoryType.TRAFFIC).note("버스비").build(),
+                        ExpenditureResponseDto.builder().expenditureId(2L).amount(4000L)
+                            .categoryId(1L).type(CategoryType.FOOD).note("편의점 점심").build())).build(),
+                ExpenditureListByDateResponseDto.builder()
+                    .expenditureDate(LocalDate.of(2023, 11, 15))
+                    .expenditureList(List.of(
+                        ExpenditureResponseDto.builder().expenditureId(1L).amount(21000L)
+                            .categoryId(1L).type(CategoryType.FOOD).note("식비를 아끼자!").build())).build()))
+            .paging(PageResponse.builder()
+                .pageNumber(1).pageSize(3).numberOfElements(3).totalPages(4).totalElements(12L)
+                .first(true).last(false).empty(false).build())
+            .build();
+        LocalDate startDate = LocalDate.of(2023, 11, 1);
+        LocalDate endDate = LocalDate.of(2023, 11, 30);
+        List<Long> categories = List.of(1L, 2L);
+        Long minAmount = 1000L;
+        Long maxAmount = 50000L;
+        given(expenditureService.searchExpenditure(anyString(), any(ExpenditureSearchCond.class),
+            any(Pageable.class))).willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures")
+                .param("startDate", startDate.toString())
+                .param("endDate", endDate.toString())
+                .param("categories", collectionToCommaDelimitedString(categories))
+                .param("minAmount", String.valueOf(minAmount))
+                .param("maxAmount", String.valueOf(maxAmount))
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").exists())
+            .andDo(restDocs.document(
+                queryParameters(
+                    parameterWithName("startDate").description("지출 조회 시작 날짜").optional()
+                        .attributes(key("formats").value("yyyy-MM-dd"))
+                        .attributes(key("default").value("현재 날짜 기준 1달 전")),
+                    parameterWithName("endDate").description("지출 조회 종료 날짜").optional()
+                        .attributes(key("formats").value("yyyy-MM-dd"))
+                        .attributes(key("constraints").value("지출 조회 가능 기간은 최대 1년"))
+                        .attributes(key("default").value("현재 날짜")),
+                    parameterWithName("categories").description("지출 조회 카테고리 id").optional()
+                        .attributes(key("default").value("모든 카테고리 조회")),
+                    parameterWithName("minAmount").description("지출 조회 최소 금액").optional()
+                        .attributes(key("constraints").value("0원 이상"))
+                        .attributes(key("default").value(0)),
+                    parameterWithName("maxAmount").description("지출 조회 최대 금액").optional()
+                        .attributes(key("constraints").value("100,000,000원 이하"))
+                        .attributes(key("default").value(1000_000)),
+                    parameterWithName("excepts").description("지출 합계 제외 지출 id").optional()
+                        .attributes(key("default").value("조회된 모든 지출을 합계에 포함"))),
+
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("totalAmount").description("총 지출 합계"),
+                    fieldWithPath("totalAmountListByCategory").description("카테고리 별 지출 합계 목록"),
+                    fieldWithPath("totalAmountListByCategory[].categoryId").description("카테고리 id"),
+                    fieldWithPath("totalAmountListByCategory[].type")
+                        .description(DocsPopupLinkGenerator.generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("totalAmountListByCategory[].totalAmount").description("카테고리 별 지출 합계"),
+                    fieldWithPath("expenditureListByDate").description("날짜 별 지출 상세 목록"),
+                    fieldWithPath("expenditureListByDate[].expenditureDate").description("지출 날짜"),
+                    fieldWithPath("expenditureListByDate[].expenditureList").description("날짜 별 지출"),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].expenditureId").description("지출 id"),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].amount").description("지출 금액"),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].type")
+                        .description(DocsPopupLinkGenerator.generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].note").description("지출 관련 메모"),
+                    subsectionWithPath("paging").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.PAGING_RESPONSE)))));
+    }
+
+    @Disabled
+    @DisplayName("지출 내역 목록 조회 시 합계 제외 컨트롤러 테스트 : 성공")
+    @Test
+    void searchExpenditureExcepts() throws Exception {
+        //given
+        Long minAmount = -1L;
+        Long maxAmount = 1000_000_000L;
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures")
+                .param("minAmount", String.valueOf(minAmount))
+                .param("maxAmount", String.valueOf(maxAmount))
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message", AllOf.allOf(
+                containsString("검색 지출 금액은 0원 이상이어야 합니다."),
+                containsString("검색 지출 금액은 100000000원 이하이어야 합니다.")
+            )))
+            .andDo(print());
+    }
+
+    @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 실패 - 가능한 검색 기간 초과")
+    @Test
+    void searchExpenditure_validation_fail() throws Exception {
         //given
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusMonths(13);
@@ -99,7 +220,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @DisplayName("지출 내역 목록 조회 시 합계 제외 컨트롤러 테스트 : 실패 - 검색 지출 금액 validation 실패")
     @Test
-    void searchExpenditureExcepts() throws Exception {
+    void searchExpenditureExcepts_validation_fail() throws Exception {
         //given
         Long minAmount = -1L;
         Long maxAmount = 1000_000_000L;
