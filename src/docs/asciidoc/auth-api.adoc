@@ -14,11 +14,11 @@
 ==== `POST /api/auth/login`
 
 - 로그인 후 `JWT` 발급
-- 이후 모든 API 요청 헤더에 `Access Token` 포함하여 요청
+- 이후 인증이 필요한 모든 API 요청 헤더에 `Access Token` 포함하여 요청
 - 발급된 `Refresh Token` 은 Redis와 쿠키에 저장
 - `/api/auth` 관련 요청 시 해당 쿠키가 자동으로 포함되어 요청
 
-operation::auth-controller-test/
+operation::auth-controller-test/login[snippets="request-body,request-fields,response-headers,response-cookies"]
 
 === 사용자 로그아웃 API
 ==== `PUT /api/auth/logout`
@@ -26,7 +26,7 @@ operation::auth-controller-test/
 - `Refresh Token` Cookie 삭제
 - Redis에서 `Refresh Token` 삭제
 
-operation::auth-controller-test/
+operation::auth-controller-test/logout[snippets="http-request,request-cookies,http-response,response-cookies"]
 
 === 토큰 재발급 API
 ==== `PUT /api/auth/refresh`
