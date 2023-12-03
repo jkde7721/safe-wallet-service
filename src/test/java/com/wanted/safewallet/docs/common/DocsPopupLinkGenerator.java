@@ -11,7 +11,8 @@ public abstract class DocsPopupLinkGenerator {
 
     @RequiredArgsConstructor
     public enum DocsPopupInfo {
-        CATEGORY_TYPE("category-type", "카테고리 타입");
+        CATEGORY_TYPE("category-type", "카테고리 타입"),
+        PAGING_RESPONSE("paging-response", "페이징 응답");
 
         private final String fileName;
         private final String description;

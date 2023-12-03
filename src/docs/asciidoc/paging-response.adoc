@@ -1,0 +1,3 @@
+[[paging-response]]
+Paging Response
+include::{snippets}/paging-docs-controller-test/get-paging/response-fields.adoc[]
