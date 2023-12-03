@@ -6,26 +6,49 @@
 :operation-response-fields-data-title: Response Fields
 :operation-query-parameters-title: Query Parameters
 
-=== 지출 생성 API
-==== `POST /api/expenditures`
-operation::expenditure-controller-test/create-expenditure[snippets="request-body,request-fields,response-body,response-fields-data"]
-
-=== 지출 수정 API
-==== `PUT /api/expenditures/{expenditureId}`
-operation::expenditure-controller-test/update-expenditure[snippets="request-body,request-fields,response-body"]
-
 === 지출 상세 조회 API
 ==== `GET /api/expenditures/{expenditureId}`
-operation::expenditure-controller-test/get-expenditure-details[snippets="response-body,response-fields-data"]
 
-=== 지출 삭제 API
-==== `DELETE /api/expenditures/{expenditureId}`
-operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
+- `지출` 을 생성한 유저만 권한
+
+operation::expenditure-controller-test/get-expenditure-details[snippets="response-body,response-fields-data"]
 
 === 지출 목록 조회 API
 ==== `GET /api/expenditures`
+
+- `지출` 을 생성한 유저만 권한
+- 조회된 모든 내용의 `지출 합계`, `카테고리 별 지출 합계` 반환
+- `지출일`, `지출 금액`, `지출 id` 를 기준으로 내림차순 정렬
+
 operation::expenditure-controller-test/search-expenditure[snippets="http-request,query-parameters,response-body,response-fields-data"]
 
 === 지출 합계 제외 API
 ==== `GET /api/expenditures/excepts`
+
+- `지출` 을 생성한 유저만 권한
+- `합계 제외` 처리한 지출은 목록에 포함되지만, 모든 `지출 합계` 에서는 제외
+
 operation::expenditure-controller-test/search-expenditure-excepts[snippets="http-request,query-parameters,response-body,response-fields-data"]
+
+=== 지출 생성 API
+==== `POST /api/expenditures`
+
+- 해당 지출 내역의 카테고리 유효성 검사 수행 (존재하는 카테고리인지, `카테고리 id` 와 `type` 이 일치하는지)
+
+operation::expenditure-controller-test/create-expenditure[snippets="request-body,request-fields,response-body,response-fields-data"]
+
+=== 지출 수정 API
+==== `PUT /api/expenditures/{expenditureId}`
+
+- `지출` 을 생성한 유저만 권한
+- 해당 지출 내역의 카테고리 유효성 검사 수행 (존재하는 카테고리인지, `카테고리 id` 와 `type` 이 일치하는지)
+
+operation::expenditure-controller-test/update-expenditure[snippets="request-body,request-fields,response-body"]
+
+=== 지출 삭제 API
+==== `DELETE /api/expenditures/{expenditureId}`
+
+- `지출` 을 생성한 유저만 권한
+- **Soft Delete** 수행
+
+operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
