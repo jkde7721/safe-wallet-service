@@ -7,6 +7,7 @@
 :docinfo: shared-head
 
 include::overview.adoc[]
+include::auth-api.adoc[]
 include::user-api.adoc[]
 include::category-api.adoc[]
 include::budget-api.adoc[]

@@ -1,0 +1,38 @@
+== 인증 및 인가 API
+:operation-http-request-title: HTTP Request
+:operation-http-response-title: HTTP Response
+:operation-request-body-title: Request Body
+:operation-request-fields-title: Request Fields
+:operation-response-body-title: Response Body
+:operation-response-fields-data-title: Response Fields
+:operation-request-headers-title: Request Headers
+:operation-request-cookies-title: Request Cookies
+:operation-response-headers-title: Response Headers
+:operation-response-cookies-title: Response Cookies
+
+=== 사용자 로그인 API
+==== `POST /api/auth/login`
+
+- 로그인 후 `JWT` 발급
+- 이후 모든 API 요청 헤더에 `Access Token` 포함하여 요청
+- 발급된 `Refresh Token` 은 Redis와 쿠키에 저장
+- `/api/auth` 관련 요청 시 해당 쿠키가 자동으로 포함되어 요청
+
+operation::auth-controller-test/
+
+=== 사용자 로그아웃 API
+==== `PUT /api/auth/logout`
+
+- `Refresh Token` Cookie 삭제
+- Redis에서 `Refresh Token` 삭제
+
+operation::auth-controller-test/
+
+=== 토큰 재발급 API
+==== `PUT /api/auth/refresh`
+
+- `Access Token` 이 만료된 경우, 유효한 `Refresh Token` 을 통해 토큰을 재발급 받을 수 있음
+- 요청 헤더에 기존 `Access Token`, 요청 쿠키에 기존 `Refresh Token` 포함하여 요청
+- 재발급된 `Access Token` 과 `Refresh Token` 이 각각 응답 헤더, 쿠키에 포함되어 전달
+
+operation::auth-controller-test/refresh[snippets="http-request,request-headers,request-cookies,http-response,response-headers,response-cookies"]
