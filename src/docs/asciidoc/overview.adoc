@@ -1,0 +1,95 @@
+[[overview]]
+== Overview
+
+[[overview-host]]
+=== Host
+
+|===
+| Environment | Host
+
+| Local
+| `http://localhost:8080`
+
+| Production
+| `ec2 URL`
+|===
+
+[[overview-http-status-code]]
+=== HTTP Status Code
+
+|===
+| 상태 코드 | 상태값 | 설명
+
+| `OK`
+| 200
+| 성공
+
+| `Created`
+| 201
+| 새로운 리소스 생성
+
+| `Bad Request`
+| 400
+| 잘못된 요청
+
+| `Unauthorized`
+| 401
+| 비인증 상태 (인증 실패)
+
+| `Forbidden`
+| 403
+| 권한 거부 (인가 실패)
+
+| `Not Found`
+| 404
+| 존재하지 않는 리소스
+
+| `Method Not Allowed`
+| 405
+| 허용되지 않는 메소드
+
+| `Internal Server Error`
+| 500
+| 서버 내부 에러
+|===
+
+[[overview-error-code]]
+=== Error Code
+
+|===
+| 에러 코드 | 상태 코드 | 설명
+
+| `ALREADY_EXISTS_BUDGET`
+| `BAD_REQUEST`
+| 예산 생성 요청 시 해당 월, 해당 카테고리의 예산 설정 내역 이미 존재
+
+| `NOT_FOUND_CATEGORY`
+| `NOT_FOUND`
+| 존재하지 않는 카테고리
+
+| `NOT_FOUND_EXPENDITURE`
+| `NOT_FOUND`
+| 존재하지 않는 지출 내역
+
+| `FORBIDDEN_EXPENDITURE`
+| `FORBIDDEN`
+| 권한 없음으로 해당 지출 내역 조회 불가
+
+| `ALREADY_EXISTS_USERNAME`
+| `BAD_REQUEST`
+| 회원가입 시 해당 계정명 이미 존재
+
+| `NOT_FOUND_USER`
+| `NOT_FOUND`
+| 존재하지 않는 사용자
+
+| `UNAUTHORIZED_JWT_TOKEN`
+| `UNAUTHORIZED`
+| 유효하지 않은 JWT 토큰
+
+|===
+
+[[overview-common-response-fields]]
+=== Common Response Fields
+
+operation::common-response-controller-test/get-common-response[snippets='http-response,response-fields']

@@ -1,9 +1,13 @@
 package com.wanted.safewallet.global.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class PageResponse {
 
     private final Integer pageNumber;

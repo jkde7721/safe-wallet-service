@@ -2,10 +2,16 @@ package com.wanted.safewallet.domain.user.web.controller;
 
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,6 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequestDto;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponseDto;
@@ -27,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WithMockCustomUser
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+class UserControllerTest extends AbstractRestDocsTest {
 
     @MockBean
     UserService userService;
@@ -44,12 +53,41 @@ class UserControllerTest {
         given(userService.isDuplicatedUsername(anyString())).willReturn(responseDto);
 
         //when, then
-        mockMvc.perform(get("/api/users/" + username)
+        restDocsMockMvc.perform(get("/api/users/" + username)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isDuplicatedUsername").isBoolean())
-            .andDo(print());
+            .andDo(restDocs.document(
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("isDuplicatedUsername").description("계정명 중복 여부"))));
         then(userService).should(times(1)).isDuplicatedUsername(anyString());
+    }
+
+    @DisplayName("유저 회원가입 컨트롤러 테스트 : 성공")
+    @Test
+    void joinUser() throws Exception {
+        //given
+        String username = "testUsername";
+        String password = "hello12345!";
+        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+
+        //when, then
+        restDocsMockMvc.perform(post("/api/users")
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("username").description("계정명")
+                        .attributes(key("formats").value("이메일 형식 (추후 이메일 인증 기능 구현)"))
+                        .attributes(key("constraints").value("회원가입 전 계정명 중복 확인 필수")),
+                    fieldWithPath("password").description("비밀번호")
+                        .attributes(key("constraints").value(DocsPopupLinkGenerator
+                            .generatePopupLink(DocsPopupInfo.PASSWORD_CONSTRAINTS))))));
+        then(userService).should(times(1))
+            .joinUser(any(UserJoinRequestDto.class));
     }
 
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 계정명 공백")

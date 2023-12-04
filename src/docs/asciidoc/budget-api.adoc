@@ -1,0 +1,5 @@
+== 예산 API
+
+=== 월별 예산 설정 API
+==== `POST /api/budgets`
+operation::budget-controller-test/set-up-budget[snippets="request-body,request-fields,response-body,response-fields-data"]

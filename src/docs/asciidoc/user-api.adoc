@@ -1,0 +1,13 @@
+== 유저 API
+
+=== 사용자 계정명 중복 확인 API
+==== `GET /api/users/{username}`
+
+- 회원가입 전 필수 호출 API
+- `계정명` 은 경로 변수(path variable)로 전달
+
+operation::user-controller-test/check-for-username[snippets="http-request,response-body,response-fields-data"]
+
+=== 사용자 회원가입 API
+==== `POST /api/users`
+operation::user-controller-test/join-user[snippets="request-body,request-fields,response-body"]

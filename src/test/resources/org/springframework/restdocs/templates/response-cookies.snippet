@@ -1,0 +1,9 @@
+|===
+|쿠키명|설명|유효기간(초)
+
+{{#cookies}}
+|{{#tableCellContent}}`{{name}}`{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#maxAge}}{{.}}{{/maxAge}}{{/tableCellContent}}
+{{/cookies}}
+|===

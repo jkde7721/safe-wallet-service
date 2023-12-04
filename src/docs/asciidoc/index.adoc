@@ -1,0 +1,27 @@
+= Safe Wallet API 문서
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+:docinfo: shared-head
+
+:operation-http-request-title: HTTP Request
+:operation-http-response-title: HTTP Response
+:operation-request-body-title: Request Body
+:operation-response-body-title: Response Body
+:operation-request-fields-title: Request Fields
+:operation-response-fields-title: Response Fields
+:operation-response-fields-data-title: Response Fields
+:operation-request-headers-title: Request Headers
+:operation-response-headers-title: Response Headers
+:operation-request-cookies-title: Request Cookies
+:operation-response-cookies-title: Response Cookies
+:operation-query-parameters-title: Query Parameters
+
+include::overview.adoc[]
+include::auth-api.adoc[]
+include::user-api.adoc[]
+include::category-api.adoc[]
+include::budget-api.adoc[]
+include::expenditure-api.adoc[]

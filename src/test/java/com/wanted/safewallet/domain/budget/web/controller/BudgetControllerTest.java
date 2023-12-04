@@ -8,12 +8,20 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
+import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
@@ -33,7 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WithMockCustomUser
 @WebMvcTest(BudgetController.class)
-class BudgetControllerTest {
+class BudgetControllerTest extends AbstractRestDocsTest {
 
     @MockBean
     BudgetService budgetService;
@@ -51,17 +59,34 @@ class BudgetControllerTest {
         given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequestDto.class))).willReturn(responseDto);
 
         //when, then
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
+        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.now(),
             List.of(new BudgetSetUpRequestDto.BudgetByCategory(1L, CategoryType.FOOD, 10000L),
                 new BudgetSetUpRequestDto.BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
-        mockMvc.perform(post("/api/budgets")
+        restDocsMockMvc.perform(post("/api/budgets")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.budgetList", hasSize(2)))
-            .andDo(print());
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("budgetYearMonth").description("예산 설정 년월")
+                        .attributes(key("constraints").value("오늘 날짜 이후만 가능"))
+                        .attributes(key("formats").value("yyyy-M 또는 yyyy/M 또는 yyyy.M")),
+                    fieldWithPath("budgetList").description("예산 설정 목록")
+                        .attributes(key("constraints").value("같은 날짜, 같은 카테고리의 기존 예산 설정 내역이 있다면 설정 불가")),
+                    fieldWithPath("budgetList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("budgetList[].type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("budgetList[].amount").description("해당 카테고리의 예산 설정 금액")),
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("budgetList").description("생성된 예산 목록"),
+                    fieldWithPath("budgetList[].budgetId").description("생성된 예산 id"),
+                    fieldWithPath("budgetList[].categoryId").description("생성된 예산 카테고리 id"),
+                    fieldWithPath("budgetList[].type").description("생성된 예산 카테고리 타입"),
+                    fieldWithPath("budgetList[].amount").description("생성된 예산 금액"))));
         then(budgetService).should(times(1))
             .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
     }

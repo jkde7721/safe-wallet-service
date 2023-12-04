@@ -2,7 +2,6 @@ package com.wanted.safewallet.domain.auth.handler;
 
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.utils.CookieUtils;
-import com.wanted.safewallet.domain.auth.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import org.springframework.util.StringUtils;
 @Component
 public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
 
-    private final JwtUtils jwtUtils;
     private final CookieUtils cookieUtils;
     private final RefreshTokenService refreshTokenService;
 
@@ -24,7 +22,7 @@ public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException {
         String token = cookieUtils.getToken(request);
-        if (StringUtils.hasText(token) && jwtUtils.validateToken(token)) {
+        if (StringUtils.hasText(token)) {
             refreshTokenService.deleteToken(token);
             cookieUtils.deleteToken(request, response);
         }
