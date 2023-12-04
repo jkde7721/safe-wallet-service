@@ -1,10 +1,4 @@
 == 지출 API
-:operation-http-request-title: HTTP Request
-:operation-request-body-title: Request Body
-:operation-request-fields-title: Request Fields
-:operation-response-body-title: Response Body
-:operation-response-fields-data-title: Response Fields
-:operation-query-parameters-title: Query Parameters
 
 === 지출 상세 조회 API
 ==== `GET /api/expenditures/{expenditureId}`

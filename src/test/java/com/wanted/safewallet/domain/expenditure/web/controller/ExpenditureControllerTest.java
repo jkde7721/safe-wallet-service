@@ -152,10 +152,10 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         .attributes(key("default").value("모든 카테고리 조회")),
                     parameterWithName("minAmount").description("지출 조회 최소 금액").optional()
                         .attributes(key("constraints").value("0원 이상"))
-                        .attributes(key("default").value(0)),
+                        .attributes(key("default").value("0원")),
                     parameterWithName("maxAmount").description("지출 조회 최대 금액").optional()
                         .attributes(key("constraints").value("100,000,000원 이하"))
-                        .attributes(key("default").value(1000_000)),
+                        .attributes(key("default").value("1000,000원")),
                     parameterWithName("excepts").description("지출 합계 제외 지출 id").optional()
                         .attributes(key("default").value("조회된 모든 지출을 합계에 포함"))),
 
@@ -225,10 +225,10 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         .attributes(key("default").value("모든 카테고리 조회")),
                     parameterWithName("minAmount").description("지출 조회 최소 금액").optional()
                         .attributes(key("constraints").value("0원 이상"))
-                        .attributes(key("default").value(0)),
+                        .attributes(key("default").value("0원")),
                     parameterWithName("maxAmount").description("지출 조회 최대 금액").optional()
                         .attributes(key("constraints").value("100,000,000원 이하"))
-                        .attributes(key("default").value(1000_000)),
+                        .attributes(key("default").value("1000,000원")),
                     parameterWithName("excepts").description("지출 합계 제외 지출 id").optional()
                         .attributes(key("default").value("조회된 모든 지출을 합계에 포함"))),
 

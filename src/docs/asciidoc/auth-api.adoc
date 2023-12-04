@@ -1,14 +1,4 @@
 == 인증 및 인가 API
-:operation-http-request-title: HTTP Request
-:operation-http-response-title: HTTP Response
-:operation-request-body-title: Request Body
-:operation-request-fields-title: Request Fields
-:operation-response-body-title: Response Body
-:operation-response-fields-data-title: Response Fields
-:operation-request-headers-title: Request Headers
-:operation-request-cookies-title: Request Cookies
-:operation-response-headers-title: Response Headers
-:operation-response-cookies-title: Response Cookies
 
 === 사용자 로그인 API
 ==== `POST /api/auth/login`

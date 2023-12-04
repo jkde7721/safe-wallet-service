@@ -1,9 +1,4 @@
 == 유저 API
-:operation-http-request-title: HTTP Request
-:operation-request-body-title: Request Body
-:operation-request-fields-title: Request Fields
-:operation-response-body-title: Response Body
-:operation-response-fields-data-title: Response Fields
 
 === 사용자 계정명 중복 확인 API
 ==== `GET /api/users/{username}`

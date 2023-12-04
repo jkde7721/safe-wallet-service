@@ -28,7 +28,7 @@ class CommonResponseControllerTest extends AbstractRestDocsTest {
                         fieldWithPath("timestamp").description("응답 시간"),
                         fieldWithPath("status").description("응답 상태값"),
                         fieldWithPath("code").description("응답 상태 코드 또는 에러 코드"),
-                        fieldWithPath("message").description("응답 메시지"),
+                        fieldWithPath("message").description("응답 메시지 또는 에러 메시지"),
                         fieldWithPath("data").type(VARIES).description("응답 데이터"),
                         fieldWithPath("data.name").ignored(),
                         fieldWithPath("data.age").ignored()
