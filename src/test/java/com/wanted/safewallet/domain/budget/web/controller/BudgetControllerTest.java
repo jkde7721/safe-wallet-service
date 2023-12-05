@@ -4,6 +4,7 @@ import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -15,6 +16,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,8 +26,10 @@ import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.YearMonth;
@@ -110,5 +114,65 @@ class BudgetControllerTest extends AbstractRestDocsTest {
             .andDo(print());
         then(budgetService).should(times(0))
             .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
+    }
+
+    @DisplayName("월별 예산 수정 컨트롤러 테스트 : 성공")
+    @Test
+    void updateBudget() throws Exception {
+        //given
+        Long budgetId = 1L;
+        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(YearMonth.now(),
+            2L, CategoryType.TRAFFIC, 20000L);
+        BudgetUpdateResponseDto responseDto = new BudgetUpdateResponseDto(budgetId,
+            requestDto.getBudgetYearMonth(), requestDto.getCategoryId(), requestDto.getType(), requestDto.getAmount());
+        given(budgetService.updateBudget(anyString(), anyLong(), any(BudgetUpdateRequestDto.class)))
+            .willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(put("/api/budgets/" + budgetId)
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").exists())
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("budgetYearMonth").description("예산 내역 수정 년월")
+                        .attributes(key("formats").value("yyyy-M 또는 yyyy/M 또는 yyyy.M")),
+                    fieldWithPath("categoryId").description("카테고리 id"),
+                    fieldWithPath("type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("amount").description("예산 내역 수정 금액")
+                        .attributes(key("constraints").value("0원 이상 100,000,000원 이하"))),
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("budgetId").description("수정된 예산 내역의 id"),
+                    fieldWithPath("budgetYearMonth").description("예산 내역 년월"),
+                    fieldWithPath("categoryId").description("카테고리 id"),
+                    fieldWithPath("type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("amount").description("예산 내역 금액"))
+            ));
+    }
+
+    @DisplayName("월별 예산 수정 컨트롤러 테스트 : 실패")
+    @Test
+    void updateBudget_validation_fail() throws Exception {
+        //given
+        Long budgetId = 1L;
+        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(null,
+            2L, CategoryType.TRAFFIC, -1L);
+
+        //when, then
+        mockMvc.perform(put("/api/budgets/" + budgetId)
+                .content(asJsonString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", AllOf.allOf(
+                containsString("budgetYearMonth: 월별 예산 수정값이 널일 수 없습니다."),
+                containsString("amount: 월별 예산 금액은 0원 이상이어야 합니다."))))
+            .andDo(print());
     }
 }

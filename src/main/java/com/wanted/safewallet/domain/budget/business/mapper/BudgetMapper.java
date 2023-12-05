@@ -4,6 +4,7 @@ import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import java.time.YearMonth;
@@ -28,5 +29,14 @@ public class BudgetMapper {
                 b.getCategory().getType(), b.getAmount()))
             .toList();
         return new BudgetSetUpResponseDto(budgetListByCategory);
+    }
+
+    public BudgetUpdateResponseDto toDto(Budget budget) {
+        return BudgetUpdateResponseDto.builder()
+            .budgetId(budget.getId())
+            .budgetYearMonth(budget.getBudgetYearMonth())
+            .categoryId(budget.getCategory().getId())
+            .type(budget.getCategory().getType())
+            .amount(budget.getAmount()).build();
     }
 }
