@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface BudgetRepository extends JpaRepository<Budget, Long>, BudgetRepositoryCustom {
 
-    @Query("select b from Budget b join fetch b.category where b.category.id = :categoryId and b.budgetYearMonth = :budgetYearMonth")
-    Optional<Budget> findByCategoryAndBudgetYearMonthFetch(@Param("categoryId") Long categoryId,
-        @Param("budgetYearMonth") YearMonth budgetYearMonth);
+    @Query("select b from Budget b join fetch b.category where b.user.id = :userId and b.category.id = :categoryId and b.budgetYearMonth = :budgetYearMonth")
+    Optional<Budget> findByUserAndCategoryAndBudgetYearMonthFetch(@Param("userId") String userId,
+        @Param("categoryId") Long categoryId, @Param("budgetYearMonth") YearMonth budgetYearMonth);
 }

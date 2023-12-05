@@ -44,8 +44,9 @@ public class BudgetService {
         validateRequest(requestDto);
         Budget budget = getValidBudget(userId, budgetId);
 
-        Budget anotherBudget = budgetRepository.findByCategoryAndBudgetYearMonthFetch(
-            requestDto.getCategoryId(), requestDto.getBudgetYearMonth()).orElse(budget);
+        Budget anotherBudget = budgetRepository.findByUserAndCategoryAndBudgetYearMonthFetch(
+            userId, requestDto.getCategoryId(), requestDto.getBudgetYearMonth())
+            .orElse(budget);
         if (Objects.equals(anotherBudget.getId(), budgetId)) {
             anotherBudget.update(requestDto.getCategoryId(), requestDto.getType(),
                 requestDto.getAmount(), requestDto.getBudgetYearMonth());
