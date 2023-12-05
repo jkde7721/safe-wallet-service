@@ -9,7 +9,6 @@ import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
 import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetConsultRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
@@ -66,12 +65,12 @@ public class BudgetService {
     }
 
     //TODO: Redis Cache 적용
-    public BudgetConsultResponseDto consultBudget(String userId, BudgetConsultRequestDto requestDto) {
+    public BudgetConsultResponseDto consultBudget(String userId, Long totalAmountForConsult) {
         List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList =
             budgetRepository.existsByUser(userId) ?
                 budgetRepository.getTotalAmountByCategoryList(userId) :
                 budgetRepository.getTotalAmountByCategoryList();
-        Map<Category, Long> budgetAmountByCategory = consultBudgetAmount(requestDto.getTotalAmount(), totalAmountByCategoryList);
+        Map<Category, Long> budgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, totalAmountByCategoryList);
         return budgetMapper.toDto(budgetAmountByCategory);
     }
 

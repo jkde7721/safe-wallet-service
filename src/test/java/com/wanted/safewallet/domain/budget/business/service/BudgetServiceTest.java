@@ -23,7 +23,6 @@ import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
 import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetConsultRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
@@ -212,7 +211,7 @@ class BudgetServiceTest {
     void consultBudget_withMyBudgets() {
         //given
         String userId = "testUserId";
-        BudgetConsultRequestDto requestDto = new BudgetConsultRequestDto(1000_000L);
+        Long totalAmount = 1000_000L;
         List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList = List.of(
             new TotalAmountByCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
             new TotalAmountByCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
@@ -224,7 +223,7 @@ class BudgetServiceTest {
         given(budgetRepository.getTotalAmountByCategoryList(anyString())).willReturn(totalAmountByCategoryList);
 
         //when
-        BudgetConsultResponseDto responseDto = budgetService.consultBudget(userId, requestDto);
+        BudgetConsultResponseDto responseDto = budgetService.consultBudget(userId, totalAmount);
 
         //then
         then(budgetRepository).should(times(1)).existsByUser(anyString());
