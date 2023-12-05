@@ -3,3 +3,13 @@
 === 월별 예산 설정 API
 ==== `POST /api/budgets`
 operation::budget-controller-test/set-up-budget[snippets="request-body,request-fields,response-body,response-fields-data"]
+
+=== 월별 예산 수정 API
+==== `PUT /api/budgets/{budgetId}`
+
+- 월별 예산 설정 API를 통해 설정한 예산 정보 수정
+- `예산` 을 설정한 유저만 권한
+- `budgetYearMonth` 또는 `category` 변경 시 같은 년월, 카테고리의 예산이 있다면 기존 것에 예산 금액이 추가되는 방식으로 동작
+- 없다면 해당 예산 정보만을 수정
+
+operation::budget-controller-test/update-budget[snippets="request-body,request-fields,response-body,response-fields-data"]
