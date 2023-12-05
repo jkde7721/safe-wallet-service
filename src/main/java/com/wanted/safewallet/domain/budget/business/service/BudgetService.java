@@ -3,19 +3,26 @@ package com.wanted.safewallet.domain.budget.business.service;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_BUDGET;
+import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
+import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetConsultRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
+import com.wanted.safewallet.domain.category.persistence.entity.Category;
+import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,6 +63,45 @@ public class BudgetService {
             anotherBudget.addAmount(requestDto.getAmount());
         }
         return budgetMapper.toDto(anotherBudget);
+    }
+
+    //TODO: Redis Cache 적용
+    public BudgetConsultResponseDto consultBudget(String userId, BudgetConsultRequestDto requestDto) {
+        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList =
+            budgetRepository.existsByUser(userId) ?
+                budgetRepository.getTotalAmountByCategoryList(userId) :
+                budgetRepository.getTotalAmountByCategoryList();
+        Map<Category, Long> budgetAmountByCategory = consultBudgetAmount(requestDto.getTotalAmount(), totalAmountByCategoryList);
+        return budgetMapper.toDto(budgetAmountByCategory);
+    }
+
+    private Map<Category, Long> consultBudgetAmount(Long totalAmountForConsult,
+        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList) {
+        long totalAmount = totalAmountByCategoryList.stream()
+            .mapToLong(TotalAmountByCategoryResponseDto::getTotalAmount).sum();
+        Map<Category, Long> budgetAmountByCategory = totalAmountByCategoryList.stream()
+            .collect(toMap(TotalAmountByCategoryResponseDto::getCategory,
+                dto -> calculateBudgetAmount(dto.getCategory().getType(), dto.getTotalAmount(),
+                    totalAmount, totalAmountForConsult)));
+        consultBudgetAmountOfEtcCategory(totalAmountForConsult, budgetAmountByCategory);
+        return budgetAmountByCategory;
+    }
+
+    private Long calculateBudgetAmount(CategoryType type, Long totalAmountByCategory,
+        Long totalAmount, Long totalAmountForConsult) {
+        if (type == CategoryType.ETC || (double) totalAmountByCategory / totalAmount <= 0.10) {
+            return 0L;
+        }
+        double ratio = (double) totalAmountByCategory / totalAmount;
+        return ((long) (totalAmountForConsult * ratio / 100)) * 100; //100원 아래 버림
+    }
+
+    private void consultBudgetAmountOfEtcCategory(Long totalAmountForConsult,
+        Map<Category, Long> budgetAmountByCategory) {
+        long remainedAmount = totalAmountForConsult - budgetAmountByCategory.values().stream()
+            .mapToLong(Long::longValue).sum();
+        Category etcCategory = Category.builder().type(CategoryType.ETC).build();
+        budgetAmountByCategory.replace(etcCategory, remainedAmount);
     }
 
     public Budget getValidBudget(String userId, Long budgetId) {
