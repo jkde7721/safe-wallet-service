@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.wanted.safewallet.global.dto.response.CommonResponse;
+import jakarta.validation.ConstraintViolationException;
 import java.util.stream.Stream;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -25,6 +26,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 errorCode.getMessage(), null));
     }
 
+    @ExceptionHandler
+    public ResponseEntity<CommonResponse<Void>> handleConstraintViolationException(
+        ConstraintViolationException e) {
+        String errorMessage = getErrorMessage(e);
+        return ResponseEntity.status(BAD_REQUEST)
+            .body(new CommonResponse<>(BAD_REQUEST.value(), BAD_REQUEST.name(),
+                errorMessage, null));
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -32,6 +42,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(BAD_REQUEST)
             .body(new CommonResponse<>(BAD_REQUEST.value(), BAD_REQUEST.name(),
                 errorMessage, null));
+    }
+
+    private String getErrorMessage(ConstraintViolationException e) {
+        return e.getConstraintViolations().stream()
+            .map(err -> "[" + err.getMessage() + "]")
+            .collect(joining(", "));
     }
 
     private String getErrorMessage(MethodArgumentNotValidException e) {
