@@ -75,6 +75,19 @@ public class BudgetService {
         return budgetMapper.toDto(budgetAmountByCategory);
     }
 
+    public Budget getValidBudget(String userId, Long budgetId) {
+        Budget budget = getBudget(budgetId);
+        if (Objects.equals(budget.getUser().getId(), userId)) {
+            return budget;
+        }
+        throw new BusinessException(FORBIDDEN_BUDGET);
+    }
+
+    public Budget getBudget(Long budgetId) {
+        return budgetRepository.findById(budgetId)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_BUDGET));
+    }
+
     private Map<Category, Long> consultBudgetAmount(Long totalAmountForConsult,
         List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList) {
         long totalAmount = totalAmountByCategoryList.stream()
@@ -102,19 +115,6 @@ public class BudgetService {
             .mapToLong(Long::longValue).sum();
         Category etcCategory = Category.builder().type(CategoryType.ETC).build();
         budgetAmountByCategory.replace(etcCategory, remainedAmount);
-    }
-
-    public Budget getValidBudget(String userId, Long budgetId) {
-        Budget budget = getBudget(budgetId);
-        if (Objects.equals(budget.getUser().getId(), userId)) {
-            return budget;
-        }
-        throw new BusinessException(FORBIDDEN_BUDGET);
-    }
-
-    public Budget getBudget(Long budgetId) {
-        return budgetRepository.findById(budgetId)
-            .orElseThrow(() -> new BusinessException(NOT_FOUND_BUDGET));
     }
 
     private void validateRequest(String userId, BudgetSetUpRequestDto requestDto) {
