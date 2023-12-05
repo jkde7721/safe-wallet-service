@@ -12,4 +12,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long>, BudgetRep
     @Query("select b from Budget b join fetch b.category where b.user.id = :userId and b.category.id = :categoryId and b.budgetYearMonth = :budgetYearMonth")
     Optional<Budget> findByUserAndCategoryAndBudgetYearMonthFetch(@Param("userId") String userId,
         @Param("categoryId") Long categoryId, @Param("budgetYearMonth") YearMonth budgetYearMonth);
+
+    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM Budget b WHERE b.user.id = :userId")
+    boolean existsByUser(@Param("userId") String userId);
 }
