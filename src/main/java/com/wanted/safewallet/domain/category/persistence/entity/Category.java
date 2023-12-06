@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,21 @@ public class Category extends BaseTime {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private CategoryType type;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Category category = (Category) o;
+        return type == category.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type);
+    }
 }
