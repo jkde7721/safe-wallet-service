@@ -12,6 +12,7 @@ public abstract class DocsPopupLinkGenerator {
     @RequiredArgsConstructor
     public enum DocsPopupInfo {
         CATEGORY_TYPE("category-type", "카테고리 타입"),
+        STATS_CRITERIA("stats-criteria", "지출 통계 기준"),
         PAGING_RESPONSE("paging-response", "페이징 응답"),
         PASSWORD_CONSTRAINTS("password-constraints", "비밀번호 제약조건");
 
