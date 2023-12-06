@@ -78,8 +78,11 @@ public class ExpenditureMapper {
                 .map(category -> new ConsumptionRateByCategoryResponseDto(category.getId(), category.getType(),
                     consumptionRateByCategory.get(category)))
                 .toList();
-        return new ExpenditureStatsResponseDto(currentStartDate, currentEndDate, criteriaStartDate,
-            criteriaEndDate, totalConsumptionRate, consumptionRateListByCategory);
+        return ExpenditureStatsResponseDto.builder()
+            .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
+            .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
+            .totalConsumptionRate(totalConsumptionRate)
+            .consumptionRateListByCategory(consumptionRateListByCategory).build();
     }
 
     private List<TotalAmountByCategoryResponseDto> toListByCategoryDto(

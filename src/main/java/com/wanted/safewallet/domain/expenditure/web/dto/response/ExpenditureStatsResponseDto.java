@@ -4,9 +4,11 @@ import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class ExpenditureStatsResponseDto {
 
