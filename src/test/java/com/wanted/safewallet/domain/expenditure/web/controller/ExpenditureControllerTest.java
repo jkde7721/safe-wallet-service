@@ -1,6 +1,14 @@
 package com.wanted.safewallet.domain.expenditure.web.controller;
 
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.CLOTHING;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.ETC;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.LEISURE;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.RESIDENCE;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
+import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_MONTH;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -40,7 +48,10 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureList
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
@@ -393,5 +404,55 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.data").doesNotExist());
         then(expenditureService).should(times(1))
             .deleteExpenditure(anyString(), anyLong());
+    }
+
+    @DisplayName("지출 통계 컨트롤러 테스트 : 성공")
+    @Test
+    void produceExpenditureStats() throws Exception {
+        //given
+        LocalDate currentEndDate = LocalDate.now();
+        LocalDate currentStartDate = LocalDate.of(currentEndDate.getYear(), currentEndDate.getMonth(), 1);
+        LocalDate criteriaStartDate = currentStartDate.minusMonths(1);
+        LocalDate criteriaEndDate = criteriaStartDate.plusDays(DAYS.between(currentStartDate, currentEndDate));
+        Long totalConsumptionRate = 110L;
+        List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory = List.of(
+            new ConsumptionRateByCategoryResponseDto(1L, FOOD, 150L),
+            new ConsumptionRateByCategoryResponseDto(2L, TRAFFIC, 130L),
+            new ConsumptionRateByCategoryResponseDto(3L, RESIDENCE, 100L),
+            new ConsumptionRateByCategoryResponseDto(4L, CLOTHING, 70L),
+            new ConsumptionRateByCategoryResponseDto(5L, LEISURE, 55L),
+            new ConsumptionRateByCategoryResponseDto(6L, ETC, 100L));
+        ExpenditureStatsResponseDto responseDto = ExpenditureStatsResponseDto.builder()
+            .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
+            .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
+            .totalConsumptionRate(totalConsumptionRate)
+            .consumptionRateListByCategory(consumptionRateListByCategory).build();
+        given(expenditureService.produceExpenditureStats(anyString(), any(StatsCriteria.class)))
+            .willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures/stats")
+                .param("criteria", LAST_MONTH.name())
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(restDocs.document(
+                queryParameters(
+                    parameterWithName("criteria").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.STATS_CRITERIA))
+                        .attributes(key("default").value(LAST_MONTH)).optional()),
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("currentStartDate").description("지출 통계 대상 시작일"),
+                    fieldWithPath("currentEndDate").description("지출 통계 대상 종료일 (오늘 날짜)"),
+                    fieldWithPath("criteriaStartDate").description("지출 통계 기준 시작일"),
+                    fieldWithPath("criteriaEndDate").description("지출 통계 기준 종료일"),
+                    fieldWithPath("totalConsumptionRate").description("지난 년도, 달, 주 대비 전체 소비율(%)"),
+                    fieldWithPath("consumptionRateListByCategory").description("카테고리 별 소비율 목록"),
+                    fieldWithPath("consumptionRateListByCategory[].categoryId").description("카테고리 id"),
+                    fieldWithPath("consumptionRateListByCategory[].type").description(DocsPopupLinkGenerator
+                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("consumptionRateListByCategory[].consumptionRate")
+                        .description("지난 년도, 달, 주 대비 해당 카테고리의 소비율(%)"))
+            ));
     }
 }
