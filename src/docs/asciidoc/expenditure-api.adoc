@@ -46,3 +46,14 @@ operation::expenditure-controller-test/update-expenditure[snippets="request-body
 - **Soft Delete** 수행
 
 operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
+
+=== 지출 통계 API
+==== `GET /api/expenditures/stats`
+
+- 오늘 날짜를 기준으로 통계 생성
+- `지난 년도`, `지난 달`, `지난 주` 대비 `총액`, `카테고리 별` 소비율
+- `지난 년도`: 현재 `2023-12-06` 이라면, `2022-01-01 ~ 2022-12-06` 대비 `2023-01-01 ~ 2023-12-06` 소비율
+- `지난 달`: 현재 `2023-12-06` 이라면, `2023-11-01 ~ 2023-11-06` 대비 `2023-12-01 ~ 2023-12-06` 소비율
+- `지난 주`: 현재 `2023-12-06` 이라면, `2023-11-27 ~ 2023-11-29` 대비 `2023-12-04 ~ 2023-12-06` 소비율 (한 주는 `월 ~ 일`)
+
+operation::expenditure-controller-test/produce-expenditure-stats[snippets="http-request,query-parameters,response-body,response-fields-data"]
