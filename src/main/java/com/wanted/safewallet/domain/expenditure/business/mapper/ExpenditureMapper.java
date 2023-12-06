@@ -13,6 +13,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureList
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -65,6 +67,22 @@ public class ExpenditureMapper {
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
             .build();
+    }
+
+    public ExpenditureStatsResponseDto toDto(LocalDate currentStartDate, LocalDate currentEndDate,
+        LocalDate criteriaStartDate, LocalDate criteriaEndDate, Long totalConsumptionRate,
+        Map<Category, Long> consumptionRateByCategory) {
+        List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory =
+            consumptionRateByCategory.keySet().stream()
+                .sorted(Comparator.comparing(Category::getId))
+                .map(category -> new ConsumptionRateByCategoryResponseDto(category.getId(), category.getType(),
+                    consumptionRateByCategory.get(category)))
+                .toList();
+        return ExpenditureStatsResponseDto.builder()
+            .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
+            .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
+            .totalConsumptionRate(totalConsumptionRate)
+            .consumptionRateListByCategory(consumptionRateListByCategory).build();
     }
 
     private List<TotalAmountByCategoryResponseDto> toListByCategoryDto(

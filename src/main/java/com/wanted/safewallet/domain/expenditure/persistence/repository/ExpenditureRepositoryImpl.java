@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDate;
@@ -66,6 +67,19 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
             .where(expenditureSearchExpression(userId, searchCond));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList(String userId,
+        LocalDate startDate, LocalDate endDate) {
+        return queryFactory
+            .select(constructor(TotalAmountByCategoryResponseDto.class,
+                category, expenditure.amount.coalesce(0L).sum()))
+            .from(expenditure)
+            .rightJoin(expenditure.category, category)
+            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate))
+            .groupBy(category.id)
+            .fetch();
     }
 
     private BooleanExpression expenditureSearchExpression(String userId, ExpenditureSearchCond searchCond) {

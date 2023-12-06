@@ -8,6 +8,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCrea
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import jakarta.validation.Valid;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @CommonResponseContent
@@ -67,5 +70,11 @@ public class ExpenditureController {
     @DeleteMapping("/{expenditureId}")
     public void deleteExpenditure(@PathVariable Long expenditureId, @CurrentUserId String userId) {
         expenditureService.deleteExpenditure(userId, expenditureId);
+    }
+
+    @GetMapping("/stats")
+    public ExpenditureStatsResponseDto produceExpenditureStats(@CurrentUserId String userId,
+        @RequestParam(defaultValue = "LAST_MONTH") StatsCriteria criteria) {
+        return expenditureService.produceExpenditureStats(userId, criteria);
     }
 }

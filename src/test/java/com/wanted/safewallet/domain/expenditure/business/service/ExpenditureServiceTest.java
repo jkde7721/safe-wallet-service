@@ -1,7 +1,15 @@
 package com.wanted.safewallet.domain.expenditure.business.service;
 
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.CLOTHING;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.ETC;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.LEISURE;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.RESIDENCE;
+import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_EXPENDITURE;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_EXPENDITURE;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MONTHS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,15 +24,19 @@ import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -201,5 +213,41 @@ class ExpenditureServiceTest {
         assertThatThrownBy(() -> expenditureService.getExpenditureWithCategory(expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_EXPENDITURE);
+    }
+
+    @DisplayName("지출 통계 서비스 테스트 : 성공")
+    @Test
+    void produceExpenditureStats() {
+        //given
+        String userId = "testUserId";
+        StatsCriteria criteria = StatsCriteria.LAST_MONTH;
+        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList = List.of(
+            new TotalAmountByCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
+            new TotalAmountByCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
+            new TotalAmountByCategoryResponseDto(Category.builder().id(3L).type(RESIDENCE).build(), 500_000L),
+            new TotalAmountByCategoryResponseDto(Category.builder().id(4L).type(CLOTHING).build(), 100_000L),
+            new TotalAmountByCategoryResponseDto(Category.builder().id(5L).type(LEISURE).build(), 50_000L),
+            new TotalAmountByCategoryResponseDto(Category.builder().id(6L).type(ETC).build(), 5_000L));
+        given(expenditureRepository.getTotalAmountByCategoryList(anyString(), any(LocalDate.class), any(LocalDate.class)))
+            .willReturn(totalAmountByCategoryList);
+
+        //when
+        ExpenditureStatsResponseDto responseDto = expenditureService.produceExpenditureStats(userId, criteria);
+
+        //then
+        then(expenditureRepository).should(times(2)).getTotalAmountByCategoryList(
+            anyString(), any(LocalDate.class), any(LocalDate.class));
+        assertThat(MONTHS.between(responseDto.getCriteriaStartDate(), responseDto.getCurrentStartDate()))
+            .isEqualTo(1);
+        assertThat(DAYS.between(responseDto.getCurrentStartDate(), responseDto.getCurrentEndDate()))
+            .isEqualTo(DAYS.between(responseDto.getCriteriaStartDate(), responseDto.getCriteriaEndDate()));
+        assertThat(responseDto.getTotalConsumptionRate()).isEqualTo(100L);
+        assertThat(responseDto.getConsumptionRateListByCategory()).satisfiesExactly(
+            item1 -> assertThat(item1).extracting("type", "consumptionRate").containsExactly(FOOD, 100L),
+            item2 -> assertThat(item2).extracting("type", "consumptionRate").containsExactly(TRAFFIC, 100L),
+            item3 -> assertThat(item3).extracting("type", "consumptionRate").containsExactly(RESIDENCE, 100L),
+            item4 -> assertThat(item4).extracting("type", "consumptionRate").containsExactly(CLOTHING, 100L),
+            item5 -> assertThat(item5).extracting("type", "consumptionRate").containsExactly(LEISURE, 100L),
+            item6 -> assertThat(item6).extracting("type", "consumptionRate").containsExactly(ETC, 100L));
     }
 }
