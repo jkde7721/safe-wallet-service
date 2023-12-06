@@ -107,6 +107,32 @@ public class ExpenditureService {
             totalConsumptionRate, consumptionRateByCategory);
     }
 
+    public Expenditure getValidExpenditure(String userId, Long expenditureId) {
+        Expenditure expenditure = getExpenditure(expenditureId);
+        if (Objects.equals(expenditure.getUser().getId(), userId)) {
+            return expenditure;
+        }
+        throw new BusinessException(FORBIDDEN_EXPENDITURE);
+    }
+
+    public Expenditure getValidExpenditureWithCategory(String userId, Long expenditureId) {
+        Expenditure expenditure = getExpenditureWithCategory(expenditureId);
+        if (Objects.equals(expenditure.getUser().getId(), userId)) {
+            return expenditure;
+        }
+        throw new BusinessException(FORBIDDEN_EXPENDITURE);
+    }
+
+    public Expenditure getExpenditure(Long expenditureId) {
+        return expenditureRepository.findById(expenditureId)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
+    }
+
+    public Expenditure getExpenditureWithCategory(Long expenditureId) {
+        return expenditureRepository.findByIdFetch(expenditureId)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
+    }
+
     private LocalDate getCurrentStartDate(LocalDate currentEndDate, StatsCriteria criteria) {
         if (criteria == LAST_YEAR) {
             return LocalDate.of(currentEndDate.getYear(), 1, 1);
@@ -162,32 +188,6 @@ public class ExpenditureService {
     private Long calculateConsumptionRate(Long currentAmount, Long criteriaAmount) {
         if (criteriaAmount == 0) criteriaAmount = 1L;
         return Math.round((double) currentAmount / criteriaAmount * 100); //% 단위로 변환하기 위해 곱하기 100
-    }
-
-    public Expenditure getValidExpenditure(String userId, Long expenditureId) {
-        Expenditure expenditure = getExpenditure(expenditureId);
-        if (Objects.equals(expenditure.getUser().getId(), userId)) {
-            return expenditure;
-        }
-        throw new BusinessException(FORBIDDEN_EXPENDITURE);
-    }
-
-    public Expenditure getValidExpenditureWithCategory(String userId, Long expenditureId) {
-        Expenditure expenditure = getExpenditureWithCategory(expenditureId);
-        if (Objects.equals(expenditure.getUser().getId(), userId)) {
-            return expenditure;
-        }
-        throw new BusinessException(FORBIDDEN_EXPENDITURE);
-    }
-
-    public Expenditure getExpenditure(Long expenditureId) {
-        return expenditureRepository.findById(expenditureId)
-            .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
-    }
-
-    public Expenditure getExpenditureWithCategory(Long expenditureId) {
-        return expenditureRepository.findByIdFetch(expenditureId)
-            .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
 
     private void validateRequest(ExpenditureCreateRequestDto requestDto) {
