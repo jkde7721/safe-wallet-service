@@ -77,16 +77,21 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
                 category, expenditure.amount.coalesce(0L).sum()))
             .from(expenditure)
             .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate))
+            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
             .groupBy(category.id)
             .fetch();
+    }
+
+    private BooleanExpression notDeleted() {
+        return expenditure.deleted.isFalse();
     }
 
     private BooleanExpression expenditureSearchExpression(String userId, ExpenditureSearchCond searchCond) {
         return userIdEq(userId)
             .and(expenditureDateBetween(searchCond.getStartDate(), searchCond.getEndDate()))
             .and(categoryIdIn(searchCond.getCategories()))
-            .and(amountBetween(searchCond.getMinAmount(), searchCond.getMaxAmount()));
+            .and(amountBetween(searchCond.getMinAmount(), searchCond.getMaxAmount()))
+            .and(notDeleted());
     }
 
     private BooleanExpression userIdEq(String userId) {
