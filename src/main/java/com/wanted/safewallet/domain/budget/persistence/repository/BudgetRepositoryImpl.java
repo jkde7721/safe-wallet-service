@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import java.time.YearMonth;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,17 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
         return getTotalAmountByCategoryList(null);
     }
 
+    @Override
+    public List<Budget> findByUserAndBudgetYearMonthFetch(String userId, YearMonth budgetYearMonth) {
+        return queryFactory.select(constructor(Budget.class,
+                budget.id, budget.user, budget.category,
+                budget.amount.coalesce(0L), budget.budgetYearMonth))
+            .from(budget)
+            .rightJoin(budget.category, category)
+            .on(userIdEq(userId), budgetYearMonthEq(budgetYearMonth))
+            .fetch();
+    }
+
     private BooleanExpression budgetCountCase() {
         return new CaseBuilder()
             .when(budget.count().gt(0)).then(true)
@@ -54,6 +66,10 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
 
     private BooleanExpression userIdEq(String userId) {
         return userId == null ? alwaysTrue() : budget.user.id.eq(userId);
+    }
+
+    private BooleanExpression budgetYearMonthEq(YearMonth budgetYearMonth) {
+        return budget.budgetYearMonth.eq(budgetYearMonth);
     }
 
     private BooleanExpression alwaysTrue() {
