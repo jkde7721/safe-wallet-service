@@ -47,18 +47,18 @@ class EnumDocsControllerTest extends AbstractRestDocsTest {
                 enumFieldsSnippet(enumDocs.getFinanceStatus(), FinanceStatus.class.getSimpleName())));
     }
 
-    private static EnumDocs getData(MvcResult mvcResult) throws IOException {
+    private EnumDocs getData(MvcResult mvcResult) throws IOException {
         String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
         return objectMapper.readValue(content, EnumDocs.class);
     }
 
-    private static EnumFieldsSnippet enumFieldsSnippet(Map<String, String> enumValues, String enumTypeName) {
+    private EnumFieldsSnippet enumFieldsSnippet(Map<String, String> enumValues, String enumTypeName) {
         return new EnumFieldsSnippet(convertFieldDescriptors(enumValues),
             attributes(key(ATTRIBUTE_KEY).value(enumTypeName)), true,
-            beneathPath(uncapitalize(enumTypeName)).withSubsectionId(uncapitalize(enumTypeName)));
+            beneathPath(uncapitalize(enumTypeName)).withSubsectionId(enumTypeName));
     }
 
-    private static List<FieldDescriptor> convertFieldDescriptors(Map<String, String> enumValues) {
+    private List<FieldDescriptor> convertFieldDescriptors(Map<String, String> enumValues) {
         return enumValues.entrySet().stream()
             .map(e -> fieldWithPath(e.getKey()).description(e.getValue()))
             .toList();

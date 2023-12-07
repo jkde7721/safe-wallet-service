@@ -1,2 +1,2 @@
 [[finance-status]]
-include::{snippets}/enum-docs-controller-test/get-enums/enum-fields-financeStatus.adoc[]
+include::{snippets}/enum-docs-controller-test/get-enums/enum-fields-FinanceStatus.adoc[]
