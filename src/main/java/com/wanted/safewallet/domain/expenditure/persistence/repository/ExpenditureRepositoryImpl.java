@@ -3,17 +3,20 @@ package com.wanted.safewallet.domain.expenditure.persistence.repository;
 import static com.querydsl.core.types.Projections.constructor;
 import static com.wanted.safewallet.domain.category.persistence.entity.QCategory.category;
 import static com.wanted.safewallet.domain.expenditure.persistence.entity.QExpenditure.expenditure;
+import static java.util.stream.Collectors.toMap;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -69,6 +72,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    //TODO: 아래 메소드 제거
     @Override
     public List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList(String userId,
         LocalDate startDate, LocalDate endDate) {
@@ -80,6 +84,20 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
             .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
             .groupBy(category.id)
             .fetch();
+    }
+
+    @Override
+    public Map<Category, Long> findTotalAmountMapByUserAndExpenditureDateRange(String userId,
+        LocalDate startDate, LocalDate endDate) {
+        return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
+            .from(expenditure)
+            .rightJoin(expenditure.category, category)
+            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
+            .groupBy(category.id)
+            .fetch()
+            .stream()
+            .collect(toMap(tuple -> tuple.get(category),
+                tuple -> tuple.get(1, Long.class)));
     }
 
     private BooleanExpression notDeleted() {
