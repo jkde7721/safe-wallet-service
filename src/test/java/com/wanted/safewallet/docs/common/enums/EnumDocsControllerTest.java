@@ -11,6 +11,7 @@ import static org.springframework.util.StringUtils.uncapitalize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.io.IOException;
@@ -42,7 +43,8 @@ class EnumDocsControllerTest extends AbstractRestDocsTest {
         resultActions.andExpect(status().isOk())
             .andDo(restDocs.document(
                 enumFieldsSnippet(enumDocs.getCategoryType(), CategoryType.class.getSimpleName()),
-                enumFieldsSnippet(enumDocs.getStatsCriteria(), StatsCriteria.class.getSimpleName())));
+                enumFieldsSnippet(enumDocs.getStatsCriteria(), StatsCriteria.class.getSimpleName()),
+                enumFieldsSnippet(enumDocs.getFinanceStatus(), FinanceStatus.class.getSimpleName())));
     }
 
     private static EnumDocs getData(MvcResult mvcResult) throws IOException {

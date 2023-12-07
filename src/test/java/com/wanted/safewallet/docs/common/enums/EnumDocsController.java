@@ -3,6 +3,7 @@ package com.wanted.safewallet.docs.common.enums;
 import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.enums.EnumType;
 import java.util.Arrays;
@@ -19,9 +20,11 @@ public class EnumDocsController {
     public EnumDocs getEnums() {
         Map<String, String> categoryType = getEnumMap(CategoryType.values());
         Map<String, String> statsCriteria = getEnumMap(StatsCriteria.values());
+        Map<String, String> financeStatus = getEnumMap(FinanceStatus.values());
         return EnumDocs.builder()
             .categoryType(categoryType)
             .statsCriteria(statsCriteria)
+            .financeStatus(financeStatus)
             .build();
     }
 
