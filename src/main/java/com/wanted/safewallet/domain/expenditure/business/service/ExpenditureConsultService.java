@@ -86,8 +86,13 @@ public class ExpenditureConsultService {
         long budgetTotalAmount = budgetTotalAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
         long budgetTotalAmountToNow = budgetAmountPerDayByCategory.values().stream().mapToLong(Long::longValue).sum() * now.getDayOfMonth();
         long expenditureTotalAmountToNow = expenditureTotalAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
-        return getFinanceStatus(budgetTotalAmount, expenditureTotalAmountToNow,
-            budgetTotalAmountToNow, expenditureTotalAmountToNow);
+
+        if (budgetTotalAmount < expenditureTotalAmountToNow) return BAD; //예산 초과
+        Long toleranceAmount = calculateToleranceAmount(budgetTotalAmountToNow);
+        if (budgetTotalAmountToNow + toleranceAmount < expenditureTotalAmountToNow) return WARN;
+        if (budgetTotalAmountToNow - toleranceAmount <= expenditureTotalAmountToNow &&
+            budgetTotalAmountToNow + toleranceAmount >= expenditureTotalAmountToNow) return GOOD;
+        return EXCELLENT;
     }
 
     private Map<Category, TodayExpenditureConsultVo> getTodayExpenditureConsultByCategory(
