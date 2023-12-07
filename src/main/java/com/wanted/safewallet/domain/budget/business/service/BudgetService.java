@@ -75,8 +75,8 @@ public class BudgetService {
         return budgetMapper.toDto(budgetAmountByCategory);
     }
 
-    public List<Budget> getBudgetListWithCategoryInYearMonth(String userId, YearMonth budgetYearMonth) {
-        return budgetRepository.findByUserAndBudgetYearMonthFetch(userId, budgetYearMonth);
+    public Map<Category, Long> getBudgetTotalAmountByCategory(String userId, YearMonth budgetYearMonth) {
+        return budgetRepository.findTotalAmountMapByUserAndBudgetYearMonth(userId, budgetYearMonth);
     }
 
     public Budget getValidBudget(String userId, Long budgetId) {
