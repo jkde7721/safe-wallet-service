@@ -1,6 +1,7 @@
 package com.wanted.safewallet.domain.expenditure.web.controller;
 
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
+import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
@@ -11,6 +12,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSear
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -37,6 +39,7 @@ public class ExpenditureController {
 
     private final ExpenditureService expenditureService;
     private final ExpenditureConsultService expenditureConsultService;
+    private final ExpenditureDailyStatsService expenditureDailyStatsService;
 
     @GetMapping("/{expenditureId}")
     public ExpenditureDetailsResponseDto getExpenditureDetails(@PathVariable Long expenditureId,
@@ -84,5 +87,10 @@ public class ExpenditureController {
     @GetMapping("/consult")
     public TodayExpenditureConsultResponseDto consultTodayExpenditure(@CurrentUserId String userId) {
         return expenditureConsultService.consultTodayExpenditure(userId);
+    }
+
+    @GetMapping("/daily-stats")
+    public TodayExpenditureDailyStatsResponseDto produceTodayExpenditureDailyStats(@CurrentUserId String userId) {
+        return expenditureDailyStatsService.produceTodayExpenditureDailyStats(userId);
     }
 }
