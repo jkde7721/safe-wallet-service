@@ -1,2 +1,2 @@
 [[stats-criteria]]
-include::{snippets}/enum-docs-controller-test/get-enums/enum-fields-statsCriteria.adoc[]
+include::{snippets}/enum-docs-controller-test/get-enums/enum-fields-StatsCriteria.adoc[]

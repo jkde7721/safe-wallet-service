@@ -11,6 +11,7 @@ import static org.springframework.util.StringUtils.uncapitalize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.io.IOException;
@@ -42,21 +43,22 @@ class EnumDocsControllerTest extends AbstractRestDocsTest {
         resultActions.andExpect(status().isOk())
             .andDo(restDocs.document(
                 enumFieldsSnippet(enumDocs.getCategoryType(), CategoryType.class.getSimpleName()),
-                enumFieldsSnippet(enumDocs.getStatsCriteria(), StatsCriteria.class.getSimpleName())));
+                enumFieldsSnippet(enumDocs.getStatsCriteria(), StatsCriteria.class.getSimpleName()),
+                enumFieldsSnippet(enumDocs.getFinanceStatus(), FinanceStatus.class.getSimpleName())));
     }
 
-    private static EnumDocs getData(MvcResult mvcResult) throws IOException {
+    private EnumDocs getData(MvcResult mvcResult) throws IOException {
         String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
         return objectMapper.readValue(content, EnumDocs.class);
     }
 
-    private static EnumFieldsSnippet enumFieldsSnippet(Map<String, String> enumValues, String enumTypeName) {
+    private EnumFieldsSnippet enumFieldsSnippet(Map<String, String> enumValues, String enumTypeName) {
         return new EnumFieldsSnippet(convertFieldDescriptors(enumValues),
             attributes(key(ATTRIBUTE_KEY).value(enumTypeName)), true,
-            beneathPath(uncapitalize(enumTypeName)).withSubsectionId(uncapitalize(enumTypeName)));
+            beneathPath(uncapitalize(enumTypeName)).withSubsectionId(enumTypeName));
     }
 
-    private static List<FieldDescriptor> convertFieldDescriptors(Map<String, String> enumValues) {
+    private List<FieldDescriptor> convertFieldDescriptors(Map<String, String> enumValues) {
         return enumValues.entrySet().stream()
             .map(e -> fieldWithPath(e.getKey()).description(e.getValue()))
             .toList();

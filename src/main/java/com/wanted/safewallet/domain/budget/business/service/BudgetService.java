@@ -20,6 +20,7 @@ import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.global.exception.BusinessException;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,6 +73,10 @@ public class BudgetService {
                 budgetRepository.getTotalAmountByCategoryList();
         Map<Category, Long> budgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, totalAmountByCategoryList);
         return budgetMapper.toDto(budgetAmountByCategory);
+    }
+
+    public Map<Category, Long> getBudgetTotalAmountByCategory(String userId, YearMonth budgetYearMonth) {
+        return budgetRepository.findTotalAmountMapByUserAndBudgetYearMonth(userId, budgetYearMonth);
     }
 
     public Budget getValidBudget(String userId, Long budgetId) {
