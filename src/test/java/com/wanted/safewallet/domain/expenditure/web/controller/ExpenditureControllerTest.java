@@ -1,14 +1,23 @@
 package com.wanted.safewallet.domain.expenditure.web.controller;
 
+import static com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo.CATEGORY_TYPE;
+import static com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo.FINANCE_STATUS;
+import static com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo.PAGING_RESPONSE;
+import static com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo.STATS_CRITERIA;
+import static com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.generatePopupLink;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.CLOTHING;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.ETC;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.LEISURE;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.RESIDENCE;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
+import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.BAD;
+import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
+import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.GOOD;
 import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_MONTH;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -35,9 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
-import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
-import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
+import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
@@ -50,6 +58,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSear
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -73,6 +83,9 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @MockBean
     ExpenditureService expenditureService;
 
+    @MockBean
+    ExpenditureConsultService expenditureConsultService;
+
     @Autowired
     MockMvc mockMvc;
 
@@ -95,8 +108,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("expenditureDate").description("지출 발생 년월일"),
                     fieldWithPath("amount").description("지출 금액"),
                     fieldWithPath("categoryId").description("카테고리 id"),
-                    fieldWithPath("type").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("note").description("지출 관련 메모")
                 )
             ));
@@ -175,8 +187,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("totalAmount").description("총 지출 합계"),
                     fieldWithPath("totalAmountListByCategory").description("카테고리 별 지출 합계 목록"),
                     fieldWithPath("totalAmountListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("totalAmountListByCategory[].type")
-                        .description(DocsPopupLinkGenerator.generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("totalAmountListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("totalAmountListByCategory[].totalAmount").description("카테고리 별 지출 합계"),
                     fieldWithPath("expenditureListByDate").description("날짜 별 지출 상세 목록"),
                     fieldWithPath("expenditureListByDate[].expenditureDate").description("지출 날짜"),
@@ -184,11 +195,9 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("expenditureListByDate[].expenditureList[].expenditureId").description("지출 id"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].amount").description("지출 금액"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].categoryId").description("카테고리 id"),
-                    fieldWithPath("expenditureListByDate[].expenditureList[].type")
-                        .description(DocsPopupLinkGenerator.generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("expenditureListByDate[].expenditureList[].note").description("지출 관련 메모"),
-                    subsectionWithPath("paging").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.PAGING_RESPONSE)))));
+                    subsectionWithPath("paging").description(generatePopupLink(PAGING_RESPONSE)))));
     }
 
     @DisplayName("지출 내역 목록 조회 시 합계 제외 컨트롤러 테스트 : 성공")
@@ -248,8 +257,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("totalAmount").description("총 지출 합계(excepts 파라미터에서 지정한 지출은 제외)"),
                     fieldWithPath("totalAmountListByCategory").description("카테고리 별 지출 합계 목록"),
                     fieldWithPath("totalAmountListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("totalAmountListByCategory[].type")
-                        .description(DocsPopupLinkGenerator.generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("totalAmountListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("totalAmountListByCategory[].totalAmount")
                         .description("카테고리 별 지출 합계(excepts 파라미터에서 지정한 지출은 제외)"))));
     }
@@ -316,8 +324,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("amount").description("지출 금액")
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
-                    fieldWithPath("type").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("note").description("지출 관련 메모").optional()),
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
@@ -366,8 +373,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("amount").description("지출 금액")
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
-                    fieldWithPath("type").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("note").description("지출 관련 메모").optional())));
         then(expenditureService).should(times(1)).updateExpenditure(
             anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
@@ -437,8 +443,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(status().isOk())
             .andDo(restDocs.document(
                 queryParameters(
-                    parameterWithName("criteria").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.STATS_CRITERIA))
+                    parameterWithName("criteria").description(generatePopupLink(STATS_CRITERIA))
                         .attributes(key("default").value(LAST_MONTH)).optional()),
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
@@ -449,10 +454,42 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("totalConsumptionRate").description("지난 년도, 달, 주 대비 전체 소비율(%)"),
                     fieldWithPath("consumptionRateListByCategory").description("카테고리 별 소비율 목록"),
                     fieldWithPath("consumptionRateListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("consumptionRateListByCategory[].type").description(DocsPopupLinkGenerator
-                        .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)),
+                    fieldWithPath("consumptionRateListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("consumptionRateListByCategory[].consumptionRate")
                         .description("지난 년도, 달, 주 대비 해당 카테고리의 소비율(%)"))
+            ));
+    }
+
+    @DisplayName("오늘 지출 추천 컨트롤러 테스트 : 성공")
+    @Test
+    void consultTodayExpenditure() throws Exception {
+        //given
+        List<TodayExpenditureConsultOfCategoryResponseDto> todayExpenditureConsultOfCategoryList = List.of(
+            new TodayExpenditureConsultOfCategoryResponseDto(1L, FOOD, 10800L, EXCELLENT),
+            new TodayExpenditureConsultOfCategoryResponseDto(2L, TRAFFIC, 7200L, EXCELLENT),
+            new TodayExpenditureConsultOfCategoryResponseDto(3L, RESIDENCE, 300000L, GOOD),
+            new TodayExpenditureConsultOfCategoryResponseDto(4L, CLOTHING, 15000L, BAD),
+            new TodayExpenditureConsultOfCategoryResponseDto(5L, LEISURE, 10000L, GOOD),
+            new TodayExpenditureConsultOfCategoryResponseDto(6L, ETC, 3600L, EXCELLENT));
+        TodayExpenditureConsultResponseDto responseDto = new TodayExpenditureConsultResponseDto(
+            346600L, EXCELLENT, todayExpenditureConsultOfCategoryList);
+        given(expenditureConsultService.consultTodayExpenditure(anyString())).willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures/consult")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.todayExpenditureConsultOfCategoryList", hasSize(6)))
+            .andDo(restDocs.document(
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("todayTotalAmount").description("오늘 지출 추천 총액"),
+                    fieldWithPath("totalFinanceStatus").description(generatePopupLink(FINANCE_STATUS)),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList").description("카테고리 별 오늘 지출 추천 목록"),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList[].todayTotalAmount").description("카테고리 별 오늘 지출 추천 금액"),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList[].financeStatus").description(generatePopupLink(FINANCE_STATUS)))
             ));
     }
 }
