@@ -22,4 +22,6 @@ public interface ExpenditureRepositoryCustom {
     List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList(String userId, LocalDate startDate, LocalDate endDate);
 
     Map<Category, Long> findTotalAmountMapByUserAndExpenditureDateRange(String userId, LocalDate startDate, LocalDate endDate);
+
+    Map<Category, Long> findTotalAmountMapByUserAndExpenditureDate(String userId, LocalDate expenditureDate);
 }
