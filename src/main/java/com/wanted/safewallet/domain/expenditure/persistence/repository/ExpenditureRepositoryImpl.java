@@ -100,6 +100,19 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
                 tuple -> tuple.get(1, Long.class)));
     }
 
+    @Override
+    public Map<Category, Long> findTotalAmountMapByUserAndExpenditureDate(String userId, LocalDate expenditureDate) {
+        return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
+            .from(expenditure)
+            .rightJoin(expenditure.category, category)
+            .on(userIdEq(userId), expenditureDateEq(expenditureDate), notDeleted())
+            .groupBy(category.id)
+            .fetch()
+            .stream()
+            .collect(toMap(tuple -> tuple.get(category),
+                tuple -> tuple.get(1, Long.class)));
+    }
+
     private BooleanExpression notDeleted() {
         return expenditure.deleted.isFalse();
     }
@@ -118,6 +131,10 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
 
     private BooleanExpression expenditureDateBetween(LocalDate startDate, LocalDate endDate) {
         return expenditure.expenditureDate.between(startDate, endDate);
+    }
+
+    private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
+        return expenditure.expenditureDate.eq(expenditureDate);
     }
 
     private BooleanExpression categoryIdIn(List<Long> categories) {

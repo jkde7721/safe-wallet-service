@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureConsultVo;
+import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureDailyStatsVo;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
@@ -18,6 +19,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStat
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto.TodayExpenditureDailyStatsOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
@@ -135,5 +138,18 @@ public class ExpenditureMapper {
                     todayExpenditureConsultByCategory.get(category).financeStatus()))
                 .toList();
         return new TodayExpenditureConsultResponseDto(todayTotalAmount, totalFinanceStatus, todayExpenditureConsultOfCategoryList);
+    }
+
+    public TodayExpenditureDailyStatsResponseDto toDto(Long todayTotalAmount,
+        Map<Category, TodayExpenditureDailyStatsVo> todayExpenditureDailyStatsByCategory) {
+        List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList =
+            todayExpenditureDailyStatsByCategory.keySet().stream()
+                .sorted(Comparator.comparing(Category::getId))
+                .map(category -> new TodayExpenditureDailyStatsOfCategoryResponseDto(category.getId(), category.getType(),
+                    todayExpenditureDailyStatsByCategory.get(category).consultedTotalAmount(),
+                    todayExpenditureDailyStatsByCategory.get(category).todayTotalAmount(),
+                    todayExpenditureDailyStatsByCategory.get(category).consumptionRate()))
+                .toList();
+        return new TodayExpenditureDailyStatsResponseDto(todayTotalAmount, todayExpenditureDailyStatsOfCategoryList);
     }
 }
