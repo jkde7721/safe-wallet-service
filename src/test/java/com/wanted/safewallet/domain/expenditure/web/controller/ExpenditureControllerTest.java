@@ -46,6 +46,7 @@ import static org.springframework.util.StringUtils.collectionToCommaDelimitedStr
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
+import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
@@ -60,6 +61,8 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStat
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto.TodayExpenditureDailyStatsOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -85,6 +88,9 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @MockBean
     ExpenditureConsultService expenditureConsultService;
+
+    @MockBean
+    ExpenditureDailyStatsService expenditureDailyStatsService;
 
     @Autowired
     MockMvc mockMvc;
@@ -490,6 +496,40 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].todayTotalAmount").description("카테고리 별 오늘 지출 추천 금액"),
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].financeStatus").description(generatePopupLink(FINANCE_STATUS)))
+            ));
+    }
+
+    @DisplayName("오늘 지출 안내 컨트롤러 테스트 : 성공")
+    @Test
+    void produceTodayExpenditureDailyStats() throws Exception {
+        //given
+        List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList = List.of(
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(1L, FOOD, 9600L, 9600L, 100L),
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(2L, TRAFFIC, 6400L, 3200L, 50L),
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(3L, RESIDENCE, 0L, 0L, 0L),
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(4L, CLOTHING, 50000L, 35000L, 70L),
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(5L, LEISURE, 10000L, 0L, 0L),
+            new TodayExpenditureDailyStatsOfCategoryResponseDto(6L, ETC, 3200L, 4800L, 150L));
+        TodayExpenditureDailyStatsResponseDto responseDto = new TodayExpenditureDailyStatsResponseDto(
+            52600L, todayExpenditureDailyStatsOfCategoryList);
+        given(expenditureDailyStatsService.produceTodayExpenditureDailyStats(anyString())).willReturn(responseDto);
+
+        //when, then
+        restDocsMockMvc.perform(get("/api/expenditures/daily-stats")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.todayExpenditureDailyStatsOfCategoryList", hasSize(6)))
+            .andDo(restDocs.document(
+                responseFields(
+                    beneathPath("data").withSubsectionId("data"),
+                    fieldWithPath("todayTotalAmount").description("오늘 지출 총액"),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList").description("카테고리 별 오늘 지출 안내 목록"),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].consultedTotalAmount").description("오늘 적정 지출 금액"),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].todayTotalAmount").description("오늘 실제 지출 금액"),
+                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].consumptionRate")
+                        .description("소비율(적정 지출 금액 대비 실제 지출 금액의 비율, % 단위)"))
             ));
     }
 }
