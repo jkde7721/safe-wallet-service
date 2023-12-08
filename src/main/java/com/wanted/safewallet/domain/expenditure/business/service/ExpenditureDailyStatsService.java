@@ -30,6 +30,7 @@ public class ExpenditureDailyStatsService {
         YearMonth currentYearMonth = YearMonth.of(expenditureDate.getYear(), expenditureDate.getMonth());
         int daysOfCurrentMonth = currentYearMonth.lengthOfMonth();
         Map<Category, Long> budgetTotalAmountByCategory = budgetService.getBudgetTotalAmountByCategory(userId, currentYearMonth);
+        //TODO: 아래 값 정확하지 않음 (현재까지의 지출 고려X)
         Map<Category, Long> budgetAmountPerDayByCategory = getBudgetAmountPerDayByCategory(budgetTotalAmountByCategory, daysOfCurrentMonth);
         Map<Category, Long> todayExpenditureTotalAmountByCategory = expenditureRepository.findTotalAmountMapByUserAndExpenditureDate(userId, expenditureDate);
 
