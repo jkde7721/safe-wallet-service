@@ -5,9 +5,11 @@ import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class TodayExpenditureConsultResponseDto {
 
     private Long todayTotalAmount;
@@ -18,6 +20,7 @@ public class TodayExpenditureConsultResponseDto {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class TodayExpenditureConsultOfCategoryResponseDto {
 
         private Long categoryId;

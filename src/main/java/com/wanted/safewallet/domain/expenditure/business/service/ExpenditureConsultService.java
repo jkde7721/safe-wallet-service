@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,9 @@ public class ExpenditureConsultService {
     private final ExpenditureMapper expenditureMapper;
     private final BudgetService budgetService;
     private final ExpenditureRepository expenditureRepository;
+    private static final String CACHE_NAME = "today-expenditure-consult";
 
+    @Cacheable(cacheNames = CACHE_NAME, key = "#userId")
     public TodayExpenditureConsultResponseDto consultTodayExpenditure(String userId) {
         LocalDate expenditureEndDate = LocalDate.now();
         YearMonth currentYearMonth = YearMonth.of(expenditureEndDate.getYear(), expenditureEndDate.getMonth());
