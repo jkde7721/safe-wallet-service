@@ -92,7 +92,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
             .from(expenditure)
             .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
+            .on(userIdEq(userId), expenditureDateGoeAndLt(startDate, endDate), notDeleted())
             .groupBy(category.id)
             .fetch()
             .stream()
@@ -132,6 +132,11 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     private BooleanExpression expenditureDateBetween(LocalDate startInclusive, LocalDate endInclusive) {
         return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
             .and(expenditure.expenditureDate.lt(endInclusive.plusDays(1).atStartOfDay()));
+    }
+
+    private BooleanExpression expenditureDateGoeAndLt(LocalDate startInclusive, LocalDate endExclusive) {
+        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(endExclusive.atStartOfDay()));
     }
 
     private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
