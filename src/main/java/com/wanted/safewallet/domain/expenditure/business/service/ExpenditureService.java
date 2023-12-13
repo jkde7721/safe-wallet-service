@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.expenditure.business.service;
 
+import static com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService.CACHE_NAME;
 import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_MONTH;
 import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_YEAR;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_EXPENDITURE;
@@ -12,6 +13,7 @@ import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidR
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
+import com.wanted.safewallet.domain.expenditure.business.vo.ExpenditureDateUpdateVo;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,6 +70,8 @@ public class ExpenditureService {
         return expenditureMapper.toSearchExceptsDto(totalAmount, statsByCategory);
     }
 
+    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
+        "#root.target.isBeforeDateOfCurrentYearMonth(#requestDto.expenditureDate)")
     @Transactional
     public ExpenditureCreateResponseDto createExpenditure(String userId,
         ExpenditureCreateRequestDto requestDto) {
@@ -76,18 +81,26 @@ public class ExpenditureService {
         return expenditureMapper.toCreateDto(savedExpenditure);
     }
 
+    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition = """
+        #root.target.isBeforeDateOfCurrentYearMonth(#result.originalExpenditureDate()) ||
+        #root.target.isBeforeDateOfCurrentYearMonth(#result.updatedExpenditureDate())""")
     @Transactional
-    public void updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
+    public ExpenditureDateUpdateVo updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
         validateRequest(requestDto);
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
+        LocalDate originalExpenditureDate = expenditure.getExpenditureDate();
         expenditure.update(requestDto.getCategoryId(), requestDto.getExpenditureDate(),
             requestDto.getAmount(), requestDto.getNote());
+        return new ExpenditureDateUpdateVo(originalExpenditureDate, requestDto.getExpenditureDate());
     }
 
+    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
+        "#root.target.isBeforeDateOfCurrentYearMonth(#result)")
     @Transactional
-    public void deleteExpenditure(String userId, Long expenditureId) {
+    public LocalDate deleteExpenditure(String userId, Long expenditureId) {
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
         expenditure.softDelete();
+        return expenditure.getExpenditureDate();
     }
 
     public ExpenditureStatsResponseDto produceExpenditureStats(String userId, StatsCriteria criteria) {
@@ -105,6 +118,12 @@ public class ExpenditureService {
         Map<Category, Long> consumptionRateByCategory = calculateConsumptionRateByCategory(currentTotalAmountList, criteriaTotalAmountList);
         return expenditureMapper.toDto(currentStartDate, currentEndDate, criteriaStartDate, criteriaEndDate,
             totalConsumptionRate, consumptionRateByCategory);
+    }
+
+    public boolean isBeforeDateOfCurrentYearMonth(LocalDate date) {
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now.withDayOfMonth(1);
+        return date.isBefore(now) && (date.isEqual(startDate) || date.isAfter(startDate));
     }
 
     public Expenditure getValidExpenditure(String userId, Long expenditureId) {
