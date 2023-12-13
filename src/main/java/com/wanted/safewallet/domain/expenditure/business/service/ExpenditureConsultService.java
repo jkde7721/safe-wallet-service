@@ -30,7 +30,7 @@ public class ExpenditureConsultService {
     private final ExpenditureMapper expenditureMapper;
     private final BudgetService budgetService;
     private final ExpenditureRepository expenditureRepository;
-    private static final String CACHE_NAME = "today-expenditure-consult";
+    public static final String CACHE_NAME = "today-expenditure-consult";
 
     @Cacheable(cacheNames = CACHE_NAME, key = "#userId")
     public TodayExpenditureConsultResponseDto consultTodayExpenditure(String userId) {
