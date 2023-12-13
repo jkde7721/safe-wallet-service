@@ -30,6 +30,7 @@ import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,7 +72,7 @@ public class ExpenditureService {
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
-        "#root.target.isBeforeDateOfCurrentYearMonth(#requestDto.expenditureDate)")
+        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#requestDto.expenditureDate)")
     @Transactional
     public ExpenditureCreateResponseDto createExpenditure(String userId,
         ExpenditureCreateRequestDto requestDto) {
@@ -82,22 +83,22 @@ public class ExpenditureService {
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition = """
-        #root.target.isBeforeDateOfCurrentYearMonth(#result.originalExpenditureDate()) ||
-        #root.target.isBeforeDateOfCurrentYearMonth(#result.updatedExpenditureDate())""")
+        #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.originalExpenditureDate()) ||
+        #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.updatedExpenditureDate())""")
     @Transactional
     public ExpenditureDateUpdateVo updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
         validateRequest(requestDto);
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
-        LocalDate originalExpenditureDate = expenditure.getExpenditureDate();
+        LocalDateTime originalExpenditureDate = expenditure.getExpenditureDate();
         expenditure.update(requestDto.getCategoryId(), requestDto.getExpenditureDate(),
             requestDto.getAmount(), requestDto.getNote());
         return new ExpenditureDateUpdateVo(originalExpenditureDate, requestDto.getExpenditureDate());
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
-        "#root.target.isBeforeDateOfCurrentYearMonth(#result)")
+        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#result)")
     @Transactional
-    public LocalDate deleteExpenditure(String userId, Long expenditureId) {
+    public LocalDateTime deleteExpenditure(String userId, Long expenditureId) {
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
         expenditure.softDelete();
         return expenditure.getExpenditureDate();
@@ -120,10 +121,12 @@ public class ExpenditureService {
             totalConsumptionRate, consumptionRateByCategory);
     }
 
-    public boolean isBeforeDateOfCurrentYearMonth(LocalDate date) {
+    public boolean isCurrentYearMonthAndBeforeCurrentDate(LocalDateTime expenditureDate) {
         LocalDate now = LocalDate.now();
-        LocalDate startDate = now.withDayOfMonth(1);
-        return date.isBefore(now) && (date.isEqual(startDate) || date.isAfter(startDate));
+        LocalDateTime startDateTime = now.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endDateTime = now.atStartOfDay();
+        return (expenditureDate.isEqual(startDateTime) || expenditureDate.isAfter(startDateTime)) &&
+            expenditureDate.isBefore(endDateTime);
     }
 
     public Expenditure getValidExpenditure(String userId, Long expenditureId) {

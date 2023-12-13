@@ -1,7 +1,7 @@
 package com.wanted.safewallet.domain.expenditure.web.dto.response;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ExpenditureDetailsResponseDto {
 
-    private LocalDate expenditureDate;
+    private LocalDateTime expenditureDate;
 
     private Long amount;
 

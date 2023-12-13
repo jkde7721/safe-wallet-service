@@ -36,6 +36,7 @@ import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -66,15 +67,16 @@ class ExpenditureServiceTest {
     void createExpenditure() {
         //given
         String userId = "testUserId";
+        LocalDateTime now = LocalDateTime.now();
         Expenditure expenditure = Expenditure.builder().id(1L)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(now).amount(10000L).note("").build();
         given(expenditureRepository.save(any(Expenditure.class))).willReturn(expenditure);
 
         //when
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            LocalDate.now(), 10000L, 1L, CategoryType.FOOD, "");
+            now, 10000L, 1L, CategoryType.FOOD, "");
         ExpenditureCreateResponseDto responseDto = expenditureService.createExpenditure(userId, requestDto);
 
         //then
@@ -91,15 +93,16 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
+        LocalDateTime now = LocalDateTime.now();
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(now).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            LocalDate.now().plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "지출을 줄이자");
+            now.plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "지출을 줄이자");
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
 
         //then
@@ -120,7 +123,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
@@ -151,7 +154,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -171,7 +174,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -192,7 +195,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then

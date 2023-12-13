@@ -68,6 +68,7 @@ import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.DisplayName;
@@ -100,7 +101,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void getExpenditureDetails() throws Exception {
         //given
         ExpenditureDetailsResponseDto responseDto = new ExpenditureDetailsResponseDto(
-            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
         given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(responseDto);
 
         //when, then
@@ -315,7 +316,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
         //when, then
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
         restDocsMockMvc.perform(post("/api/expenditures")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -363,7 +364,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void updateExpenditure() throws Exception {
         //given
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            LocalDate.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
 
         //when, then
         restDocsMockMvc.perform(put("/api/expenditures/1")

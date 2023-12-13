@@ -130,11 +130,13 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     private BooleanExpression expenditureDateBetween(LocalDate startDate, LocalDate endDate) {
-        return expenditure.expenditureDate.between(startDate, endDate);
+        return expenditure.expenditureDate.goe(startDate.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(endDate.plusDays(1).atStartOfDay()));
     }
 
     private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
-        return expenditure.expenditureDate.eq(expenditureDate);
+        return expenditure.expenditureDate.goe(expenditureDate.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(expenditureDate.plusDays(1).atStartOfDay()));
     }
 
     private BooleanExpression categoryIdIn(List<Long> categories) {

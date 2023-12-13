@@ -60,7 +60,7 @@ public class ExpenditureMapper {
     public ExpenditureSearchResponseDto toSearchDto(long totalAmount,
         List<StatsByCategoryResponseDto> statsByCategory, Page<Expenditure> expenditurePage) {
         Map<LocalDate, List<Expenditure>> expenditureListByDate = expenditurePage.getContent().stream()
-            .collect(groupingBy(Expenditure::getExpenditureDate, toList()));
+            .collect(groupingBy(expenditure -> expenditure.getExpenditureDate().toLocalDate(), toList()));
         return ExpenditureSearchResponseDto.builder()
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))

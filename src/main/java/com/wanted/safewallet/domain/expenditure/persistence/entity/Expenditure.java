@@ -11,7 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,7 +44,7 @@ public class Expenditure extends BaseTime {
     private Category category;
 
     @Column(nullable = false)
-    private LocalDate expenditureDate;
+    private LocalDateTime expenditureDate;
 
     @Column(nullable = false)
     private Long amount;
@@ -57,7 +57,7 @@ public class Expenditure extends BaseTime {
     @ColumnDefault("0")
     private Boolean deleted = Boolean.FALSE;
 
-    public void update(Long categoryId, LocalDate expenditureDate, Long amount, String note) {
+    public void update(Long categoryId, LocalDateTime expenditureDate, Long amount, String note) {
         this.category = Category.builder().id(categoryId).build();
         this.expenditureDate = expenditureDate;
         this.amount = amount;
