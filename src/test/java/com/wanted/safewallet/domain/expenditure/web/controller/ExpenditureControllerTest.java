@@ -327,7 +327,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document(
                 requestFields(
                     fieldWithPath("expenditureDate").description("지출 발생 년월일")
-                        .attributes(key("formats").value("yyyy-M-d 또는 yyyy/M/d 또는 yyyy.M.d")),
+                        .attributes(key("formats").value("yyyy-M-d'T'HH:mm:ss 또는 yyyy/M/d'T'HH:mm:ss 또는 yyyy.M.d'T'HH:mm:ss")),
                     fieldWithPath("amount").description("지출 금액")
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
@@ -376,7 +376,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document(
                 requestFields(
                     fieldWithPath("expenditureDate").description("지출 발생 년월일")
-                        .attributes(key("formats").value("yyyy-M-d 또는 yyyy/M/d 또는 yyyy.M.d")),
+                        .attributes(key("formats").value("yyyy-M-d'T'HH:mm:ss 또는 yyyy/M/d'T'HH:mm:ss 또는 yyyy.M.d'T'HH:mm:ss")),
                     fieldWithPath("amount").description("지출 금액")
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
