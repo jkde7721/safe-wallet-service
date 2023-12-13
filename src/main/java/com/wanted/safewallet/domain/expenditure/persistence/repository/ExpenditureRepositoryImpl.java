@@ -129,9 +129,9 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return userId == null ? alwaysFalse() : expenditure.user.id.eq(userId);
     }
 
-    private BooleanExpression expenditureDateBetween(LocalDate startDate, LocalDate endDate) {
-        return expenditure.expenditureDate.goe(startDate.atStartOfDay())
-            .and(expenditure.expenditureDate.lt(endDate.plusDays(1).atStartOfDay()));
+    private BooleanExpression expenditureDateBetween(LocalDate startInclusive, LocalDate endInclusive) {
+        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(endInclusive.plusDays(1).atStartOfDay()));
     }
 
     private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
