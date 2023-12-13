@@ -101,7 +101,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void getExpenditureDetails() throws Exception {
         //given
         ExpenditureDetailsResponseDto responseDto = new ExpenditureDetailsResponseDto(
-            LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
         given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(responseDto);
 
         //when, then
@@ -116,6 +116,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("amount").description("지출 금액"),
                     fieldWithPath("categoryId").description("카테고리 id"),
                     fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("title").description("지출 제목"),
                     fieldWithPath("note").description("지출 관련 메모")
                 )
             ));
@@ -139,14 +140,14 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     .expenditureDate(LocalDate.of(2023, 11, 17))
                     .expenditureList(List.of(
                         ExpenditureResponseDto.builder().expenditureId(3L).amount(5000L)
-                            .categoryId(2L).type(CategoryType.TRAFFIC).note("버스비").build(),
+                            .categoryId(2L).type(CategoryType.TRAFFIC).title("하루 교통비").build(),
                         ExpenditureResponseDto.builder().expenditureId(2L).amount(4000L)
-                            .categoryId(1L).type(CategoryType.FOOD).note("편의점 점심").build())).build(),
+                            .categoryId(1L).type(CategoryType.FOOD).title("편의점 점심").build())).build(),
                 ExpenditureListByDateResponseDto.builder()
                     .expenditureDate(LocalDate.of(2023, 11, 15))
                     .expenditureList(List.of(
                         ExpenditureResponseDto.builder().expenditureId(1L).amount(21000L)
-                            .categoryId(1L).type(CategoryType.FOOD).note("식비를 아끼자!").build())).build()))
+                            .categoryId(1L).type(CategoryType.FOOD).title("점심 커피챗").build())).build()))
             .paging(PageResponse.builder()
                 .pageNumber(1).pageSize(3).numberOfElements(3).totalPages(4).totalElements(12L)
                 .first(true).last(false).empty(false).build())
@@ -203,7 +204,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("expenditureListByDate[].expenditureList[].amount").description("지출 금액"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].categoryId").description("카테고리 id"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("expenditureListByDate[].expenditureList[].note").description("지출 관련 메모"),
+                    fieldWithPath("expenditureListByDate[].expenditureList[].title").description("지출 제목"),
                     subsectionWithPath("paging").description(generatePopupLink(PAGING_RESPONSE)))));
     }
 
@@ -316,7 +317,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
         //when, then
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
         restDocsMockMvc.perform(post("/api/expenditures")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -332,6 +333,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
                     fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("title").description("지출 제목"),
                     fieldWithPath("note").description("지출 관련 메모").optional()),
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
@@ -344,7 +346,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void createExpenditure_validation_fail() throws Exception {
         //given
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            null, -1L, 1L, CategoryType.FOOD, "");
+            null, -1L, 1L, CategoryType.FOOD, "점심 커피챗", "");
 
         //when, then
         mockMvc.perform(post("/api/expenditures")
@@ -364,7 +366,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void updateExpenditure() throws Exception {
         //given
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "식비를 줄이자!");
+            LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
 
         //when, then
         restDocsMockMvc.perform(put("/api/expenditures/1")
@@ -381,6 +383,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         .attributes(key("constraints").value("0원 이상")),
                     fieldWithPath("categoryId").description("카테고리 id"),
                     fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("title").description("지출 제목"),
                     fieldWithPath("note").description("지출 관련 메모").optional())));
         then(expenditureService).should(times(1)).updateExpenditure(
             anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
@@ -391,7 +394,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void updateExpenditure_validation_fail() throws Exception {
         //given
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            null, -1L, 1L, CategoryType.FOOD, "");
+            null, -1L, 1L, CategoryType.FOOD, "점심 커피챗", "");
 
         //when, then
         mockMvc.perform(put("/api/expenditures/1")

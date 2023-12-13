@@ -54,6 +54,7 @@ public class ExpenditureMapper {
             .amount(expenditure.getAmount())
             .categoryId(expenditure.getCategory().getId())
             .type(expenditure.getCategory().getType())
+            .title(expenditure.getTitle())
             .note(expenditure.getNote()).build();
     }
 
@@ -123,7 +124,7 @@ public class ExpenditureMapper {
                 .amount(expenditure.getAmount())
                 .categoryId(expenditure.getCategory().getId())
                 .type(expenditure.getCategory().getType())
-                .note(expenditure.getNote())
+                .title(expenditure.getTitle())
                 .build())
             .toList();
     }

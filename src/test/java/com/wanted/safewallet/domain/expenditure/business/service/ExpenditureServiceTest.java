@@ -76,7 +76,7 @@ class ExpenditureServiceTest {
 
         //when
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            now, 10000L, 1L, CategoryType.FOOD, "");
+            now, 10000L, 1L, CategoryType.FOOD, "점심 커피챗", "");
         ExpenditureCreateResponseDto responseDto = expenditureService.createExpenditure(userId, requestDto);
 
         //then
@@ -102,7 +102,7 @@ class ExpenditureServiceTest {
 
         //when
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            now.plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "지출을 줄이자");
+            now.plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "하루 교통비", "지출을 줄이자");
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
 
         //then

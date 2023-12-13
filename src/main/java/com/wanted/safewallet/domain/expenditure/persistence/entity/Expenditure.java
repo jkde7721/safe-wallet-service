@@ -49,6 +49,9 @@ public class Expenditure extends BaseTime {
     @Column(nullable = false)
     private Long amount;
 
+    @Column(nullable = false, length = 100)
+    private String title;
+
     @Column(nullable = false, length = 500)
     private String note;
 

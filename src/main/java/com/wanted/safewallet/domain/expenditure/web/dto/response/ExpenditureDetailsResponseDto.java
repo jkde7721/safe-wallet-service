@@ -23,5 +23,7 @@ public class ExpenditureDetailsResponseDto {
 
     private CategoryType type;
 
+    private String title;
+
     private String note;
 }
