@@ -26,7 +26,7 @@ public class ExpenditureDailyStatsService {
     private final ExpenditureRepository expenditureRepository;
 
     public TodayExpenditureDailyStatsResponseDto produceTodayExpenditureDailyStats(String userId) {
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now().minusDays(1); //오늘 지출 안내는 다음날 계산하므로 -1
         TodayExpenditureConsultResponseDto todayExpenditureConsult = expenditureConsultService.consultTodayExpenditure(userId);
         Map<Category, Long> budgetAmountPerDayByCategory = convertToBudgetAmountPerDayByCategory(todayExpenditureConsult);
         Map<Category, Long> todayExpenditureTotalAmountByCategory = expenditureRepository.findTotalAmountMapByUserAndExpenditureDate(userId, now);
