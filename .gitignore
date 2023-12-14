@@ -40,3 +40,6 @@ src/main/generated/
 
 ### 빌드 시 자동 생성되는 API 문서 경로 ###
 src/main/resources/static/docs/
+
+### 로그 파일 ###
+*.log

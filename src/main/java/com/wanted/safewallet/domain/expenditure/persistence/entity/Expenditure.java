@@ -3,6 +3,7 @@ package com.wanted.safewallet.domain.expenditure.persistence.entity;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.audit.BaseTime;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +12,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
+import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,10 +47,13 @@ public class Expenditure extends BaseTime {
     private Category category;
 
     @Column(nullable = false)
-    private LocalDate expenditureDate;
+    private LocalDateTime expenditureDate;
 
     @Column(nullable = false)
     private Long amount;
+
+    @Column(nullable = false, length = 100)
+    private String title;
 
     @Column(nullable = false, length = 500)
     private String note;
@@ -57,7 +63,21 @@ public class Expenditure extends BaseTime {
     @ColumnDefault("0")
     private Boolean deleted = Boolean.FALSE;
 
-    public void update(Long categoryId, LocalDate expenditureDate, Long amount, String note) {
+    @Builder.Default
+    @OneToMany(mappedBy = "expenditure",
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<ExpenditureImage> images = List.of();
+
+    public List<String> getImageUrls() {
+        return images.stream().map(ExpenditureImage::getImageUrl).toList();
+    }
+
+    public void addImage(ExpenditureImage image) {
+        this.images.add(image);
+        image.updateExpenditure(this);
+    }
+
+    public void update(Long categoryId, LocalDateTime expenditureDate, Long amount, String note) {
         this.category = Category.builder().id(categoryId).build();
         this.expenditureDate = expenditureDate;
         this.amount = amount;

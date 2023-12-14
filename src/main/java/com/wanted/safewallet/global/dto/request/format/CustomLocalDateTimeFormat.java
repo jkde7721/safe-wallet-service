@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @JacksonAnnotationsInside
-@JsonDeserialize(using = CustomLocalDateDeserializer.class)
-public @interface CustomLocalDateFormat {
+@JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+public @interface CustomLocalDateTimeFormat {
 
 }

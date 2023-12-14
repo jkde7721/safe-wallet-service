@@ -29,6 +29,6 @@ public class ExpenditureListByDateResponseDto {
 
         private CategoryType type;
 
-        private String note;
+        private String title;
     }
 }

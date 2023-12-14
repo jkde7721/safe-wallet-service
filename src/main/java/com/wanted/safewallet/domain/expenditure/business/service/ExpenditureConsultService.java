@@ -43,7 +43,7 @@ public class ExpenditureConsultService {
         Map<Category, Long> budgetTotalAmountByCategory = budgetService.getBudgetTotalAmountByCategory(userId, currentYearMonth);
         //일별 적정 예산 (카테고리 별)
         Map<Category, Long> budgetAmountPerDayByCategory = getBudgetAmountPerDayByCategory(budgetTotalAmountByCategory, daysOfCurrentMonth);
-        //현재 월 내에서 현재까지 총 지출 (카테고리 별)
+        //현재 월 내에서 어제까지 총 지출 (카테고리 별)
         Map<Category, Long> expenditureTotalAmountByCategory = expenditureRepository.findTotalAmountMapByUserAndExpenditureDateRange(
             userId, expenditureStartDate, expenditureEndDate);
         //현재 월 내에서 남은 기간 동안 일별 적정 지출 (카테고리 별)

@@ -1,10 +1,11 @@
 package com.wanted.safewallet.domain.expenditure.web.dto.request;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.global.dto.request.format.CustomLocalDateFormat;
+import com.wanted.safewallet.global.dto.request.format.CustomLocalDateTimeFormat;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExpenditureUpdateRequestDto {
 
-    @CustomLocalDateFormat
+    @CustomLocalDateTimeFormat
     @NotNull(message = "{expenditure.update.notNull}")
-    private LocalDate expenditureDate;
+    private LocalDateTime expenditureDate;
 
     @Min(value = 0, message = "{expenditure.update.min.zero}")
     @NotNull(message = "{expenditure.update.notNull}")
@@ -27,6 +28,9 @@ public class ExpenditureUpdateRequestDto {
 
     @NotNull(message = "{expenditure.update.notNull}")
     private CategoryType type;
+
+    @NotBlank(message = "{expenditure.update.notBlank}")
+    private String title;
 
     private String note = "";
 }

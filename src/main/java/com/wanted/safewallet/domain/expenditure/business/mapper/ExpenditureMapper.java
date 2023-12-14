@@ -54,13 +54,15 @@ public class ExpenditureMapper {
             .amount(expenditure.getAmount())
             .categoryId(expenditure.getCategory().getId())
             .type(expenditure.getCategory().getType())
-            .note(expenditure.getNote()).build();
+            .title(expenditure.getTitle())
+            .note(expenditure.getNote())
+            .imageUrls(expenditure.getImageUrls()).build();
     }
 
     public ExpenditureSearchResponseDto toSearchDto(long totalAmount,
         List<StatsByCategoryResponseDto> statsByCategory, Page<Expenditure> expenditurePage) {
         Map<LocalDate, List<Expenditure>> expenditureListByDate = expenditurePage.getContent().stream()
-            .collect(groupingBy(Expenditure::getExpenditureDate, toList()));
+            .collect(groupingBy(expenditure -> expenditure.getExpenditureDate().toLocalDate(), toList()));
         return ExpenditureSearchResponseDto.builder()
             .totalAmount(totalAmount)
             .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
@@ -123,7 +125,7 @@ public class ExpenditureMapper {
                 .amount(expenditure.getAmount())
                 .categoryId(expenditure.getCategory().getId())
                 .type(expenditure.getCategory().getType())
-                .note(expenditure.getNote())
+                .title(expenditure.getTitle())
                 .build())
             .toList();
     }

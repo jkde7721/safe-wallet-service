@@ -36,6 +36,7 @@ import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -66,15 +67,16 @@ class ExpenditureServiceTest {
     void createExpenditure() {
         //given
         String userId = "testUserId";
+        LocalDateTime now = LocalDateTime.now();
         Expenditure expenditure = Expenditure.builder().id(1L)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(now).amount(10000L).note("").build();
         given(expenditureRepository.save(any(Expenditure.class))).willReturn(expenditure);
 
         //when
         ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
-            LocalDate.now(), 10000L, 1L, CategoryType.FOOD, "");
+            now, 10000L, 1L, CategoryType.FOOD, "점심 커피챗", "");
         ExpenditureCreateResponseDto responseDto = expenditureService.createExpenditure(userId, requestDto);
 
         //then
@@ -91,15 +93,16 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
+        LocalDateTime now = LocalDateTime.now();
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(now).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
         ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
-            LocalDate.now().plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "지출을 줄이자");
+            now.plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "하루 교통비", "지출을 줄이자");
         expenditureService.updateExpenditure(userId, expenditureId, requestDto);
 
         //then
@@ -120,7 +123,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
@@ -151,7 +154,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -171,7 +174,7 @@ class ExpenditureServiceTest {
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -185,18 +188,18 @@ class ExpenditureServiceTest {
 
     @DisplayName("현재 로그인한 사용자의 유효한 지출 내역 조회 테스트 with 카테고리 : 실패 - 접근 권한 없는 지출 내역")
     @Test
-    void getValidExpenditureWithCategory() {
+    void getValidExpenditureWithCategoryAndImages() {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
         Expenditure expenditure = Expenditure.builder().id(expenditureId)
             .user(User.builder().id(userId).build())
             .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDate.now()).amount(10000L).note("").build();
+            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategory(
+        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategoryAndImages(
             "wrong " + userId, expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(FORBIDDEN_EXPENDITURE);
@@ -204,13 +207,13 @@ class ExpenditureServiceTest {
 
     @DisplayName("해당 지출 내역 식별자로 조회 테스트 with 카테고리 : 실패 - 해당 지출 내역 존재하지 않음")
     @Test
-    void getExpenditureWithCategory() {
+    void getExpenditureWithCategoryAndImages() {
         //given
         Long expenditureId = 1L;
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.empty());
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getExpenditureWithCategory(expenditureId))
+        assertThatThrownBy(() -> expenditureService.getExpenditureWithCategoryAndImages(expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_EXPENDITURE);
     }

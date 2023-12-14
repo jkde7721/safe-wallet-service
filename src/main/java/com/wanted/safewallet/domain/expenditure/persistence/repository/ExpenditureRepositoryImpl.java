@@ -30,6 +30,15 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public Optional<Expenditure> findByIdFetch(Long expenditureId) {
+        return Optional.ofNullable(queryFactory.selectFrom(expenditure)
+            .join(expenditure.category).fetchJoin()
+            .leftJoin(expenditure.images).fetchJoin()
+            .where(expenditure.id.eq(expenditureId), notDeleted())
+            .fetchOne());
+    }
+
+    @Override
     public long getTotalAmount(String userId, ExpenditureSearchCond searchCond) {
         return Optional.ofNullable(queryFactory.select(expenditure.amount.sum())
                 .from(expenditure)
@@ -92,7 +101,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
             .from(expenditure)
             .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
+            .on(userIdEq(userId), expenditureDateGoeAndLt(startDate, endDate), notDeleted())
             .groupBy(category.id)
             .fetch()
             .stream()
@@ -129,12 +138,19 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return userId == null ? alwaysFalse() : expenditure.user.id.eq(userId);
     }
 
-    private BooleanExpression expenditureDateBetween(LocalDate startDate, LocalDate endDate) {
-        return expenditure.expenditureDate.between(startDate, endDate);
+    private BooleanExpression expenditureDateBetween(LocalDate startInclusive, LocalDate endInclusive) {
+        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(endInclusive.plusDays(1).atStartOfDay()));
+    }
+
+    private BooleanExpression expenditureDateGoeAndLt(LocalDate startInclusive, LocalDate endExclusive) {
+        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(endExclusive.atStartOfDay()));
     }
 
     private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
-        return expenditure.expenditureDate.eq(expenditureDate);
+        return expenditure.expenditureDate.goe(expenditureDate.atStartOfDay())
+            .and(expenditure.expenditureDate.lt(expenditureDate.plusDays(1).atStartOfDay()));
     }
 
     private BooleanExpression categoryIdIn(List<Long> categories) {
