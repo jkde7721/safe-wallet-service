@@ -10,7 +10,4 @@ public interface ExpenditureRepository extends JpaRepository<Expenditure, Long>,
 
     @Query("select e from Expenditure e where e.id = :expenditureId and e.deleted = false")
     Optional<Expenditure> findById(@Param("expenditureId") Long expenditureId);
-
-    @Query("select e from Expenditure e join fetch e.category where e.id = :expenditureId and e.deleted = false")
-    Optional<Expenditure> findByIdFetch(@Param("expenditureId") Long expenditureId);
 }

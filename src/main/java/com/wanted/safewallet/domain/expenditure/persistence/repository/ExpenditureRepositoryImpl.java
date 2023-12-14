@@ -30,6 +30,15 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public Optional<Expenditure> findByIdFetch(Long expenditureId) {
+        return Optional.ofNullable(queryFactory.selectFrom(expenditure)
+            .join(expenditure.category).fetchJoin()
+            .leftJoin(expenditure.images).fetchJoin()
+            .where(expenditure.id.eq(expenditureId), notDeleted())
+            .fetchOne());
+    }
+
+    @Override
     public long getTotalAmount(String userId, ExpenditureSearchCond searchCond) {
         return Optional.ofNullable(queryFactory.select(expenditure.amount.sum())
                 .from(expenditure)

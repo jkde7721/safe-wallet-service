@@ -8,10 +8,13 @@ import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearc
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExpenditureRepositoryCustom {
+
+    Optional<Expenditure> findByIdFetch(Long expenditureId);
 
     long getTotalAmount(String userId, ExpenditureSearchCond searchCond);
 
