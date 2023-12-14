@@ -118,7 +118,8 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("categoryId").description("카테고리 id"),
                     fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("title").description("지출 제목"),
-                    fieldWithPath("note").description("지출 관련 메모")
+                    fieldWithPath("note").description("지출 관련 메모"),
+                    fieldWithPath("imageUrls").description("지출 이미지 URL")
                 )
             ));
         then(expenditureService).should(times(1))
