@@ -101,7 +101,8 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void getExpenditureDetails() throws Exception {
         //given
         ExpenditureDetailsResponseDto responseDto = new ExpenditureDetailsResponseDto(
-            LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
+            LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!",
+            List.of("https://image1", "https://image2", "https://image3"));
         given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(responseDto);
 
         //when, then
