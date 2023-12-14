@@ -188,7 +188,7 @@ class ExpenditureServiceTest {
 
     @DisplayName("현재 로그인한 사용자의 유효한 지출 내역 조회 테스트 with 카테고리 : 실패 - 접근 권한 없는 지출 내역")
     @Test
-    void getValidExpenditureWithCategory() {
+    void getValidExpenditureWithCategoryAndImages() {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
@@ -199,7 +199,7 @@ class ExpenditureServiceTest {
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategory(
+        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategoryAndImages(
             "wrong " + userId, expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(FORBIDDEN_EXPENDITURE);
@@ -207,13 +207,13 @@ class ExpenditureServiceTest {
 
     @DisplayName("해당 지출 내역 식별자로 조회 테스트 with 카테고리 : 실패 - 해당 지출 내역 존재하지 않음")
     @Test
-    void getExpenditureWithCategory() {
+    void getExpenditureWithCategoryAndImages() {
         //given
         Long expenditureId = 1L;
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.empty());
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getExpenditureWithCategory(expenditureId))
+        assertThatThrownBy(() -> expenditureService.getExpenditureWithCategoryAndImages(expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_EXPENDITURE);
     }

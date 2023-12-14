@@ -52,7 +52,7 @@ public class ExpenditureService {
     private final ExpenditureRepository expenditureRepository;
 
     public ExpenditureDetailsResponseDto getExpenditureDetails(String userId, Long expenditureId) {
-        Expenditure expenditure = getValidExpenditureWithCategory(userId, expenditureId);
+        Expenditure expenditure = getValidExpenditureWithCategoryAndImages(userId, expenditureId);
         return expenditureMapper.toDetailsDto(expenditure);
     }
 
@@ -137,8 +137,8 @@ public class ExpenditureService {
         throw new BusinessException(FORBIDDEN_EXPENDITURE);
     }
 
-    public Expenditure getValidExpenditureWithCategory(String userId, Long expenditureId) {
-        Expenditure expenditure = getExpenditureWithCategory(expenditureId);
+    public Expenditure getValidExpenditureWithCategoryAndImages(String userId, Long expenditureId) {
+        Expenditure expenditure = getExpenditureWithCategoryAndImages(expenditureId);
         if (Objects.equals(expenditure.getUser().getId(), userId)) {
             return expenditure;
         }
@@ -150,7 +150,7 @@ public class ExpenditureService {
             .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
 
-    public Expenditure getExpenditureWithCategory(Long expenditureId) {
+    public Expenditure getExpenditureWithCategoryAndImages(Long expenditureId) {
         return expenditureRepository.findByIdFetch(expenditureId)
             .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
