@@ -55,7 +55,8 @@ public class ExpenditureMapper {
             .categoryId(expenditure.getCategory().getId())
             .type(expenditure.getCategory().getType())
             .title(expenditure.getTitle())
-            .note(expenditure.getNote()).build();
+            .note(expenditure.getNote())
+            .imageUrls(expenditure.getImageUrls()).build();
     }
 
     public ExpenditureSearchResponseDto toSearchDto(long totalAmount,
