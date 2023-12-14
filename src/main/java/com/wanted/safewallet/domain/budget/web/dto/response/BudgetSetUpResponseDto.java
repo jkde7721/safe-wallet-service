@@ -9,11 +9,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BudgetSetUpResponseDto {
 
-    private List<BudgetByCategory> budgetList;
+    private List<BudgetOfCategory> budgetList;
 
     @Getter
     @AllArgsConstructor
-    public static class BudgetByCategory {
+    public static class BudgetOfCategory {
 
         private Long budgetId;
         private Long categoryId;

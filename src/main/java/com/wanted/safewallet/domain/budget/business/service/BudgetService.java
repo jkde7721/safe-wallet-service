@@ -10,7 +10,7 @@ import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountB
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
@@ -125,7 +125,7 @@ public class BudgetService {
         List<CategoryValidRequestDto> categoryValidDtoList = requestDto.getBudgetList().stream()
             .map(b -> new CategoryValidRequestDto(b.getCategoryId(), b.getType())).toList();
         List<Long> categoryIds = requestDto.getBudgetList().stream().map(
-            BudgetByCategory::getCategoryId).toList();
+            BudgetOfCategory::getCategoryId).toList();
 
         categoryService.validateCategory(categoryValidDtoList);
         if (budgetRepository.existsByUserIdAndBudgetYearMonthAndInCategories(

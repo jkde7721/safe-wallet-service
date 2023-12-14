@@ -24,12 +24,12 @@ public class BudgetSetUpRequestDto {
 
     @Valid
     @NotEmpty(message = "{budget.setup.notEmpty}")
-    private List<BudgetByCategory> budgetList;
+    private List<BudgetOfCategory> budgetList;
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class BudgetByCategory {
+    public static class BudgetOfCategory {
 
         @NotNull(message = "{budget.setup.notNull}")
         private Long categoryId;

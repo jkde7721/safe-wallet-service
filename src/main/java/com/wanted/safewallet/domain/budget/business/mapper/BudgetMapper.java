@@ -5,7 +5,7 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
@@ -20,19 +20,20 @@ public class BudgetMapper {
 
     public List<Budget> toEntityList(String userId, BudgetSetUpRequestDto requestDto) {
         YearMonth budgetYearMonth = requestDto.getBudgetYearMonth();
-        return requestDto.getBudgetList().stream().map(b -> Budget.builder()
+        return requestDto.getBudgetList().stream()
+            .map(budgetOfCategory -> Budget.builder()
                 .user(User.builder().id(userId).build())
-                .category(Category.builder().id(b.getCategoryId()).type(b.getType()).build())
-                .budgetYearMonth(budgetYearMonth).amount(b.getAmount()).build())
+                .category(Category.builder().id(budgetOfCategory.getCategoryId()).type(budgetOfCategory.getType()).build())
+                .budgetYearMonth(budgetYearMonth).amount(budgetOfCategory.getAmount()).build())
             .toList();
     }
 
     public BudgetSetUpResponseDto toDto(List<Budget> budgetList) {
-        List<BudgetByCategory> budgetListByCategory = budgetList.stream()
-            .map(b -> new BudgetByCategory(b.getId(), b.getCategory().getId(),
-                b.getCategory().getType(), b.getAmount()))
+        List<BudgetOfCategory> budgetOfCategoryList = budgetList.stream()
+            .map(budget -> new BudgetOfCategory(budget.getId(), budget.getCategory().getId(),
+                budget.getCategory().getType(), budget.getAmount()))
             .toList();
-        return new BudgetSetUpResponseDto(budgetListByCategory);
+        return new BudgetSetUpResponseDto(budgetOfCategoryList);
     }
 
     public BudgetUpdateResponseDto toDto(Budget budget) {

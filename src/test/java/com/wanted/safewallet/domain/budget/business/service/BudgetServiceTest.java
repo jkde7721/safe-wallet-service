@@ -24,7 +24,7 @@ import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountB
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
@@ -70,8 +70,8 @@ class BudgetServiceTest {
         //when
         String userId = "testUserId";
         BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
-            List.of(new BudgetByCategory(1L, FOOD, 10000L),
-                new BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
+            List.of(new BudgetOfCategory(1L, FOOD, 10000L),
+                new BudgetOfCategory(2L, CategoryType.TRAFFIC, 5000L)));
         BudgetSetUpResponseDto responseDto = budgetService.setUpBudget(userId, requestDto);
 
         //then
@@ -97,8 +97,8 @@ class BudgetServiceTest {
         //when
         String userId = "testUserId";
         BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
-            List.of(new BudgetByCategory(1L, FOOD, 10000L),
-                new BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
+            List.of(new BudgetOfCategory(1L, FOOD, 10000L),
+                new BudgetOfCategory(2L, CategoryType.TRAFFIC, 5000L)));
 
         //then
         assertThatThrownBy(() -> budgetService.setUpBudget(userId, requestDto))

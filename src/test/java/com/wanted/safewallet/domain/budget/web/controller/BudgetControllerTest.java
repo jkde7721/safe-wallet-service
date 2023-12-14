@@ -35,11 +35,11 @@ import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
@@ -69,14 +69,14 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     void setUpBudget() throws Exception {
         //given
         BudgetSetUpResponseDto responseDto = new BudgetSetUpResponseDto(List.of(
-            new BudgetByCategory(1L, 1L, CategoryType.FOOD, 10000L),
-            new BudgetByCategory(2L, 2L, CategoryType.TRAFFIC, 5000L)));
+            new BudgetSetUpResponseDto.BudgetOfCategory(1L, 1L, CategoryType.FOOD, 10000L),
+            new BudgetSetUpResponseDto.BudgetOfCategory(2L, 2L, CategoryType.TRAFFIC, 5000L)));
         given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequestDto.class))).willReturn(responseDto);
 
         //when, then
         BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.now(),
-            List.of(new BudgetSetUpRequestDto.BudgetByCategory(1L, CategoryType.FOOD, 10000L),
-                new BudgetSetUpRequestDto.BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
+            List.of(new BudgetOfCategory(1L, CategoryType.FOOD, 10000L),
+                new BudgetOfCategory(2L, CategoryType.TRAFFIC, 5000L)));
         restDocsMockMvc.perform(post("/api/budgets")
                 .content(asJsonString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON)
