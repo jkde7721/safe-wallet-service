@@ -24,7 +24,8 @@ import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto.ExpenditureAmountOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
@@ -35,7 +36,6 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStat
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -224,28 +224,30 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         StatsCriteria criteria = StatsCriteria.LAST_MONTH;
-        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList = List.of(
-            new TotalAmountByCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(3L).type(RESIDENCE).build(), 500_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(4L).type(CLOTHING).build(), 100_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(5L).type(LEISURE).build(), 50_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(6L).type(ETC).build(), 5_000L));
-        given(expenditureRepository.getTotalAmountByCategoryList(anyString(), any(LocalDate.class), any(LocalDate.class)))
-            .willReturn(totalAmountByCategoryList);
+        List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList = List.of(
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(3L).type(RESIDENCE).build(), 500_000L),
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(4L).type(CLOTHING).build(), 100_000L),
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(5L).type(LEISURE).build(), 50_000L),
+            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(6L).type(ETC).build(), 5_000L));
+        ExpenditureAmountOfCategoryListResponseDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListResponseDto(expenditureAmountOfCategoryList);
+        given(expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))
+            .willReturn(expenditureAmountOfCategoryListDto);
 
         //when
         ExpenditureStatsResponseDto responseDto = expenditureService.produceExpenditureStats(userId, criteria);
 
         //then
-        then(expenditureRepository).should(times(2)).getTotalAmountByCategoryList(
-            anyString(), any(LocalDate.class), any(LocalDate.class));
+        then(expenditureRepository).should(times(2)).findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            anyString(), any(LocalDateTime.class), any(LocalDateTime.class));
         assertThat(MONTHS.between(responseDto.getCriteriaStartDate(), responseDto.getCurrentStartDate()))
             .isEqualTo(1);
         assertThat(DAYS.between(responseDto.getCurrentStartDate(), responseDto.getCurrentEndDate()))
             .isEqualTo(DAYS.between(responseDto.getCriteriaStartDate(), responseDto.getCriteriaEndDate()));
         assertThat(responseDto.getTotalConsumptionRate()).isEqualTo(100L);
-        assertThat(responseDto.getConsumptionRateListByCategory()).satisfiesExactly(
+        assertThat(responseDto.getConsumptionRateOfCategoryList()).satisfiesExactly(
             item1 -> assertThat(item1).extracting("type", "consumptionRate").containsExactly(FOOD, 100L),
             item2 -> assertThat(item2).extracting("type", "consumptionRate").containsExactly(TRAFFIC, 100L),
             item3 -> assertThat(item3).extracting("type", "consumptionRate").containsExactly(RESIDENCE, 100L),

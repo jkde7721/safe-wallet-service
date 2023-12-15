@@ -58,12 +58,12 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureList
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto.TodayExpenditureDailyStatsOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponseDto.YesterdayExpenditureDailyStatsOfCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureAmountOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
@@ -132,11 +132,11 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         //given
         ExpenditureSearchResponseDto responseDto = ExpenditureSearchResponseDto.builder()
             .totalAmount(30000L)
-            .totalAmountListByCategory(List.of(
-                TotalAmountByCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
-                    .totalAmount(25000L).build(),
-                TotalAmountByCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
-                    .totalAmount(5000L).build()))
+            .expenditureAmountOfCategoryList(List.of(
+                ExpenditureAmountOfCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
+                    .amount(25000L).build(),
+                ExpenditureAmountOfCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
+                    .amount(5000L).build()))
             .expenditureListByDate(List.of(
                 ExpenditureListByDateResponseDto.builder()
                     .expenditureDate(LocalDate.of(2023, 11, 17))
@@ -216,11 +216,11 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         //given
         ExpenditureSearchExceptsResponseDto responseDto = ExpenditureSearchExceptsResponseDto.builder()
             .totalAmount(26000L)
-            .totalAmountListByCategory(List.of(
-                TotalAmountByCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
-                    .totalAmount(21000L).build(),
-                TotalAmountByCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
-                    .totalAmount(5000L).build()))
+            .expenditureAmountOfCategoryList(List.of(
+                ExpenditureAmountOfCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
+                    .amount(21000L).build(),
+                ExpenditureAmountOfCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
+                    .amount(5000L).build()))
             .build();
         LocalDate startDate = LocalDate.of(2023, 11, 1);
         LocalDate endDate = LocalDate.of(2023, 11, 30);
@@ -433,18 +433,18 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         LocalDate criteriaStartDate = currentStartDate.minusMonths(1);
         LocalDate criteriaEndDate = criteriaStartDate.plusDays(DAYS.between(currentStartDate, currentEndDate));
         Long totalConsumptionRate = 110L;
-        List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory = List.of(
-            new ConsumptionRateByCategoryResponseDto(1L, FOOD, 150L),
-            new ConsumptionRateByCategoryResponseDto(2L, TRAFFIC, 130L),
-            new ConsumptionRateByCategoryResponseDto(3L, RESIDENCE, 100L),
-            new ConsumptionRateByCategoryResponseDto(4L, CLOTHING, 70L),
-            new ConsumptionRateByCategoryResponseDto(5L, LEISURE, 55L),
-            new ConsumptionRateByCategoryResponseDto(6L, ETC, 100L));
+        List<ConsumptionRateOfCategoryResponseDto> consumptionRateOfCategoryList = List.of(
+            new ConsumptionRateOfCategoryResponseDto(1L, FOOD, 150L),
+            new ConsumptionRateOfCategoryResponseDto(2L, TRAFFIC, 130L),
+            new ConsumptionRateOfCategoryResponseDto(3L, RESIDENCE, 100L),
+            new ConsumptionRateOfCategoryResponseDto(4L, CLOTHING, 70L),
+            new ConsumptionRateOfCategoryResponseDto(5L, LEISURE, 55L),
+            new ConsumptionRateOfCategoryResponseDto(6L, ETC, 100L));
         ExpenditureStatsResponseDto responseDto = ExpenditureStatsResponseDto.builder()
             .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
             .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
             .totalConsumptionRate(totalConsumptionRate)
-            .consumptionRateListByCategory(consumptionRateListByCategory).build();
+            .consumptionRateOfCategoryList(consumptionRateOfCategoryList).build();
         given(expenditureService.produceExpenditureStats(anyString(), any(StatsCriteria.class)))
             .willReturn(responseDto);
 
@@ -505,26 +505,26 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             ));
     }
 
-    @DisplayName("오늘 지출 안내 컨트롤러 테스트 : 성공")
+    @DisplayName("어제 지출 안내 컨트롤러 테스트 : 성공")
     @Test
-    void produceTodayExpenditureDailyStats() throws Exception {
+    void produceYesterdayExpenditureDailyStats() throws Exception {
         //given
-        List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList = List.of(
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(1L, FOOD, 9600L, 9600L, 100L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(2L, TRAFFIC, 6400L, 3200L, 50L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(3L, RESIDENCE, 0L, 0L, 0L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(4L, CLOTHING, 50000L, 35000L, 70L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(5L, LEISURE, 10000L, 0L, 0L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(6L, ETC, 3200L, 4800L, 150L));
-        TodayExpenditureDailyStatsResponseDto responseDto = new TodayExpenditureDailyStatsResponseDto(
-            52600L, todayExpenditureDailyStatsOfCategoryList);
-        given(expenditureDailyStatsService.produceTodayExpenditureDailyStats(anyString())).willReturn(responseDto);
+        List<YesterdayExpenditureDailyStatsOfCategoryResponseDto> yesterdayExpenditureDailyStatsOfCategoryList = List.of(
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(1L, FOOD, 9600L, 9600L, 100L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(2L, TRAFFIC, 6400L, 3200L, 50L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(3L, RESIDENCE, 0L, 0L, 0L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(4L, CLOTHING, 50000L, 35000L, 70L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(5L, LEISURE, 10000L, 0L, 0L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponseDto(6L, ETC, 3200L, 4800L, 150L));
+        YesterdayExpenditureDailyStatsResponseDto responseDto = new YesterdayExpenditureDailyStatsResponseDto(
+            52600L, yesterdayExpenditureDailyStatsOfCategoryList);
+        given(expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(anyString())).willReturn(responseDto);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/daily-stats")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.todayExpenditureDailyStatsOfCategoryList", hasSize(6)))
+            .andExpect(jsonPath("$.data.yesterdayExpenditureDailyStatsOfCategoryList", hasSize(6)))
             .andDo(restDocs.document(
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
