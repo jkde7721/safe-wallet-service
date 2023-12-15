@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.business.vo.YesterdayExpenditureDailyStatsVo;
+import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
@@ -33,7 +33,7 @@ public class ExpenditureDailyStatsService {
         Map<Category, Long> yesterdayExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, yesterday);
 
         Long totalAmount = calculateTotalAmount(yesterdayExpenditureAmountByCategory);
-        Map<Category, YesterdayExpenditureDailyStatsVo> yesterdayExpenditureDailyStatsByCategory =
+        Map<Category, YesterdayExpenditureDailyStatsDto> yesterdayExpenditureDailyStatsByCategory =
             getYesterdayExpenditureDailyStatsByCategory(dailyConsultedExpenditureAmountByCategory, yesterdayExpenditureAmountByCategory);
         return expenditureMapper.toDto(totalAmount, yesterdayExpenditureDailyStatsByCategory);
     }
@@ -55,10 +55,10 @@ public class ExpenditureDailyStatsService {
         return amountByCategory.values().stream().mapToLong(Long::longValue).sum();
     }
 
-    private Map<Category, YesterdayExpenditureDailyStatsVo> getYesterdayExpenditureDailyStatsByCategory(
+    private Map<Category, YesterdayExpenditureDailyStatsDto> getYesterdayExpenditureDailyStatsByCategory(
         Map<Category, Long> dailyConsultedExpenditureAmountByCategory, Map<Category, Long> yesterdayExpenditureAmountByCategory) {
         return dailyConsultedExpenditureAmountByCategory.keySet().stream()
-            .collect(toMap(identity(), category -> new YesterdayExpenditureDailyStatsVo(
+            .collect(toMap(identity(), category -> new YesterdayExpenditureDailyStatsDto(
                 dailyConsultedExpenditureAmountByCategory.get(category), yesterdayExpenditureAmountByCategory.get(category),
                 calculateConsumptionRate(dailyConsultedExpenditureAmountByCategory.get(category),
                     yesterdayExpenditureAmountByCategory.get(category)))));

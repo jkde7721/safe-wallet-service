@@ -4,8 +4,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureConsultVo;
-import com.wanted.safewallet.domain.expenditure.business.vo.YesterdayExpenditureDailyStatsVo;
+import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
@@ -130,7 +130,7 @@ public class ExpenditureMapper {
     }
 
     public TodayExpenditureConsultResponseDto toDto(long totalAmount, FinanceStatus totalFinanceStatus,
-        Map<Category, TodayExpenditureConsultVo> todayExpenditureConsultByCategory) {
+        Map<Category, TodayExpenditureConsultDto> todayExpenditureConsultByCategory) {
         List<TodayExpenditureConsultOfCategoryResponseDto> todayExpenditureConsultOfCategoryList =
             todayExpenditureConsultByCategory.keySet().stream()
                 .sorted(Comparator.comparing(Category::getId))
@@ -142,7 +142,7 @@ public class ExpenditureMapper {
     }
 
     public YesterdayExpenditureDailyStatsResponseDto toDto(Long totalAmount,
-        Map<Category, YesterdayExpenditureDailyStatsVo> yesterdayExpenditureDailyStatsByCategory) {
+        Map<Category, YesterdayExpenditureDailyStatsDto> yesterdayExpenditureDailyStatsByCategory) {
         List<YesterdayExpenditureDailyStatsOfCategoryResponseDto> yesterdayExpenditureDailyStatsOfCategoryList =
             yesterdayExpenditureDailyStatsByCategory.keySet().stream()
                 .sorted(Comparator.comparing(Category::getId))

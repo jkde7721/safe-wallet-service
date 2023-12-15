@@ -13,7 +13,7 @@ import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidR
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.business.vo.ExpenditureDateUpdateVo;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureDateUpdateDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
@@ -83,13 +83,13 @@ public class ExpenditureService {
         #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.originalExpenditureDate()) ||
         #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.updatedExpenditureDate())""")
     @Transactional
-    public ExpenditureDateUpdateVo updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
+    public ExpenditureDateUpdateDto updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
         validateRequest(requestDto);
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
         LocalDateTime originalExpenditureDate = expenditure.getExpenditureDate();
         expenditure.update(requestDto.getCategoryId(), requestDto.getExpenditureDate(),
             requestDto.getAmount(), requestDto.getNote());
-        return new ExpenditureDateUpdateVo(originalExpenditureDate, requestDto.getExpenditureDate());
+        return new ExpenditureDateUpdateDto(originalExpenditureDate, requestDto.getExpenditureDate());
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =

@@ -9,7 +9,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureConsultVo;
+import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDto;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
@@ -52,7 +52,7 @@ public class ExpenditureConsultService {
 
         long totalAmount = calculateTotalAmount(dailyConsultedExpenditureAmountByCategory);
         FinanceStatus totalFinanceStatus = getTotalFinanceStatus(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, expenditureEndDate);
-        Map<Category, TodayExpenditureConsultVo> todayExpenditureConsultByCategory =
+        Map<Category, TodayExpenditureConsultDto> todayExpenditureConsultByCategory =
             getTodayExpenditureConsultByCategory(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, dailyConsultedExpenditureAmountByCategory);
         return expenditureMapper.toDto(totalAmount, totalFinanceStatus, todayExpenditureConsultByCategory);
     }
@@ -104,11 +104,11 @@ public class ExpenditureConsultService {
         return EXCELLENT;
     }
 
-    private Map<Category, TodayExpenditureConsultVo> getTodayExpenditureConsultByCategory(
+    private Map<Category, TodayExpenditureConsultDto> getTodayExpenditureConsultByCategory(
         Map<Category, Long> monthlyBudgetAmountByCategory, Map<Category, Long> dailyBudgetAmountByCategory,
         Map<Category, Long> monthlyExpendedExpenditureAmountByCategory, Map<Category, Long> dailyConsultedExpenditureAmountByCategory) {
         return dailyConsultedExpenditureAmountByCategory.keySet().stream()
-            .collect(toMap(identity(), category -> new TodayExpenditureConsultVo(
+            .collect(toMap(identity(), category -> new TodayExpenditureConsultDto(
                 dailyConsultedExpenditureAmountByCategory.get(category),
                 getFinanceStatus(monthlyBudgetAmountByCategory.get(category),
                     monthlyExpendedExpenditureAmountByCategory.get(category),
