@@ -9,21 +9,21 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.TemporalAdjusters.previousOrSame;
 import static java.util.stream.Collectors.toMap;
 
-import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
+import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureDateUpdateDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.DayOfWeek;
@@ -48,12 +48,12 @@ public class ExpenditureService {
     private final CategoryService categoryService;
     private final ExpenditureRepository expenditureRepository;
 
-    public ExpenditureDetailsResponseDto getExpenditureDetails(String userId, Long expenditureId) {
+    public ExpenditureDetailsResponse getExpenditureDetails(String userId, Long expenditureId) {
         Expenditure expenditure = getValidExpenditureWithCategoryAndImages(userId, expenditureId);
         return expenditureMapper.toDetailsDto(expenditure);
     }
 
-    public ExpenditureSearchResponseDto searchExpenditure(String userId,
+    public ExpenditureSearchResponse searchExpenditure(String userId,
         ExpenditureSearchCond searchCond, Pageable pageable) {
         long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
         Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
@@ -61,7 +61,7 @@ public class ExpenditureService {
         return expenditureMapper.toSearchDto(totalAmount, expenditureAmountByCategory, expenditurePage);
     }
 
-    public ExpenditureSearchExceptsResponseDto searchExpenditureExcepts(String userId,
+    public ExpenditureSearchExceptsResponse searchExpenditureExcepts(String userId,
         ExpenditureSearchCond searchCond) {
         long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
         Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
@@ -69,12 +69,12 @@ public class ExpenditureService {
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
-        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#requestDto.expenditureDate)")
+        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#request.expenditureDate)")
     @Transactional
-    public ExpenditureCreateResponseDto createExpenditure(String userId,
-        ExpenditureCreateRequestDto requestDto) {
-        validateRequest(requestDto);
-        Expenditure expenditure = expenditureMapper.toEntity(userId, requestDto);
+    public ExpenditureCreateResponse createExpenditure(String userId,
+        ExpenditureCreateRequest request) {
+        validateRequest(request);
+        Expenditure expenditure = expenditureMapper.toEntity(userId, request);
         Expenditure savedExpenditure = expenditureRepository.save(expenditure);
         return expenditureMapper.toCreateDto(savedExpenditure);
     }
@@ -83,13 +83,13 @@ public class ExpenditureService {
         #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.originalExpenditureDate()) ||
         #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.updatedExpenditureDate())""")
     @Transactional
-    public ExpenditureDateUpdateDto updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequestDto requestDto) {
-        validateRequest(requestDto);
+    public ExpenditureDateUpdateDto updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequest request) {
+        validateRequest(request);
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
         LocalDateTime originalExpenditureDate = expenditure.getExpenditureDate();
-        expenditure.update(requestDto.getCategoryId(), requestDto.getExpenditureDate(),
-            requestDto.getAmount(), requestDto.getNote());
-        return new ExpenditureDateUpdateDto(originalExpenditureDate, requestDto.getExpenditureDate());
+        expenditure.update(request.getCategoryId(), request.getExpenditureDate(),
+            request.getAmount(), request.getNote());
+        return new ExpenditureDateUpdateDto(originalExpenditureDate, request.getExpenditureDate());
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
@@ -101,7 +101,7 @@ public class ExpenditureService {
         return expenditure.getExpenditureDate();
     }
 
-    public ExpenditureStatsResponseDto produceExpenditureStats(String userId, StatsCriteria criteria) {
+    public ExpenditureStatsResponse produceExpenditureStats(String userId, StatsCriteria criteria) {
         LocalDate currentEndDate = LocalDate.now();
         LocalDate currentStartDate = getCurrentStartDate(currentEndDate, criteria);
         LocalDate criteriaStartDate = getCriteriaStartDate(currentStartDate, criteria);
@@ -213,15 +213,15 @@ public class ExpenditureService {
         return Math.round((double) currentAmount / criteriaAmount * 100); //% 단위로 변환하기 위해 곱하기 100
     }
 
-    private void validateRequest(ExpenditureCreateRequestDto requestDto) {
-        CategoryValidRequestDto categoryValidDto = new CategoryValidRequestDto(
-            requestDto.getCategoryId(), requestDto.getType());
-        categoryService.validateCategory(categoryValidDto);
+    private void validateRequest(ExpenditureCreateRequest request) {
+        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
+            request.getCategoryId(), request.getType());
+        categoryService.validateCategory(categoryValidationDto);
     }
 
-    private void validateRequest(ExpenditureUpdateRequestDto requestDto) {
-        CategoryValidRequestDto categoryValidDto = new CategoryValidRequestDto(
-            requestDto.getCategoryId(), requestDto.getType());
-        categoryService.validateCategory(categoryValidDto);
+    private void validateRequest(ExpenditureUpdateRequest request) {
+        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
+            request.getCategoryId(), request.getType());
+        categoryService.validateCategory(categoryValidationDto);
     }
 }

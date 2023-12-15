@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureSearchExceptsResponseDto {
+public class ExpenditureSearchExceptsResponse {
 
     private Long totalAmount;
 
-    private List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList;
+    private List<ExpenditureAmountOfCategoryResponse> expenditureAmountOfCategoryList;
 }

@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.auth.business.service;
 
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -9,13 +9,13 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureSearchResponseDto {
+public class ExpenditureSearchResponse {
 
     private Long totalAmount;
 
-    private List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList;
+    private List<ExpenditureAmountOfCategoryResponse> expenditureAmountOfCategoryList;
 
-    private List<ExpenditureListByDateResponseDto> expenditureListByDate;
+    private List<ExpenditureListByDateResponse> expenditureListByDate;
 
     private PageResponse paging;
 }

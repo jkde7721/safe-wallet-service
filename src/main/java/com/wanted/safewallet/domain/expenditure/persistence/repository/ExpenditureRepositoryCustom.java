@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.expenditure.persistence.repository;
 
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDateTime;
@@ -16,7 +16,7 @@ public interface ExpenditureRepositoryCustom {
 
     Page<Expenditure> findAllByUserAndSearchCondFetch(String userId, ExpenditureSearchCond searchCond, Pageable pageable);
 
-    ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond);
+    ExpenditureAmountOfCategoryListDto findExpenditureAmountOfCategoryListByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond);
 
-    ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(String userId, LocalDateTime startInclusive, LocalDateTime endExclusive);
+    ExpenditureAmountOfCategoryListDto findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(String userId, LocalDateTime startInclusive, LocalDateTime endExclusive);
 }

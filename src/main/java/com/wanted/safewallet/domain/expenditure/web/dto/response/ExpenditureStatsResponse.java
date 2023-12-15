@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureStatsResponseDto {
+public class ExpenditureStatsResponse {
 
     private LocalDate currentStartDate;
 
@@ -22,11 +22,11 @@ public class ExpenditureStatsResponseDto {
 
     private Long totalConsumptionRate;
 
-    private List<ConsumptionRateOfCategoryResponseDto> consumptionRateOfCategoryList;
+    private List<ConsumptionRateOfCategoryResponse> consumptionRateOfCategoryList;
 
     @Getter
     @AllArgsConstructor
-    public static class ConsumptionRateOfCategoryResponseDto {
+    public static class ConsumptionRateOfCategoryResponse {
 
         private Long categoryId;
 

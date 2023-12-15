@@ -10,16 +10,16 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureListByDateResponseDto {
+public class ExpenditureListByDateResponse {
 
     private LocalDate expenditureDate;
 
-    private List<ExpenditureResponseDto> expenditureList;
+    private List<ExpenditureResponse> expenditureList;
 
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class ExpenditureResponseDto {
+    public static class ExpenditureResponse {
 
         private Long expenditureId;
 

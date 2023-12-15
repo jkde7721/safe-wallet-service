@@ -10,18 +10,18 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TodayExpenditureConsultResponseDto {
+public class TodayExpenditureConsultResponse {
 
     private Long totalAmount;
 
     private FinanceStatus totalFinanceStatus;
 
-    private List<TodayExpenditureConsultOfCategoryResponseDto> todayExpenditureConsultOfCategoryList;
+    private List<TodayExpenditureConsultOfCategoryResponse> todayExpenditureConsultOfCategoryList;
 
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class TodayExpenditureConsultOfCategoryResponseDto {
+    public static class TodayExpenditureConsultOfCategoryResponse {
 
         private Long categoryId;
 

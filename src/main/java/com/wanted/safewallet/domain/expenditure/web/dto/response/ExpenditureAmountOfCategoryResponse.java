@@ -1,7 +1,6 @@
-package com.wanted.safewallet.domain.budget.web.dto.response;
+package com.wanted.safewallet.domain.expenditure.web.dto.response;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import java.time.YearMonth;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,11 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class BudgetUpdateResponseDto {
-
-    private Long budgetId;
-
-    private YearMonth budgetYearMonth;
+public class ExpenditureAmountOfCategoryResponse {
 
     private Long categoryId;
 

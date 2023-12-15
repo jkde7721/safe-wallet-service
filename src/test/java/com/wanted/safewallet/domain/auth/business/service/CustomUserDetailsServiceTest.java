@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import java.util.Optional;

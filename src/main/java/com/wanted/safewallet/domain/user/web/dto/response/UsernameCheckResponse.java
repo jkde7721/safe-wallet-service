@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UsernameCheckResponseDto {
+public class UsernameCheckResponse {
 
     Boolean isDuplicatedUsername;
 }

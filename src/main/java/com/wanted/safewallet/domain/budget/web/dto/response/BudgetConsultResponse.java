@@ -7,17 +7,18 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BudgetSetUpResponseDto {
+public class BudgetConsultResponse {
 
-    private List<BudgetOfCategory> budgetList;
+    private List<BudgetConsultOfCategoryResponse> budgetConsultList;
 
     @Getter
     @AllArgsConstructor
-    public static class BudgetOfCategory {
+    public static class BudgetConsultOfCategoryResponse {
 
-        private Long budgetId;
         private Long categoryId;
+
         private CategoryType type;
+
         private Long amount;
     }
 }

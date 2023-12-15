@@ -9,13 +9,13 @@ import static java.util.stream.Collectors.toMap;
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetOfCategory;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
-import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponse;
+import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
@@ -38,35 +38,35 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
 
     @Transactional
-    public BudgetSetUpResponseDto setUpBudget(String userId, BudgetSetUpRequestDto requestDto) {
-        validateRequest(userId, requestDto);
-        List<Budget> budgetList = budgetMapper.toEntityList(userId, requestDto);
+    public BudgetSetUpResponse setUpBudget(String userId, BudgetSetUpRequest request) {
+        validateRequest(userId, request);
+        List<Budget> budgetList = budgetMapper.toEntityList(userId, request);
         budgetRepository.saveAll(budgetList);
         return budgetMapper.toDto(budgetList);
     }
 
     @Transactional
-    public BudgetUpdateResponseDto updateBudget(String userId, Long budgetId,
-        BudgetUpdateRequestDto requestDto) {
-        validateRequest(requestDto);
+    public BudgetUpdateResponse updateBudget(String userId, Long budgetId,
+        BudgetUpdateRequest request) {
+        validateRequest(request);
         Budget budget = getValidBudget(userId, budgetId);
 
         Budget anotherBudget = budgetRepository.findByUserAndCategoryAndBudgetYearMonthFetch(
-            userId, requestDto.getCategoryId(), requestDto.getBudgetYearMonth())
+            userId, request.getCategoryId(), request.getBudgetYearMonth())
             .orElse(budget);
         if (Objects.equals(anotherBudget.getId(), budgetId)) {
-            anotherBudget.update(requestDto.getCategoryId(), requestDto.getType(),
-                requestDto.getAmount(), requestDto.getBudgetYearMonth());
+            anotherBudget.update(request.getCategoryId(), request.getType(),
+                request.getAmount(), request.getBudgetYearMonth());
         }
         else {
             budgetRepository.deleteById(budgetId);
-            anotherBudget.addAmount(requestDto.getAmount());
+            anotherBudget.addAmount(request.getAmount());
         }
         return budgetMapper.toDto(anotherBudget);
     }
 
     //TODO: Redis Cache 적용
-    public BudgetConsultResponseDto consultBudget(String userId, Long totalAmountForConsult) {
+    public BudgetConsultResponse consultBudget(String userId, Long totalAmountForConsult) {
         Map<Category, Long> prevBudgetAmountByCategory = budgetRepository.existsByUser(userId) ?
             getBudgetAmountByCategory(userId) : getBudgetAmountByCategory();
         Map<Category, Long> consultedBudgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, prevBudgetAmountByCategory);
@@ -128,22 +128,22 @@ public class BudgetService {
         budgetAmountByCategory.replace(etcCategory, remainedAmount);
     }
 
-    private void validateRequest(String userId, BudgetSetUpRequestDto requestDto) {
-        List<CategoryValidRequestDto> categoryValidDtoList = requestDto.getBudgetList().stream()
-            .map(b -> new CategoryValidRequestDto(b.getCategoryId(), b.getType())).toList();
-        List<Long> categoryIds = requestDto.getBudgetList().stream().map(
-            BudgetOfCategory::getCategoryId).toList();
+    private void validateRequest(String userId, BudgetSetUpRequest request) {
+        List<CategoryValidationDto> categoryValidationDtoList = request.getBudgetList().stream()
+            .map(b -> new CategoryValidationDto(b.getCategoryId(), b.getType())).toList();
+        List<Long> categoryIds = request.getBudgetList().stream().map(
+            BudgetOfCategoryRequest::getCategoryId).toList();
 
-        categoryService.validateCategory(categoryValidDtoList);
+        categoryService.validateCategory(categoryValidationDtoList);
         if (budgetRepository.existsByUserAndBudgetYearMonthAndCategories(
-            userId, requestDto.getBudgetYearMonth(), categoryIds)) {
+            userId, request.getBudgetYearMonth(), categoryIds)) {
             throw new BusinessException(ALREADY_EXISTS_BUDGET);
         }
     }
 
-    private void validateRequest(BudgetUpdateRequestDto requestDto) {
-        CategoryValidRequestDto categoryValidDto = new CategoryValidRequestDto(
-            requestDto.getCategoryId(), requestDto.getType());
-        categoryService.validateCategory(categoryValidDto);
+    private void validateRequest(BudgetUpdateRequest request) {
+        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
+            request.getCategoryId(), request.getType());
+        categoryService.validateCategory(categoryValidationDto);
     }
 }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExpenditureUpdateRequestDto {
+public class ExpenditureUpdateRequest {
 
     @CustomLocalDateTimeFormat
     @NotNull(message = "{expenditure.update.notNull}")

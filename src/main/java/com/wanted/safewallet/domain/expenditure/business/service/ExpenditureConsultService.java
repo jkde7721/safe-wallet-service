@@ -12,7 +12,7 @@ import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDto;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,7 +34,7 @@ public class ExpenditureConsultService {
     public static final String CACHE_NAME = "today-expenditure-consult";
 
     @Cacheable(cacheNames = CACHE_NAME, key = "#userId")
-    public TodayExpenditureConsultResponseDto consultTodayExpenditure(String userId) {
+    public TodayExpenditureConsultResponse consultTodayExpenditure(String userId) {
         LocalDate expenditureEndDate = LocalDate.now();
         YearMonth currentYearMonth = YearMonth.of(expenditureEndDate.getYear(), expenditureEndDate.getMonth());
         LocalDate expenditureStartDate = currentYearMonth.atDay(1);

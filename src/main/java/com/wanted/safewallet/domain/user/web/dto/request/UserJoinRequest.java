@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ValidPassword
-public class UserJoinRequestDto {
+public class UserJoinRequest {
 
     @NotBlank(message = "{user.join.username}")
     private String username;

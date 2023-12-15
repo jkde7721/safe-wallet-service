@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BudgetSetUpRequestDto {
+public class BudgetSetUpRequest {
 
     @FutureOrPresent(message = "{budget.setup.futureOrPresent}")
     @NotNull(message = "{budget.setup.notNull}")
@@ -24,12 +24,12 @@ public class BudgetSetUpRequestDto {
 
     @Valid
     @NotEmpty(message = "{budget.setup.notEmpty}")
-    private List<BudgetOfCategory> budgetList;
+    private List<BudgetOfCategoryRequest> budgetList;
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class BudgetOfCategory {
+    public static class BudgetOfCategoryRequest {
 
         @NotNull(message = "{budget.setup.notNull}")
         private Long categoryId;

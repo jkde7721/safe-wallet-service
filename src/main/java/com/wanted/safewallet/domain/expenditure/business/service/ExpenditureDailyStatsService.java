@@ -7,9 +7,9 @@ import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse.TodayExpenditureConsultOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -26,9 +26,9 @@ public class ExpenditureDailyStatsService {
     private final ExpenditureConsultService expenditureConsultService;
     private final ExpenditureRepository expenditureRepository;
 
-    public YesterdayExpenditureDailyStatsResponseDto produceYesterdayExpenditureDailyStats(String userId) {
+    public YesterdayExpenditureDailyStatsResponse produceYesterdayExpenditureDailyStats(String userId) {
         LocalDate yesterday = LocalDate.now().minusDays(1); //ex. 10일이 어제라면 현재는 11일
-        TodayExpenditureConsultResponseDto yesterdayExpenditureConsult = expenditureConsultService.consultTodayExpenditure(userId); //캐싱
+        TodayExpenditureConsultResponse yesterdayExpenditureConsult = expenditureConsultService.consultTodayExpenditure(userId); //캐싱
         Map<Category, Long> dailyConsultedExpenditureAmountByCategory = convertToDailyConsultedExpenditureAmountByCategory(yesterdayExpenditureConsult);
         Map<Category, Long> yesterdayExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, yesterday);
 
@@ -45,10 +45,11 @@ public class ExpenditureDailyStatsService {
             userId, startInclusive, endExclusive).toMapByCategory();
     }
 
-    private Map<Category, Long> convertToDailyConsultedExpenditureAmountByCategory(TodayExpenditureConsultResponseDto yesterdayExpenditureConsult) {
+    private Map<Category, Long> convertToDailyConsultedExpenditureAmountByCategory(
+        TodayExpenditureConsultResponse yesterdayExpenditureConsult) {
         return yesterdayExpenditureConsult.getTodayExpenditureConsultOfCategoryList().stream()
             .collect(toMap(consult -> Category.builder().id(consult.getCategoryId()).type(consult.getType()).build(),
-                TodayExpenditureConsultOfCategoryResponseDto::getAmount));
+                TodayExpenditureConsultOfCategoryResponse::getAmount));
     }
 
     private Long calculateTotalAmount(Map<Category, Long> amountByCategory) {

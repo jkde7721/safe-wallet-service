@@ -8,8 +8,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto.ExpenditureAmountOfCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDate;
@@ -64,9 +64,9 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     @Override
-    public ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond) {
-        return new ExpenditureAmountOfCategoryListResponseDto(
-            queryFactory.select(constructor(ExpenditureAmountOfCategoryResponseDto.class,
+    public ExpenditureAmountOfCategoryListDto findExpenditureAmountOfCategoryListByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond) {
+        return new ExpenditureAmountOfCategoryListDto(
+            queryFactory.select(constructor(ExpenditureAmountOfCategoryDto.class,
                     category, expenditure.amount.coalesce(0L).sum()))
                 .from(expenditure)
                 .rightJoin(expenditure.category, category)
@@ -77,10 +77,10 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     @Override
-    public ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+    public ExpenditureAmountOfCategoryListDto findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
         String userId, LocalDateTime startInclusive, LocalDateTime endExclusive) {
-        return new ExpenditureAmountOfCategoryListResponseDto(
-            queryFactory.select(constructor(ExpenditureAmountOfCategoryResponseDto.class,
+        return new ExpenditureAmountOfCategoryListDto(
+            queryFactory.select(constructor(ExpenditureAmountOfCategoryDto.class,
                     category, expenditure.amount.coalesce(0L).sum()))
                 .from(expenditure)
                 .rightJoin(expenditure.category, category)

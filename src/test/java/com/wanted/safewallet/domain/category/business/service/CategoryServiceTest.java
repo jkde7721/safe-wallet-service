@@ -7,12 +7,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
+import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
 import com.wanted.safewallet.domain.category.business.mapper.CategoryMapper;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.category.persistence.repository.CategoryRepository;
-import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
+import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import java.util.Map;
@@ -45,16 +45,16 @@ class CategoryServiceTest {
         given(categoryRepository.findAll()).willReturn(categoryList);
 
         //when
-        CategoryListResponseDto responseDto = categoryService.getCategoryList();
+        CategoryListResponse response = categoryService.getCategoryList();
 
         //then
         then(categoryRepository).should(times(1)).findAll();
         then(categoryMapper).should(times(1)).toDto(categoryList);
-        assertThat(responseDto.getCategoryList()).hasSize(2);
-        assertThat(responseDto.getCategoryList())
+        assertThat(response.getCategoryList()).hasSize(2);
+        assertThat(response.getCategoryList())
             .extracting("categoryId")
             .contains(1L, 2L);
-        assertThat(responseDto.getCategoryList())
+        assertThat(response.getCategoryList())
             .extracting("type")
             .contains(CategoryType.FOOD, CategoryType.TRAFFIC);
     }
@@ -69,11 +69,11 @@ class CategoryServiceTest {
         given(categoryRepository.findAllMap()).willReturn(categoryMap);
 
         //when
-        List<CategoryValidRequestDto> categoryValidRequestDtoList = List.of(
-            new CategoryValidRequestDto(1L, CategoryType.TRAFFIC));
+        List<CategoryValidationDto> categoryValidationDtoList = List.of(
+            new CategoryValidationDto(1L, CategoryType.TRAFFIC));
 
         //then
-        assertThatThrownBy(() -> categoryService.validateCategory(categoryValidRequestDtoList))
+        assertThatThrownBy(() -> categoryService.validateCategory(categoryValidationDtoList))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_CATEGORY);
         then(categoryRepository).should(times(1)).findAllMap();

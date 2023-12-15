@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.auth.business.dto.response;
+package com.wanted.safewallet.domain.auth.business.dto;
 
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import java.util.List;

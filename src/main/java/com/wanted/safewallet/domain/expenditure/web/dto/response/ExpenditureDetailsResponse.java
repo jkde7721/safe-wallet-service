@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ExpenditureDetailsResponseDto {
+public class ExpenditureDetailsResponse {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = STRING, timezone = "Asia/Seoul")
     private LocalDateTime expenditureDate;

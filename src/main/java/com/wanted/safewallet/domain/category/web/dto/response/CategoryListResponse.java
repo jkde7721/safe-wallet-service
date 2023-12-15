@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.budget.web.dto.response;
+package com.wanted.safewallet.domain.category.web.dto.response;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import java.util.List;
@@ -7,18 +7,15 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BudgetConsultResponseDto {
+public class CategoryListResponse {
 
-    private List<BudgetConsultOfCategoryResponseDto> budgetConsultList;
+    private List<CategoryResponse> categoryList;
 
     @Getter
     @AllArgsConstructor
-    public static class BudgetConsultOfCategoryResponseDto {
+    public static class CategoryResponse {
 
         private Long categoryId;
-
         private CategoryType type;
-
-        private Long amount;
     }
 }

@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.budget.persistence.repository;
 
-import com.wanted.safewallet.domain.budget.persistence.dto.response.BudgetAmountOfCategoryListResponseDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -9,5 +9,5 @@ public interface BudgetRepositoryCustom {
     boolean existsByUserAndBudgetYearMonthAndCategories(String userId, YearMonth budgetYearMonth,
         List<Long> categoryIds);
 
-    BudgetAmountOfCategoryListResponseDto findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth);
+    BudgetAmountOfCategoryListDto findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth);
 }

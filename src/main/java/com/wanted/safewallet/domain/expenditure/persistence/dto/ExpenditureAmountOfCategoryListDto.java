@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.expenditure.persistence.dto.response;
+package com.wanted.safewallet.domain.expenditure.persistence.dto;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -11,13 +11,13 @@ import lombok.Getter;
 
 @Getter(AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class ExpenditureAmountOfCategoryListResponseDto {
+public class ExpenditureAmountOfCategoryListDto {
 
-    List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList;
+    List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList;
 
     @Getter(AccessLevel.PRIVATE)
     @AllArgsConstructor
-    public static class ExpenditureAmountOfCategoryResponseDto {
+    public static class ExpenditureAmountOfCategoryDto {
 
         private Category category;
 
@@ -26,7 +26,7 @@ public class ExpenditureAmountOfCategoryListResponseDto {
 
     public Map<Category, Long> toMapByCategory() {
         return expenditureAmountOfCategoryList.stream()
-            .collect(toMap(ExpenditureAmountOfCategoryResponseDto::getCategory,
-                ExpenditureAmountOfCategoryResponseDto::getAmount));
+            .collect(toMap(ExpenditureAmountOfCategoryDto::getCategory,
+                ExpenditureAmountOfCategoryDto::getAmount));
     }
 }

@@ -3,16 +3,16 @@ package com.wanted.safewallet.domain.expenditure.web.controller;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -42,35 +42,35 @@ public class ExpenditureController {
     private final ExpenditureDailyStatsService expenditureDailyStatsService;
 
     @GetMapping("/{expenditureId}")
-    public ExpenditureDetailsResponseDto getExpenditureDetails(@PathVariable Long expenditureId,
+    public ExpenditureDetailsResponse getExpenditureDetails(@PathVariable Long expenditureId,
         @CurrentUserId String userId) {
         return expenditureService.getExpenditureDetails(userId, expenditureId);
     }
 
     @GetMapping
-    public ExpenditureSearchResponseDto searchExpenditure(@CurrentUserId String userId,
+    public ExpenditureSearchResponse searchExpenditure(@CurrentUserId String userId,
         @ModelAttribute @Valid ExpenditureSearchCond searchCond, Pageable pageable) {
         return expenditureService.searchExpenditure(userId, searchCond, pageable);
     }
 
     @GetMapping("/excepts")
-    public ExpenditureSearchExceptsResponseDto searchExpenditureExcepts(@CurrentUserId String userId,
+    public ExpenditureSearchExceptsResponse searchExpenditureExcepts(@CurrentUserId String userId,
         @ModelAttribute @Valid ExpenditureSearchCond searchCond) {
         return expenditureService.searchExpenditureExcepts(userId, searchCond);
     }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
-    public ExpenditureCreateResponseDto createExpenditure(@RequestBody @Valid ExpenditureCreateRequestDto requestDto,
+    public ExpenditureCreateResponse createExpenditure(@RequestBody @Valid ExpenditureCreateRequest request,
         @CurrentUserId String userId) {
-        return expenditureService.createExpenditure(userId, requestDto);
+        return expenditureService.createExpenditure(userId, request);
     }
 
     @PutMapping("/{expenditureId}")
     public void updateExpenditure(@PathVariable Long expenditureId,
-        @RequestBody @Valid ExpenditureUpdateRequestDto requestDto,
+        @RequestBody @Valid ExpenditureUpdateRequest request,
         @CurrentUserId String userId) {
-        expenditureService.updateExpenditure(userId, expenditureId, requestDto);
+        expenditureService.updateExpenditure(userId, expenditureId, request);
     }
 
     @DeleteMapping("/{expenditureId}")
@@ -79,18 +79,18 @@ public class ExpenditureController {
     }
 
     @GetMapping("/stats")
-    public ExpenditureStatsResponseDto produceExpenditureStats(@CurrentUserId String userId,
+    public ExpenditureStatsResponse produceExpenditureStats(@CurrentUserId String userId,
         @RequestParam(defaultValue = "LAST_MONTH") StatsCriteria criteria) {
         return expenditureService.produceExpenditureStats(userId, criteria);
     }
 
     @GetMapping("/consult")
-    public TodayExpenditureConsultResponseDto consultTodayExpenditure(@CurrentUserId String userId) {
+    public TodayExpenditureConsultResponse consultTodayExpenditure(@CurrentUserId String userId) {
         return expenditureConsultService.consultTodayExpenditure(userId);
     }
 
     @GetMapping("/daily-stats")
-    public YesterdayExpenditureDailyStatsResponseDto produceYesterdayExpenditureDailyStats(@CurrentUserId String userId) {
+    public YesterdayExpenditureDailyStatsResponse produceYesterdayExpenditureDailyStats(@CurrentUserId String userId) {
         return expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(userId);
     }
 }

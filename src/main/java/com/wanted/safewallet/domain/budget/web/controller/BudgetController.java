@@ -1,11 +1,11 @@
 package com.wanted.safewallet.domain.budget.web.controller;
 
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponse;
 import com.wanted.safewallet.domain.budget.web.validation.annotation.ValidTotalAmountForConsult;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -33,19 +33,19 @@ public class BudgetController {
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
-    public BudgetSetUpResponseDto setUpBudget(@RequestBody @Valid BudgetSetUpRequestDto requestDto,
+    public BudgetSetUpResponse setUpBudget(@RequestBody @Valid BudgetSetUpRequest request,
         @CurrentUserId String userId) {
-        return budgetService.setUpBudget(userId, requestDto);
+        return budgetService.setUpBudget(userId, request);
     }
 
     @PutMapping("/{budgetId}")
-    public BudgetUpdateResponseDto updateBudget(@PathVariable Long budgetId,
-        @RequestBody @Valid BudgetUpdateRequestDto requestDto, @CurrentUserId String userId) {
-        return budgetService.updateBudget(userId, budgetId, requestDto);
+    public BudgetUpdateResponse updateBudget(@PathVariable Long budgetId,
+        @RequestBody @Valid BudgetUpdateRequest request, @CurrentUserId String userId) {
+        return budgetService.updateBudget(userId, budgetId, request);
     }
 
     @GetMapping("/consult")
-    public BudgetConsultResponseDto consultBudget(@CurrentUserId String userId,
+    public BudgetConsultResponse consultBudget(@CurrentUserId String userId,
         @RequestParam(required = false) @ValidTotalAmountForConsult Long totalAmount) {
         return budgetService.consultBudget(userId, totalAmount);
     }

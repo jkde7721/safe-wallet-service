@@ -8,8 +8,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.wanted.safewallet.domain.budget.persistence.dto.response.BudgetAmountOfCategoryListResponseDto;
-import com.wanted.safewallet.domain.budget.persistence.dto.response.BudgetAmountOfCategoryListResponseDto.BudgetAmountOfCategoryResponseDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto.BudgetAmountOfCategoryDto;
 import java.time.YearMonth;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +32,9 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
     }
 
     @Override
-    public BudgetAmountOfCategoryListResponseDto findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth) {
-        return new BudgetAmountOfCategoryListResponseDto (
-            queryFactory.select(constructor(BudgetAmountOfCategoryResponseDto.class,
+    public BudgetAmountOfCategoryListDto findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth) {
+        return new BudgetAmountOfCategoryListDto(
+            queryFactory.select(constructor(BudgetAmountOfCategoryDto.class,
                     category, budget.amount.coalesce(0L).sum()))
                 .from(budget)
                 .rightJoin(budget.category, category)

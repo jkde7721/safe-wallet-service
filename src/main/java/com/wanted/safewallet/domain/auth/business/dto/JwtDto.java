@@ -1,11 +1,11 @@
-package com.wanted.safewallet.domain.auth.business.dto.response;
+package com.wanted.safewallet.domain.auth.business.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class JwtResponseDto {
+public class JwtDto {
 
     private String accessToken;
 

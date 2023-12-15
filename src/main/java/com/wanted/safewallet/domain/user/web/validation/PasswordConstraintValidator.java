@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.user.web.validation;
 
-import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequestDto;
+import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.io.FileReader;
@@ -24,7 +24,7 @@ import org.passay.dictionary.sort.ArraysSort;
 import org.springframework.util.ResourceUtils;
 
 public class PasswordConstraintValidator implements
-    ConstraintValidator<ValidPassword, UserJoinRequestDto> {
+    ConstraintValidator<ValidPassword, UserJoinRequest> {
 
     private static final PasswordValidator validator;
     private static final String COMMON_PASSWORD_FILE = "classpath:static/common-password.txt";
@@ -55,8 +55,8 @@ public class PasswordConstraintValidator implements
     }
 
     @Override
-    public boolean isValid(UserJoinRequestDto requestDto, ConstraintValidatorContext context) {
-        PasswordData passwordData = new PasswordData(requestDto.getUsername(), requestDto.getPassword());
+    public boolean isValid(UserJoinRequest request, ConstraintValidatorContext context) {
+        PasswordData passwordData = new PasswordData(request.getUsername(), request.getPassword());
         RuleResult result = validator.validate(passwordData);
         if (result.isValid()) {
             return true;

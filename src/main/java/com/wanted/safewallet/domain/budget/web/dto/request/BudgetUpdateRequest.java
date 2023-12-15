@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BudgetUpdateRequestDto {
+public class BudgetUpdateRequest {
 
     @NotNull(message = "{budget.update.notNull}")
     @CustomYearMonthFormat

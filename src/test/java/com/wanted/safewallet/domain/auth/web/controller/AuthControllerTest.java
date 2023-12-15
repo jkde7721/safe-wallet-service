@@ -22,14 +22,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
-import com.wanted.safewallet.domain.auth.business.dto.response.JwtResponseDto;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
 import com.wanted.safewallet.domain.auth.business.service.AuthService;
 import com.wanted.safewallet.domain.auth.business.service.CustomUserDetailsService;
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.config.AuthTestConfig;
 import com.wanted.safewallet.domain.auth.utils.JwtProperties;
-import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequestDto;
+import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequest;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
@@ -75,9 +75,9 @@ class AuthControllerTest extends AbstractRestDocsTest {
         given(customUserDetailsService.loadUserByUsername(anyString())).willReturn(customUserDetails);
 
         //when, then
-        LoginRequestDto requestDto = new LoginRequestDto(username, password);
+        LoginRequest request = new LoginRequest(username, password);
         authRestDocsMockMvc.perform(post("/api/auth/login")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(header().string(AUTHORIZATION_HEADER_NAME, startsWith(jwtProperties.prefix())))
@@ -130,7 +130,7 @@ class AuthControllerTest extends AbstractRestDocsTest {
         String newAccessToken = "newAccessToken";
         String newRefreshToken = "newRefreshToken";
         given(authService.reissueToken(accessToken, refreshToken))
-            .willReturn(new JwtResponseDto(newAccessToken, newRefreshToken));
+            .willReturn(new JwtDto(newAccessToken, newRefreshToken));
 
         //when, then
         authRestDocsMockMvc.perform(put("/api/auth/refresh")

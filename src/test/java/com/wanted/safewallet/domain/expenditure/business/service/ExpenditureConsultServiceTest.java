@@ -15,10 +15,10 @@ import static org.mockito.Mockito.times;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto.ExpenditureAmountOfCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -58,11 +58,11 @@ class ExpenditureConsultServiceTest {
             Category.builder().id(1L).type(FOOD).build(), 300_000L,
             Category.builder().id(2L).type(TRAFFIC).build(), 200_000L,
             Category.builder().id(3L).type(ETC).build(), 100_000L);
-        List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList = List.of(
-            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 30_000L),
-            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 20_000L),
-            new ExpenditureAmountOfCategoryResponseDto(Category.builder().id(3L).type(ETC).build(), 10_000L));
-        ExpenditureAmountOfCategoryListResponseDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListResponseDto(expenditureAmountOfCategoryList);
+        List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList = List.of(
+            new ExpenditureAmountOfCategoryDto(Category.builder().id(1L).type(FOOD).build(), 30_000L),
+            new ExpenditureAmountOfCategoryDto(Category.builder().id(2L).type(TRAFFIC).build(), 20_000L),
+            new ExpenditureAmountOfCategoryDto(Category.builder().id(3L).type(ETC).build(), 10_000L));
+        ExpenditureAmountOfCategoryListDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListDto(expenditureAmountOfCategoryList);
         given(budgetService.getBudgetAmountByCategory(anyString(), any(YearMonth.class)))
             .willReturn(budgetAmountByCategory);
         given(expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
@@ -75,16 +75,16 @@ class ExpenditureConsultServiceTest {
             mockedStatic.when(LocalDate::now).thenReturn(now);
 
             //when
-            TodayExpenditureConsultResponseDto responseDto = expenditureConsultService.consultTodayExpenditure(userId);
+            TodayExpenditureConsultResponse response = expenditureConsultService.consultTodayExpenditure(userId);
 
             //then
             then(budgetService).should(times(1))
                 .getBudgetAmountByCategory(anyString(), any(YearMonth.class));
             then(expenditureRepository).should(times(1))
                 .findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(anyString(), any(LocalDateTime.class), any(LocalDateTime.class));
-            assertThat(responseDto.getTotalAmount()).isEqualTo(21600);
-            assertThat(responseDto.getTotalFinanceStatus()).isEqualTo(EXCELLENT);
-            assertThat(responseDto.getTodayExpenditureConsultOfCategoryList()).satisfiesExactly(
+            assertThat(response.getTotalAmount()).isEqualTo(21600);
+            assertThat(response.getTotalFinanceStatus()).isEqualTo(EXCELLENT);
+            assertThat(response.getTodayExpenditureConsultOfCategoryList()).satisfiesExactly(
                 item1 -> assertThat(item1)
                     .extracting("type", "amount", "financeStatus")
                     .containsExactly(FOOD, 10800L, EXCELLENT),

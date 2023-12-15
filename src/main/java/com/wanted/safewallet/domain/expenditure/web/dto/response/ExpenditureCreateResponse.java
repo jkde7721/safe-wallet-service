@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ExpenditureCreateResponseDto {
+public class ExpenditureCreateResponse {
 
     private Long expenditureId;
 }
