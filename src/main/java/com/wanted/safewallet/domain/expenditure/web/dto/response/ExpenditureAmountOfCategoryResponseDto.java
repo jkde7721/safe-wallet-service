@@ -8,11 +8,11 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class TotalAmountByCategoryResponseDto {
+public class ExpenditureAmountOfCategoryResponseDto {
 
     private Long categoryId;
 
     private CategoryType type;
 
-    private Long totalAmount;
+    private Long amount;
 }

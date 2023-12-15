@@ -22,11 +22,11 @@ public class ExpenditureStatsResponseDto {
 
     private Long totalConsumptionRate;
 
-    private List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory;
+    private List<ConsumptionRateOfCategoryResponseDto> consumptionRateOfCategoryList;
 
     @Getter
     @AllArgsConstructor
-    public static class ConsumptionRateByCategoryResponseDto {
+    public static class ConsumptionRateOfCategoryResponseDto {
 
         private Long categoryId;
 

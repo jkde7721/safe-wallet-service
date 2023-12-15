@@ -13,7 +13,7 @@ public class ExpenditureSearchResponseDto {
 
     private Long totalAmount;
 
-    private List<TotalAmountByCategoryResponseDto> totalAmountListByCategory;
+    private List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList;
 
     private List<ExpenditureListByDateResponseDto> expenditureListByDate;
 

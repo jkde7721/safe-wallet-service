@@ -12,5 +12,5 @@ public class ExpenditureSearchExceptsResponseDto {
 
     private Long totalAmount;
 
-    private List<TotalAmountByCategoryResponseDto> totalAmountListByCategory;
+    private List<ExpenditureAmountOfCategoryResponseDto> expenditureAmountOfCategoryList;
 }

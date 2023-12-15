@@ -7,23 +7,23 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TodayExpenditureDailyStatsResponseDto {
+public class YesterdayExpenditureDailyStatsResponseDto {
 
-    private Long todayTotalAmount;
+    private Long totalAmount;
 
-    private List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList;
+    private List<YesterdayExpenditureDailyStatsOfCategoryResponseDto> yesterdayExpenditureDailyStatsOfCategoryList;
 
     @Getter
     @AllArgsConstructor
-    public static class TodayExpenditureDailyStatsOfCategoryResponseDto {
+    public static class YesterdayExpenditureDailyStatsOfCategoryResponseDto {
 
         private Long categoryId;
 
         private CategoryType type;
 
-        private Long consultedTotalAmount;
+        private Long consultedAmount;
 
-        private Long todayTotalAmount;
+        private Long expendedAmount;
 
         private Long consumptionRate;
     }

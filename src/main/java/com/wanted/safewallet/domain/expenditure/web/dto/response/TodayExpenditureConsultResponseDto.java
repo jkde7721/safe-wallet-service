@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TodayExpenditureConsultResponseDto {
 
-    private Long todayTotalAmount;
+    private Long totalAmount;
 
     private FinanceStatus totalFinanceStatus;
 
@@ -27,7 +27,7 @@ public class TodayExpenditureConsultResponseDto {
 
         private CategoryType type;
 
-        private Long todayTotalAmount;
+        private Long amount;
 
         private FinanceStatus financeStatus;
     }
