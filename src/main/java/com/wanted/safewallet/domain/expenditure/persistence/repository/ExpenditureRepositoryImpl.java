@@ -3,20 +3,18 @@ package com.wanted.safewallet.domain.expenditure.persistence.repository;
 import static com.querydsl.core.types.Projections.constructor;
 import static com.wanted.safewallet.domain.category.persistence.entity.QCategory.category;
 import static com.wanted.safewallet.domain.expenditure.persistence.entity.QExpenditure.expenditure;
-import static java.util.stream.Collectors.toMap;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.response.ExpenditureAmountOfCategoryListResponseDto.ExpenditureAmountOfCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,7 +37,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     @Override
-    public long getTotalAmount(String userId, ExpenditureSearchCond searchCond) {
+    public long findTotalAmountByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond) {
         return Optional.ofNullable(queryFactory.select(expenditure.amount.sum())
                 .from(expenditure)
                 .where(expenditureSearchExpression(userId, searchCond),
@@ -49,23 +47,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     @Override
-    public List<StatsByCategoryResponseDto> getStatsByCategory(String userId, ExpenditureSearchCond searchCond) {
-        return queryFactory.select(
-            constructor(StatsByCategoryResponseDto.class,
-                category.id,
-                category.type,
-                expenditure.amount.sum()
-            ))
-            .from(expenditure)
-            .where(expenditureSearchExpression(userId, searchCond),
-                expenditureIdNotIn(searchCond.getExcepts()))
-            .join(expenditure.category, category)
-            .groupBy(category.id)
-            .fetch();
-    }
-
-    @Override
-    public Page<Expenditure> findAllFetch(String userId, ExpenditureSearchCond searchCond, Pageable pageable) {
+    public Page<Expenditure> findAllByUserAndSearchCondFetch(String userId, ExpenditureSearchCond searchCond, Pageable pageable) {
         List<Expenditure> content = queryFactory.selectFrom(expenditure)
             .where(expenditureSearchExpression(userId, searchCond))
             .join(expenditure.category).fetchJoin()
@@ -81,45 +63,30 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
-    //TODO: 아래 메소드 제거
     @Override
-    public List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList(String userId,
-        LocalDate startDate, LocalDate endDate) {
-        return queryFactory
-            .select(constructor(TotalAmountByCategoryResponseDto.class,
-                category, expenditure.amount.coalesce(0L).sum()))
-            .from(expenditure)
-            .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateBetween(startDate, endDate), notDeleted())
-            .groupBy(category.id)
-            .fetch();
+    public ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndSearchCond(String userId, ExpenditureSearchCond searchCond) {
+        return new ExpenditureAmountOfCategoryListResponseDto(
+            queryFactory.select(constructor(ExpenditureAmountOfCategoryResponseDto.class,
+                    category, expenditure.amount.coalesce(0L).sum()))
+                .from(expenditure)
+                .rightJoin(expenditure.category, category)
+                .on(expenditureSearchExpression(userId, searchCond)
+                    .and(expenditureIdNotIn(searchCond.getExcepts())))
+                .groupBy(category.id)
+                .fetch());
     }
 
     @Override
-    public Map<Category, Long> findTotalAmountMapByUserAndExpenditureDateRange(String userId,
-        LocalDate startDate, LocalDate endDate) {
-        return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
-            .from(expenditure)
-            .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateGoeAndLt(startDate, endDate), notDeleted())
-            .groupBy(category.id)
-            .fetch()
-            .stream()
-            .collect(toMap(tuple -> tuple.get(category),
-                tuple -> tuple.get(1, Long.class)));
-    }
-
-    @Override
-    public Map<Category, Long> findTotalAmountMapByUserAndExpenditureDate(String userId, LocalDate expenditureDate) {
-        return queryFactory.select(category, expenditure.amount.coalesce(0L).sum())
-            .from(expenditure)
-            .rightJoin(expenditure.category, category)
-            .on(userIdEq(userId), expenditureDateEq(expenditureDate), notDeleted())
-            .groupBy(category.id)
-            .fetch()
-            .stream()
-            .collect(toMap(tuple -> tuple.get(category),
-                tuple -> tuple.get(1, Long.class)));
+    public ExpenditureAmountOfCategoryListResponseDto findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+        String userId, LocalDateTime startInclusive, LocalDateTime endExclusive) {
+        return new ExpenditureAmountOfCategoryListResponseDto(
+            queryFactory.select(constructor(ExpenditureAmountOfCategoryResponseDto.class,
+                    category, expenditure.amount.coalesce(0L).sum()))
+                .from(expenditure)
+                .rightJoin(expenditure.category, category)
+                .on(userIdEq(userId), expenditureDateBetween(startInclusive, endExclusive), notDeleted())
+                .groupBy(category.id)
+                .fetch());
     }
 
     private BooleanExpression notDeleted() {
@@ -139,18 +106,13 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
     }
 
     private BooleanExpression expenditureDateBetween(LocalDate startInclusive, LocalDate endInclusive) {
-        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
-            .and(expenditure.expenditureDate.lt(endInclusive.plusDays(1).atStartOfDay()));
+        LocalDateTime endExclusive = endInclusive.plusDays(1).atStartOfDay();
+        return expenditureDateBetween(startInclusive.atStartOfDay(), endExclusive);
     }
 
-    private BooleanExpression expenditureDateGoeAndLt(LocalDate startInclusive, LocalDate endExclusive) {
-        return expenditure.expenditureDate.goe(startInclusive.atStartOfDay())
-            .and(expenditure.expenditureDate.lt(endExclusive.atStartOfDay()));
-    }
-
-    private BooleanExpression expenditureDateEq(LocalDate expenditureDate) {
-        return expenditure.expenditureDate.goe(expenditureDate.atStartOfDay())
-            .and(expenditure.expenditureDate.lt(expenditureDate.plusDays(1).atStartOfDay()));
+    private BooleanExpression expenditureDateBetween(LocalDateTime startInclusive, LocalDateTime endExclusive) {
+        return expenditure.expenditureDate.goe(startInclusive)
+            .and(expenditure.expenditureDate.lt(endExclusive));
     }
 
     private BooleanExpression categoryIdIn(List<Long> categories) {
