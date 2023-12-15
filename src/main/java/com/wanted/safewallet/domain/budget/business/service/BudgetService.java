@@ -3,10 +3,10 @@ package com.wanted.safewallet.domain.budget.business.service;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_BUDGET;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
-import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
@@ -67,16 +67,25 @@ public class BudgetService {
 
     //TODO: Redis Cache 적용
     public BudgetConsultResponseDto consultBudget(String userId, Long totalAmountForConsult) {
-        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList =
-            budgetRepository.existsByUser(userId) ?
-                budgetRepository.getTotalAmountByCategoryList(userId) :
-                budgetRepository.getTotalAmountByCategoryList();
-        Map<Category, Long> budgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, totalAmountByCategoryList);
-        return budgetMapper.toDto(budgetAmountByCategory);
+        Map<Category, Long> prevBudgetAmountByCategory = budgetRepository.existsByUser(userId) ?
+            getBudgetAmountByCategory(userId) : getBudgetAmountByCategory();
+        Map<Category, Long> consultedBudgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, prevBudgetAmountByCategory);
+        return budgetMapper.toDto(consultedBudgetAmountByCategory);
     }
 
-    public Map<Category, Long> getBudgetTotalAmountByCategory(String userId, YearMonth budgetYearMonth) {
-        return budgetRepository.findTotalAmountMapByUserAndBudgetYearMonth(userId, budgetYearMonth);
+    public Map<Category, Long> getBudgetAmountByCategory(String userId, YearMonth budgetYearMonth) {
+        return budgetRepository.findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(userId, budgetYearMonth)
+            .toMapByCategory();
+    }
+
+    public Map<Category, Long> getBudgetAmountByCategory(String userId) {
+        return budgetRepository.findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(userId, null)
+            .toMapByCategory();
+    }
+
+    public Map<Category, Long> getBudgetAmountByCategory() {
+        return budgetRepository.findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(null, null)
+            .toMapByCategory();
     }
 
     public Budget getValidBudget(String userId, Long budgetId) {
@@ -93,23 +102,21 @@ public class BudgetService {
     }
 
     private Map<Category, Long> consultBudgetAmount(Long totalAmountForConsult,
-        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList) {
-        long totalAmount = totalAmountByCategoryList.stream()
-            .mapToLong(TotalAmountByCategoryResponseDto::getTotalAmount).sum();
-        Map<Category, Long> budgetAmountByCategory = totalAmountByCategoryList.stream()
-            .collect(toMap(TotalAmountByCategoryResponseDto::getCategory,
-                dto -> calculateBudgetAmount(dto.getCategory().getType(), dto.getTotalAmount(),
-                    totalAmount, totalAmountForConsult)));
+        Map<Category, Long> prevBudgetAmountByCategory) {
+        long prevTotalAmount = prevBudgetAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
+        Map<Category, Long> budgetAmountByCategory = prevBudgetAmountByCategory.keySet().stream()
+            .collect(toMap(identity(), category -> calculateBudgetAmount(category.getType(),
+                prevBudgetAmountByCategory.get(category), prevTotalAmount, totalAmountForConsult)));
         consultBudgetAmountOfEtcCategory(totalAmountForConsult, budgetAmountByCategory);
         return budgetAmountByCategory;
     }
 
-    private Long calculateBudgetAmount(CategoryType type, Long totalAmountByCategory,
-        Long totalAmount, Long totalAmountForConsult) {
-        if (type == CategoryType.ETC || (double) totalAmountByCategory / totalAmount <= 0.10) {
+    private Long calculateBudgetAmount(CategoryType type, Long prevAmountOfCategory,
+        Long prevTotalAmount, Long totalAmountForConsult) {
+        if (type == CategoryType.ETC || (double) prevAmountOfCategory / prevTotalAmount <= 0.10) {
             return 0L;
         }
-        double ratio = (double) totalAmountByCategory / totalAmount;
+        double ratio = (double) prevAmountOfCategory / prevTotalAmount;
         return ((long) (totalAmountForConsult * ratio / 100)) * 100; //100원 아래 버림
     }
 
@@ -128,7 +135,7 @@ public class BudgetService {
             BudgetOfCategory::getCategoryId).toList();
 
         categoryService.validateCategory(categoryValidDtoList);
-        if (budgetRepository.existsByUserIdAndBudgetYearMonthAndInCategories(
+        if (budgetRepository.existsByUserAndBudgetYearMonthAndCategories(
             userId, requestDto.getBudgetYearMonth(), categoryIds)) {
             throw new BusinessException(ALREADY_EXISTS_BUDGET);
         }

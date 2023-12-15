@@ -58,7 +58,7 @@ class ExpenditureConsultServiceTest {
             Category.builder().id(1L).type(FOOD).build(), 30_000L,
             Category.builder().id(2L).type(TRAFFIC).build(), 20_000L,
             Category.builder().id(3L).type(ETC).build(), 10_000L);
-        given(budgetService.getBudgetTotalAmountByCategory(anyString(), any(YearMonth.class)))
+        given(budgetService.getBudgetAmountByCategory(anyString(), any(YearMonth.class)))
             .willReturn(budgetTotalAmountByCategory);
         given(expenditureRepository.findTotalAmountMapByUserAndExpenditureDateRange(
             anyString(), any(LocalDate.class), any(LocalDate.class)))
@@ -74,7 +74,7 @@ class ExpenditureConsultServiceTest {
 
             //then
             then(budgetService).should(times(1))
-                .getBudgetTotalAmountByCategory(anyString(), any(YearMonth.class));
+                .getBudgetAmountByCategory(anyString(), any(YearMonth.class));
             then(expenditureRepository).should(times(1))
                 .findTotalAmountMapByUserAndExpenditureDateRange(anyString(), any(LocalDate.class), any(LocalDate.class));
             assertThat(responseDto.getTodayTotalAmount()).isEqualTo(21600);

@@ -3,7 +3,7 @@ package com.wanted.safewallet.domain.budget.business.mapper;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultByCategoryResponseDto;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultOfCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
@@ -46,9 +46,9 @@ public class BudgetMapper {
     }
 
     public BudgetConsultResponseDto toDto(Map<Category, Long> budgetAmountByCategory) {
-        List<BudgetConsultByCategoryResponseDto> budgetConsultList = budgetAmountByCategory.keySet()
+        List<BudgetConsultOfCategoryResponseDto> budgetConsultList = budgetAmountByCategory.keySet()
             .stream().sorted(Comparator.comparing(Category::getId))
-            .map(category -> new BudgetConsultByCategoryResponseDto(category.getId(), category.getType(),
+            .map(category -> new BudgetConsultOfCategoryResponseDto(category.getId(), category.getType(),
                 budgetAmountByCategory.get(category)))
             .toList();
         return new BudgetConsultResponseDto(budgetConsultList);

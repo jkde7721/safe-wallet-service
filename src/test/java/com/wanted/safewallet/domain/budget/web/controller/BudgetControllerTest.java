@@ -38,7 +38,7 @@ import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetOfCategory;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultByCategoryResponseDto;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultOfCategoryResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
@@ -192,13 +192,13 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     void consultBudget() throws Exception {
         //given
         Long totalAmount = 1_000_000L;
-        List<BudgetConsultByCategoryResponseDto> budgetConsultList = List.of(
-            new BudgetConsultByCategoryResponseDto(1L, FOOD, 200_000L),
-            new BudgetConsultByCategoryResponseDto(2L, TRAFFIC, 150_000L),
-            new BudgetConsultByCategoryResponseDto(3L, RESIDENCE, 500_000L),
-            new BudgetConsultByCategoryResponseDto(4L, CLOTHING, 100_000L),
-            new BudgetConsultByCategoryResponseDto(5L, LEISURE, 30_000L),
-            new BudgetConsultByCategoryResponseDto(6L, ETC, 20_000L));
+        List<BudgetConsultOfCategoryResponseDto> budgetConsultList = List.of(
+            new BudgetConsultOfCategoryResponseDto(1L, FOOD, 200_000L),
+            new BudgetConsultOfCategoryResponseDto(2L, TRAFFIC, 150_000L),
+            new BudgetConsultOfCategoryResponseDto(3L, RESIDENCE, 500_000L),
+            new BudgetConsultOfCategoryResponseDto(4L, CLOTHING, 100_000L),
+            new BudgetConsultOfCategoryResponseDto(5L, LEISURE, 30_000L),
+            new BudgetConsultOfCategoryResponseDto(6L, ETC, 20_000L));
         BudgetConsultResponseDto responseDto = new BudgetConsultResponseDto(budgetConsultList);
         given(budgetService.consultBudget(anyString(), anyLong())).willReturn(responseDto);
 
