@@ -12,7 +12,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSear
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.auth.annotation.CurrentUserId;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -90,7 +90,7 @@ public class ExpenditureController {
     }
 
     @GetMapping("/daily-stats")
-    public TodayExpenditureDailyStatsResponseDto produceTodayExpenditureDailyStats(@CurrentUserId String userId) {
-        return expenditureDailyStatsService.produceTodayExpenditureDailyStats(userId);
+    public YesterdayExpenditureDailyStatsResponseDto produceYesterdayExpenditureDailyStats(@CurrentUserId String userId) {
+        return expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(userId);
     }
 }

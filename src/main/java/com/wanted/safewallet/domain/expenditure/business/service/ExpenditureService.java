@@ -14,8 +14,6 @@ import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.business.vo.ExpenditureDateUpdateVo;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.TotalAmountByCategoryResponseDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
@@ -31,7 +29,6 @@ import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -58,17 +55,17 @@ public class ExpenditureService {
 
     public ExpenditureSearchResponseDto searchExpenditure(String userId,
         ExpenditureSearchCond searchCond, Pageable pageable) {
-        long totalAmount = expenditureRepository.getTotalAmount(userId, searchCond);
-        List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
-        Page<Expenditure> expenditurePage = expenditureRepository.findAllFetch(userId, searchCond, pageable);
-        return expenditureMapper.toSearchDto(totalAmount, statsByCategory, expenditurePage);
+        long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
+        Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
+        Page<Expenditure> expenditurePage = expenditureRepository.findAllByUserAndSearchCondFetch(userId, searchCond, pageable);
+        return expenditureMapper.toSearchDto(totalAmount, expenditureAmountByCategory, expenditurePage);
     }
 
     public ExpenditureSearchExceptsResponseDto searchExpenditureExcepts(String userId,
         ExpenditureSearchCond searchCond) {
-        long totalAmount = expenditureRepository.getTotalAmount(userId, searchCond);
-        List<StatsByCategoryResponseDto> statsByCategory = expenditureRepository.getStatsByCategory(userId, searchCond);
-        return expenditureMapper.toSearchExceptsDto(totalAmount, statsByCategory);
+        long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
+        Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
+        return expenditureMapper.toSearchExceptsDto(totalAmount, expenditureAmountByCategory);
     }
 
     @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
@@ -110,13 +107,10 @@ public class ExpenditureService {
         LocalDate criteriaStartDate = getCriteriaStartDate(currentStartDate, criteria);
         LocalDate criteriaEndDate = getCriteriaEndDate(criteriaStartDate, DAYS.between(currentStartDate, currentEndDate));
 
-        List<TotalAmountByCategoryResponseDto> currentTotalAmountList =
-            expenditureRepository.getTotalAmountByCategoryList(userId, currentStartDate, currentEndDate);
-        List<TotalAmountByCategoryResponseDto> criteriaTotalAmountList =
-            expenditureRepository.getTotalAmountByCategoryList(userId, criteriaStartDate, criteriaEndDate);
-
-        Long totalConsumptionRate = calculateTotalConsumptionRate(currentTotalAmountList, criteriaTotalAmountList);
-        Map<Category, Long> consumptionRateByCategory = calculateConsumptionRateByCategory(currentTotalAmountList, criteriaTotalAmountList);
+        Map<Category, Long> currentExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, currentStartDate, currentEndDate);
+        Map<Category, Long> criteriaExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, criteriaStartDate, criteriaEndDate);
+        Long totalConsumptionRate = calculateTotalConsumptionRate(currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
+        Map<Category, Long> consumptionRateByCategory = calculateConsumptionRateByCategory(currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
         return expenditureMapper.toDto(currentStartDate, currentEndDate, criteriaStartDate, criteriaEndDate,
             totalConsumptionRate, consumptionRateByCategory);
     }
@@ -155,6 +149,17 @@ public class ExpenditureService {
             .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
 
+    private Map<Category, Long> getExpenditureAmountByCategory(String userId, ExpenditureSearchCond searchCond) {
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndSearchCond(userId, searchCond).toMapByCategory();
+    }
+
+    private Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startInclusive = startDate.atStartOfDay();
+        LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            userId, startInclusive, endExclusive).toMapByCategory();
+    }
+
     private LocalDate getCurrentStartDate(LocalDate currentEndDate, StatsCriteria criteria) {
         if (criteria == LAST_YEAR) {
             return LocalDate.of(currentEndDate.getYear(), 1, 1);
@@ -184,27 +189,23 @@ public class ExpenditureService {
     }
 
     private Long calculateTotalConsumptionRate(
-        List<TotalAmountByCategoryResponseDto> currentTotalAmountList,
-        List<TotalAmountByCategoryResponseDto> criteriaTotalAmountList) {
-        long currentTotalAmount = currentTotalAmountList.stream()
-            .mapToLong(TotalAmountByCategoryResponseDto::getTotalAmount).sum();
-        long criteriaTotalAmount = criteriaTotalAmountList.stream()
-            .mapToLong(TotalAmountByCategoryResponseDto::getTotalAmount).sum();
-        return calculateConsumptionRate(currentTotalAmount, criteriaTotalAmount);
+        Map<Category, Long> currentExpenditureAmountByCategory,
+        Map<Category, Long> criteriaExpenditureAmountByCategory) {
+        long currentExpenditureTotalAmount = calculateTotalAmount(currentExpenditureAmountByCategory);
+        long criteriaExpenditureTotalAmount = calculateTotalAmount(criteriaExpenditureAmountByCategory);
+        return calculateConsumptionRate(currentExpenditureTotalAmount, criteriaExpenditureTotalAmount);
     }
 
     private Map<Category, Long> calculateConsumptionRateByCategory(
-        List<TotalAmountByCategoryResponseDto> currentTotalAmountList,
-        List<TotalAmountByCategoryResponseDto> criteriaTotalAmountList) {
-        Map<Category, Long> currentTotalAmountByCategory = currentTotalAmountList.stream()
-            .collect(toMap(TotalAmountByCategoryResponseDto::getCategory,
-                TotalAmountByCategoryResponseDto::getTotalAmount));
-        Map<Category, Long> criteriaTotalAmountByCategory = criteriaTotalAmountList.stream()
-            .collect(toMap(TotalAmountByCategoryResponseDto::getCategory,
-                TotalAmountByCategoryResponseDto::getTotalAmount));
-        return currentTotalAmountByCategory.keySet().stream().collect(toMap(Function.identity(),
-            category -> calculateConsumptionRate(currentTotalAmountByCategory.get(category),
-                criteriaTotalAmountByCategory.get(category))));
+        Map<Category, Long> currentExpenditureAmountByCategory,
+        Map<Category, Long> criteriaExpenditureAmountByCategory) {
+        return currentExpenditureAmountByCategory.keySet().stream().collect(toMap(Function.identity(),
+            category -> calculateConsumptionRate(currentExpenditureAmountByCategory.get(category),
+                criteriaExpenditureAmountByCategory.get(category))));
+    }
+
+    private long calculateTotalAmount(Map<Category, Long> amountByCategory) {
+        return amountByCategory.values().stream().mapToLong(Long::longValue).sum();
     }
 
     private Long calculateConsumptionRate(Long currentAmount, Long criteriaAmount) {

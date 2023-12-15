@@ -15,6 +15,7 @@ import com.wanted.safewallet.domain.expenditure.persistence.repository.Expenditu
 import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
 import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -40,83 +41,88 @@ public class ExpenditureConsultService {
         int daysOfCurrentMonth = currentYearMonth.lengthOfMonth();
         int leftDaysOfCurrentMonth = daysOfCurrentMonth - expenditureEndDate.getDayOfMonth() + 1;
         //월별 총 예산 (카테고리 별)
-        Map<Category, Long> budgetTotalAmountByCategory = budgetService.getBudgetAmountByCategory(userId, currentYearMonth);
+        Map<Category, Long> monthlyBudgetAmountByCategory = budgetService.getBudgetAmountByCategory(userId, currentYearMonth);
         //일별 적정 예산 (카테고리 별)
-        Map<Category, Long> budgetAmountPerDayByCategory = getBudgetAmountPerDayByCategory(budgetTotalAmountByCategory, daysOfCurrentMonth);
+        Map<Category, Long> dailyBudgetAmountByCategory = getDailyBudgetAmountByCategory(monthlyBudgetAmountByCategory, daysOfCurrentMonth);
         //현재 월 내에서 어제까지 총 지출 (카테고리 별)
-        Map<Category, Long> expenditureTotalAmountByCategory = expenditureRepository.findTotalAmountMapByUserAndExpenditureDateRange(
-            userId, expenditureStartDate, expenditureEndDate);
+        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, expenditureStartDate, expenditureEndDate);
         //현재 월 내에서 남은 기간 동안 일별 적정 지출 (카테고리 별)
-        Map<Category, Long> expenditureAmountPerDayByCategory = getExpenditureAmountPerDayByCategory(
-            expenditureTotalAmountByCategory, budgetTotalAmountByCategory, budgetAmountPerDayByCategory, leftDaysOfCurrentMonth);
+        Map<Category, Long> dailyConsultedExpenditureAmountByCategory = getDailyConsultedExpenditureAmountByCategory(
+            monthlyExpendedExpenditureAmountByCategory, monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, leftDaysOfCurrentMonth);
 
-        long todayTotalAmount = calculateTodayTotalAmount(expenditureAmountPerDayByCategory);
-        FinanceStatus totalFinanceStatus = getTotalFinanceStatus(budgetTotalAmountByCategory, budgetAmountPerDayByCategory, expenditureTotalAmountByCategory, expenditureEndDate);
+        long totalAmount = calculateTotalAmount(dailyConsultedExpenditureAmountByCategory);
+        FinanceStatus totalFinanceStatus = getTotalFinanceStatus(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, expenditureEndDate);
         Map<Category, TodayExpenditureConsultVo> todayExpenditureConsultByCategory =
-            getTodayExpenditureConsultByCategory(budgetTotalAmountByCategory, budgetAmountPerDayByCategory, expenditureTotalAmountByCategory, expenditureAmountPerDayByCategory);
-        return expenditureMapper.toDto(todayTotalAmount, totalFinanceStatus, todayExpenditureConsultByCategory);
+            getTodayExpenditureConsultByCategory(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, dailyConsultedExpenditureAmountByCategory);
+        return expenditureMapper.toDto(totalAmount, totalFinanceStatus, todayExpenditureConsultByCategory);
     }
 
-    private Map<Category, Long> getBudgetAmountPerDayByCategory(Map<Category, Long> budgetTotalAmountByCategory, int daysOfCurrentMonth) {
-        return budgetTotalAmountByCategory.keySet().stream().collect(toMap(identity(), category ->
-            calculateAmountPerDay(budgetTotalAmountByCategory.get(category), daysOfCurrentMonth)));
+    private Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startInclusive = startDate.atStartOfDay();
+        LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            userId, startInclusive, endExclusive).toMapByCategory();
     }
 
-    private Map<Category, Long> getExpenditureAmountPerDayByCategory(
-        Map<Category, Long> expenditureTotalAmountByCategory,
-        Map<Category, Long> budgetTotalAmountByCategory, Map<Category, Long> budgetAmountPerDayByCategory,
-        int leftDaysOfCurrentMonth) {
-        return expenditureTotalAmountByCategory.keySet().stream().collect(toMap(identity(), category ->
-            calculateExpenditureAmountPerDay(budgetTotalAmountByCategory.get(category) - expenditureTotalAmountByCategory.get(category),
-                budgetAmountPerDayByCategory.get(category), leftDaysOfCurrentMonth)));
+    private Map<Category, Long> getDailyBudgetAmountByCategory(Map<Category, Long> monthlyBudgetAmountByCategory, int daysOfCurrentMonth) {
+        return monthlyBudgetAmountByCategory.keySet().stream().collect(toMap(identity(), category ->
+            calculateDailyAmount(monthlyBudgetAmountByCategory.get(category), daysOfCurrentMonth)));
     }
 
-    private Long calculateExpenditureAmountPerDay(Long leftBudgetTotalAmount, Long budgetAmountPerDay, int days) {
-        long expenditureAmountPerDay = calculateAmountPerDay(leftBudgetTotalAmount, days);
-        return expenditureAmountPerDay < 100 ? budgetAmountPerDay : expenditureAmountPerDay;
+    private Map<Category, Long> getDailyConsultedExpenditureAmountByCategory(
+        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory,
+        Map<Category, Long> monthlyBudgetAmountByCategory, Map<Category, Long> dailyBudgetAmountByCategory, int leftDaysOfCurrentMonth) {
+        return monthlyExpendedExpenditureAmountByCategory.keySet().stream().collect(toMap(identity(), category ->
+            calculateDailyConsultedExpenditureAmount(monthlyBudgetAmountByCategory.get(category) - monthlyExpendedExpenditureAmountByCategory.get(category),
+                dailyBudgetAmountByCategory.get(category), leftDaysOfCurrentMonth)));
     }
 
-    private Long calculateAmountPerDay(Long totalAmount, int days) {
+    private Long calculateDailyConsultedExpenditureAmount(Long leftBudgetAmount, Long dailyBudgetAmount, int days) {
+        long dailyConsultedExpenditureAmount = calculateDailyAmount(leftBudgetAmount, days);
+        return dailyConsultedExpenditureAmount < 100 ? dailyBudgetAmount : dailyConsultedExpenditureAmount;
+    }
+
+    private Long calculateDailyAmount(Long totalAmount, int days) {
         return (long) ((double) totalAmount / days / 100) * 100; //100원 단위로 환산
     }
 
-    private long calculateTodayTotalAmount(Map<Category, Long> expenditureAmountPerDayByCategory) {
-        return expenditureAmountPerDayByCategory.values().stream().mapToLong(Long::longValue).sum();
+    private long calculateTotalAmount(Map<Category, Long> amountByCategory) {
+        return amountByCategory.values().stream().mapToLong(Long::longValue).sum();
     }
 
-    private FinanceStatus getTotalFinanceStatus(Map<Category, Long> budgetTotalAmountByCategory,
-        Map<Category, Long> budgetAmountPerDayByCategory, Map<Category, Long> expenditureTotalAmountByCategory, LocalDate now) {
-        long budgetTotalAmount = budgetTotalAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
-        long budgetTotalAmountToNow = budgetAmountPerDayByCategory.values().stream().mapToLong(Long::longValue).sum() * now.getDayOfMonth();
-        long expenditureTotalAmountToNow = expenditureTotalAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
+    private FinanceStatus getTotalFinanceStatus(Map<Category, Long> monthlyBudgetAmountByCategory,
+        Map<Category, Long> dailyBudgetAmountByCategory, Map<Category, Long> monthlyExpendedExpenditureAmountByCategory, LocalDate now) {
+        long monthlyBudgetTotalAmount = calculateTotalAmount(monthlyBudgetAmountByCategory);
+        long dailyBudgetTotalAmountToYesterday = calculateTotalAmount(dailyBudgetAmountByCategory) * (now.getDayOfMonth() - 1);
+        long monthlyExpendedExpenditureTotalAmount = calculateTotalAmount(monthlyExpendedExpenditureAmountByCategory);
 
-        if (budgetTotalAmount < expenditureTotalAmountToNow) return BAD; //예산 초과
-        Long toleranceAmount = calculateToleranceAmount(budgetTotalAmountToNow);
-        if (budgetTotalAmountToNow + toleranceAmount < expenditureTotalAmountToNow) return WARN;
-        if (budgetTotalAmountToNow - toleranceAmount <= expenditureTotalAmountToNow &&
-            budgetTotalAmountToNow + toleranceAmount >= expenditureTotalAmountToNow) return GOOD;
+        if (monthlyBudgetTotalAmount < monthlyExpendedExpenditureTotalAmount) return BAD; //예산 초과
+        Long toleranceAmount = calculateToleranceAmount(dailyBudgetTotalAmountToYesterday);
+        if (dailyBudgetTotalAmountToYesterday + toleranceAmount < monthlyExpendedExpenditureTotalAmount) return WARN;
+        if (dailyBudgetTotalAmountToYesterday - toleranceAmount <= monthlyExpendedExpenditureTotalAmount &&
+            dailyBudgetTotalAmountToYesterday + toleranceAmount >= monthlyExpendedExpenditureTotalAmount) return GOOD;
         return EXCELLENT;
     }
 
     private Map<Category, TodayExpenditureConsultVo> getTodayExpenditureConsultByCategory(
-        Map<Category, Long> budgetTotalAmountByCategory, Map<Category, Long> budgetAmountPerDayByCategory,
-        Map<Category, Long> expenditureTotalAmountByCategory, Map<Category, Long> expenditureAmountPerDayByCategory) {
-        return expenditureAmountPerDayByCategory.keySet().stream()
+        Map<Category, Long> monthlyBudgetAmountByCategory, Map<Category, Long> dailyBudgetAmountByCategory,
+        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory, Map<Category, Long> dailyConsultedExpenditureAmountByCategory) {
+        return dailyConsultedExpenditureAmountByCategory.keySet().stream()
             .collect(toMap(identity(), category -> new TodayExpenditureConsultVo(
-                expenditureAmountPerDayByCategory.get(category),
-                getFinanceStatus(budgetTotalAmountByCategory.get(category),
-                    expenditureTotalAmountByCategory.get(category),
-                    budgetAmountPerDayByCategory.get(category),
-                    expenditureAmountPerDayByCategory.get(category)))));
+                dailyConsultedExpenditureAmountByCategory.get(category),
+                getFinanceStatus(monthlyBudgetAmountByCategory.get(category),
+                    monthlyExpendedExpenditureAmountByCategory.get(category),
+                    dailyBudgetAmountByCategory.get(category),
+                    dailyConsultedExpenditureAmountByCategory.get(category)))));
     }
 
-    private FinanceStatus getFinanceStatus(long budgetTotalAmount, long expenditureTotalAmount,
-        long budgetAmountPerDay, long expenditureAmountPerDay) {
-        if (budgetTotalAmount < expenditureTotalAmount) return BAD; //예산 초과
-        Long toleranceAmount = calculateToleranceAmount(budgetAmountPerDay);
-        if (budgetAmountPerDay - toleranceAmount > expenditureAmountPerDay) return WARN;
-        if (budgetAmountPerDay - toleranceAmount <= expenditureAmountPerDay &&
-            budgetAmountPerDay + toleranceAmount >= expenditureAmountPerDay) return GOOD;
+    private FinanceStatus getFinanceStatus(long monthlyBudgetAmount, long monthlyExpendedExpenditureAmount,
+        long dailyBudgetAmount, long dailyConsultedExpenditureAmount) {
+        if (monthlyBudgetAmount < monthlyExpendedExpenditureAmount) return BAD; //예산 초과
+        Long toleranceAmount = calculateToleranceAmount(dailyBudgetAmount);
+        if (dailyBudgetAmount - toleranceAmount > dailyConsultedExpenditureAmount) return WARN;
+        if (dailyBudgetAmount - toleranceAmount <= dailyConsultedExpenditureAmount &&
+            dailyBudgetAmount + toleranceAmount >= dailyConsultedExpenditureAmount) return GOOD;
         return EXCELLENT;
     }
 
