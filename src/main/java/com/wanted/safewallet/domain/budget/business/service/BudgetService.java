@@ -90,10 +90,10 @@ public class BudgetService {
 
     public Budget getValidBudget(String userId, Long budgetId) {
         Budget budget = getBudget(budgetId);
-        if (Objects.equals(budget.getUser().getId(), userId)) {
-            return budget;
+        if (!Objects.equals(budget.getUser().getId(), userId)) {
+            throw new BusinessException(FORBIDDEN_BUDGET);
         }
-        throw new BusinessException(FORBIDDEN_BUDGET);
+        return budget;
     }
 
     public Budget getBudget(Long budgetId) {

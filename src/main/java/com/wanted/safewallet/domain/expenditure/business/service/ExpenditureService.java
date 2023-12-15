@@ -125,18 +125,18 @@ public class ExpenditureService {
 
     public Expenditure getValidExpenditure(String userId, Long expenditureId) {
         Expenditure expenditure = getExpenditure(expenditureId);
-        if (Objects.equals(expenditure.getUser().getId(), userId)) {
-            return expenditure;
+        if (!Objects.equals(expenditure.getUser().getId(), userId)) {
+            throw new BusinessException(FORBIDDEN_EXPENDITURE);
         }
-        throw new BusinessException(FORBIDDEN_EXPENDITURE);
+        return expenditure;
     }
 
     public Expenditure getValidExpenditureWithCategoryAndImages(String userId, Long expenditureId) {
         Expenditure expenditure = getExpenditureWithCategoryAndImages(expenditureId);
-        if (Objects.equals(expenditure.getUser().getId(), userId)) {
-            return expenditure;
+        if (!Objects.equals(expenditure.getUser().getId(), userId)) {
+            throw new BusinessException(FORBIDDEN_EXPENDITURE);
         }
-        throw new BusinessException(FORBIDDEN_EXPENDITURE);
+        return expenditure;
     }
 
     public Expenditure getExpenditure(Long expenditureId) {
