@@ -77,10 +77,11 @@ public class Expenditure extends BaseTime {
         image.updateExpenditure(this);
     }
 
-    public void update(Long categoryId, LocalDateTime expenditureDate, Long amount, String note) {
+    public void update(Long categoryId, LocalDateTime expenditureDate, Long amount, String title, String note) {
         this.category = Category.builder().id(categoryId).build();
         this.expenditureDate = expenditureDate;
         this.amount = amount;
+        this.title = title;
         this.note = note;
     }
 

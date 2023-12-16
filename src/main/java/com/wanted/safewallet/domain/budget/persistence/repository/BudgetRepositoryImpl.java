@@ -8,12 +8,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
-import com.wanted.safewallet.domain.category.persistence.entity.Category;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto.BudgetAmountOfCategoryDto;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -22,7 +20,7 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public boolean existsByUserIdAndBudgetYearMonthAndInCategories(String userId,
+    public boolean existsByUserAndBudgetYearMonthAndCategories(String userId,
         YearMonth budgetYearMonth, List<Long> categoryIds) {
         return Boolean.TRUE.equals(queryFactory
             .select(budgetCountCase())
@@ -34,32 +32,15 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
     }
 
     @Override
-    public List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList(String userId) {
-        return queryFactory
-            .select(constructor(TotalAmountByCategoryResponseDto.class,
-                category, budget.amount.coalesce(0L).sum()))
-            .from(budget)
-            .rightJoin(budget.category, category).on(userIdEq(userId))
-            .groupBy(category.id)
-            .fetch();
-    }
-
-    @Override
-    public List<TotalAmountByCategoryResponseDto> getTotalAmountByCategoryList() {
-        return getTotalAmountByCategoryList(null);
-    }
-
-    @Override
-    public Map<Category, Long> findTotalAmountMapByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth) {
-        return queryFactory.select(category, budget.amount.coalesce(0L).sum())
-            .from(budget)
-            .rightJoin(budget.category, category)
-            .on(userIdEq(userId), budgetYearMonthEq(budgetYearMonth))
-            .groupBy(category.id)
-            .fetch()
-            .stream()
-            .collect(Collectors.toMap(tuple -> tuple.get(category),
-                tuple -> tuple.get(1, Long.class)));
+    public BudgetAmountOfCategoryListDto findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(String userId, YearMonth budgetYearMonth) {
+        return new BudgetAmountOfCategoryListDto(
+            queryFactory.select(constructor(BudgetAmountOfCategoryDto.class,
+                    category, budget.amount.coalesce(0L).sum()))
+                .from(budget)
+                .rightJoin(budget.category, category)
+                .on(userIdEq(userId), budgetYearMonthEq(budgetYearMonth))
+                .groupBy(category.id)
+                .fetch());
     }
 
     private BooleanExpression budgetCountCase() {
@@ -73,7 +54,7 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
     }
 
     private BooleanExpression budgetYearMonthEq(YearMonth budgetYearMonth) {
-        return budget.budgetYearMonth.eq(budgetYearMonth);
+        return budgetYearMonth == null ? alwaysTrue() : budget.budgetYearMonth.eq(budgetYearMonth);
     }
 
     private BooleanExpression alwaysTrue() {

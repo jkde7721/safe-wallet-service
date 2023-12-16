@@ -4,6 +4,7 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
 import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
+import static com.wanted.safewallet.utils.Fixtures.aCategory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,10 +16,14 @@ import static org.mockito.Mockito.times;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,19 +55,20 @@ class ExpenditureConsultServiceTest {
     void consultTodayExpenditure() {
         //given
         String userId = "testUserId";
-        Map<Category, Long> budgetTotalAmountByCategory = Map.of(
-            Category.builder().id(1L).type(FOOD).build(), 300_000L,
-            Category.builder().id(2L).type(TRAFFIC).build(), 200_000L,
-            Category.builder().id(3L).type(ETC).build(), 100_000L);
-        Map<Category, Long> expenditureTotalAmountByCategory = Map.of(
-            Category.builder().id(1L).type(FOOD).build(), 30_000L,
-            Category.builder().id(2L).type(TRAFFIC).build(), 20_000L,
-            Category.builder().id(3L).type(ETC).build(), 10_000L);
-        given(budgetService.getBudgetTotalAmountByCategory(anyString(), any(YearMonth.class)))
-            .willReturn(budgetTotalAmountByCategory);
-        given(expenditureRepository.findTotalAmountMapByUserAndExpenditureDateRange(
-            anyString(), any(LocalDate.class), any(LocalDate.class)))
-            .willReturn(expenditureTotalAmountByCategory);
+        Map<Category, Long> budgetAmountByCategory = Map.of(
+            aCategory().id(1L).type(FOOD).build(), 300_000L,
+            aCategory().id(2L).type(TRAFFIC).build(), 200_000L,
+            aCategory().id(3L).type(ETC).build(), 100_000L);
+        List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList = List.of(
+            new ExpenditureAmountOfCategoryDto(aCategory().id(1L).type(FOOD).build(), 30_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(2L).type(TRAFFIC).build(), 20_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(3L).type(ETC).build(), 10_000L));
+        ExpenditureAmountOfCategoryListDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListDto(expenditureAmountOfCategoryList);
+        given(budgetService.getBudgetAmountByCategory(anyString(), any(YearMonth.class)))
+            .willReturn(budgetAmountByCategory);
+        given(expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))
+            .willReturn(expenditureAmountOfCategoryListDto);
 
         //LocalDate 내 모든 static 메소드가 아닌 now 메소드만 mocking
         try (MockedStatic<LocalDate> mockedStatic = mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
@@ -70,24 +76,24 @@ class ExpenditureConsultServiceTest {
             mockedStatic.when(LocalDate::now).thenReturn(now);
 
             //when
-            TodayExpenditureConsultResponseDto responseDto = expenditureConsultService.consultTodayExpenditure(userId);
+            TodayExpenditureConsultResponse response = expenditureConsultService.consultTodayExpenditure(userId);
 
             //then
             then(budgetService).should(times(1))
-                .getBudgetTotalAmountByCategory(anyString(), any(YearMonth.class));
+                .getBudgetAmountByCategory(anyString(), any(YearMonth.class));
             then(expenditureRepository).should(times(1))
-                .findTotalAmountMapByUserAndExpenditureDateRange(anyString(), any(LocalDate.class), any(LocalDate.class));
-            assertThat(responseDto.getTodayTotalAmount()).isEqualTo(21600);
-            assertThat(responseDto.getTotalFinanceStatus()).isEqualTo(EXCELLENT);
-            assertThat(responseDto.getTodayExpenditureConsultOfCategoryList()).satisfiesExactly(
+                .findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(anyString(), any(LocalDateTime.class), any(LocalDateTime.class));
+            assertThat(response.getTotalAmount()).isEqualTo(21600);
+            assertThat(response.getTotalFinanceStatus()).isEqualTo(EXCELLENT);
+            assertThat(response.getTodayExpenditureConsultOfCategoryList()).satisfiesExactly(
                 item1 -> assertThat(item1)
-                    .extracting("type", "todayTotalAmount", "financeStatus")
+                    .extracting("type", "amount", "financeStatus")
                     .containsExactly(FOOD, 10800L, EXCELLENT),
                 item2 -> assertThat(item2)
-                    .extracting("type", "todayTotalAmount", "financeStatus")
+                    .extracting("type", "amount", "financeStatus")
                     .containsExactly(TRAFFIC, 7200L, EXCELLENT),
                 item3 -> assertThat(item3)
-                    .extracting("type", "todayTotalAmount", "financeStatus")
+                    .extracting("type", "amount", "financeStatus")
                     .containsExactly(ETC, 3600L, EXCELLENT));
         }
     }

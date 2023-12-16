@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.auth.web.controller;
 
-import com.wanted.safewallet.domain.auth.business.dto.response.JwtResponseDto;
+import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
 import com.wanted.safewallet.domain.auth.business.service.AuthService;
 import com.wanted.safewallet.domain.auth.utils.CookieUtils;
 import com.wanted.safewallet.domain.auth.utils.HeaderUtils;
@@ -26,11 +26,11 @@ public class AuthController {
     public void refresh(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = headerUtils.getToken(request);
         String refreshToken = cookieUtils.getToken(request);
-        JwtResponseDto jwtDto = authService.reissueToken(accessToken, refreshToken);
+        JwtDto jwtDto = authService.reissueToken(accessToken, refreshToken);
         storeTokenToResponse(response, jwtDto);
     }
 
-    private void storeTokenToResponse(HttpServletResponse response, JwtResponseDto jwtDto) {
+    private void storeTokenToResponse(HttpServletResponse response, JwtDto jwtDto) {
         headerUtils.setToken(response, jwtDto.getAccessToken());
         cookieUtils.setToken(response, jwtDto.getRefreshToken());
     }

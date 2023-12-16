@@ -16,8 +16,8 @@ import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
-import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto.CategoryResponseDto;
+import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
+import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse.CategoryResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +37,9 @@ class CategoryControllerTest extends AbstractRestDocsTest {
     @Test
     void getCategoryList() throws Exception {
         //given
-        CategoryListResponseDto dto = new CategoryListResponseDto(
-            List.of(new CategoryResponseDto(1L, CategoryType.FOOD),
-                new CategoryResponseDto(2L, CategoryType.TRAFFIC)));
+        CategoryListResponse dto = new CategoryListResponse(
+            List.of(new CategoryResponse(1L, CategoryType.FOOD),
+                new CategoryResponse(2L, CategoryType.TRAFFIC)));
         given(categoryService.getCategoryList()).willReturn(dto);
 
         //when, then

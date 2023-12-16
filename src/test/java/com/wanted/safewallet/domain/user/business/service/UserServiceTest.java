@@ -11,8 +11,8 @@ import static org.mockito.Mockito.times;
 import com.wanted.safewallet.domain.user.business.mapper.UserMapper;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
-import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequestDto;
-import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponseDto;
+import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
+import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.global.config.PasswordEncoderConfig;
 import com.wanted.safewallet.global.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,11 +60,11 @@ class UserServiceTest {
         given(userRepository.existsByUsername(anyString())).willReturn(true);
 
         //when
-        UsernameCheckResponseDto responseDto = userService.isDuplicatedUsername(username);
+        UsernameCheckResponse response = userService.isDuplicatedUsername(username);
 
         //then
         then(userRepository).should(times(1)).existsByUsername(username);
-        assertThat(responseDto.getIsDuplicatedUsername()).isTrue();
+        assertThat(response.getIsDuplicatedUsername()).isTrue();
     }
 
     @DisplayName("유저 회원가입 서비스 테스트 : 성공")
@@ -72,11 +72,11 @@ class UserServiceTest {
     void joinUser() {
         //given
         String username = "testUsername";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, "testPassword");
+        UserJoinRequest request = new UserJoinRequest(username, "testPassword");
         given(userRepository.existsByUsername(anyString())).willReturn(false);
 
         //when
-        userService.joinUser(requestDto);
+        userService.joinUser(request);
 
         //then
         then(userRepository).should(times(1)).existsByUsername(anyString());

@@ -23,8 +23,8 @@ import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.user.business.service.UserService;
-import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequestDto;
-import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponseDto;
+import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
+import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,8 +49,8 @@ class UserControllerTest extends AbstractRestDocsTest {
     void checkForUsername() throws Exception {
         //given
         String username = "testUsername";
-        UsernameCheckResponseDto responseDto = new UsernameCheckResponseDto(true);
-        given(userService.isDuplicatedUsername(anyString())).willReturn(responseDto);
+        UsernameCheckResponse response = new UsernameCheckResponse(true);
+        given(userService.isDuplicatedUsername(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/users/" + username)
@@ -70,11 +70,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "hello12345!";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         restDocsMockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -87,7 +87,7 @@ class UserControllerTest extends AbstractRestDocsTest {
                         .attributes(key("constraints").value(DocsPopupLinkGenerator
                             .generatePopupLink(DocsPopupInfo.PASSWORD_CONSTRAINTS))))));
         then(userService).should(times(1))
-            .joinUser(any(UserJoinRequestDto.class));
+            .joinUser(any(UserJoinRequest.class));
     }
 
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 계정명 공백")
@@ -96,11 +96,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "";
         String password = "hello12345!";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -115,11 +115,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "hi123!";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -134,11 +134,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "hello12345hi";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -153,11 +153,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "hello12345!가";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -172,11 +172,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "hello 12345!";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -191,11 +191,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "testUsername12345!";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -210,11 +210,11 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         String password = "password";
-        UserJoinRequestDto requestDto = new UserJoinRequestDto(username, password);
+        UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
         mockMvc.perform(post("/api/users")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))

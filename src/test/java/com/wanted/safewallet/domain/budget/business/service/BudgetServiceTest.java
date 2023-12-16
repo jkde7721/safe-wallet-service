@@ -9,8 +9,12 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_BUDGET;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_BUDGET;
+import static com.wanted.safewallet.utils.Fixtures.aBudget;
+import static com.wanted.safewallet.utils.Fixtures.aCategory;
+import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.anyList;
 import static org.mockito.BDDMockito.anyLong;
@@ -20,19 +24,17 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.times;
 
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
-import com.wanted.safewallet.domain.budget.persistence.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto;
+import com.wanted.safewallet.domain.budget.persistence.dto.BudgetAmountOfCategoryListDto.BudgetAmountOfCategoryDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto.BudgetByCategory;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponse;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
-import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.YearMonth;
 import java.util.List;
@@ -64,49 +66,49 @@ class BudgetServiceTest {
     @Test
     void setUpBudget() {
         //given
-        given(budgetRepository.existsByUserIdAndBudgetYearMonthAndInCategories(
+        given(budgetRepository.existsByUserAndBudgetYearMonthAndCategories(
             anyString(), any(YearMonth.class), anyList())).willReturn(false);
 
         //when
         String userId = "testUserId";
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
-            List.of(new BudgetByCategory(1L, FOOD, 10000L),
-                new BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
-        BudgetSetUpResponseDto responseDto = budgetService.setUpBudget(userId, requestDto);
+        BudgetSetUpRequest request = new BudgetSetUpRequest(YearMonth.of(2023, 11),
+            List.of(new BudgetOfCategoryRequest(1L, FOOD, 10000L),
+                new BudgetOfCategoryRequest(2L, TRAFFIC, 5000L)));
+        BudgetSetUpResponse response = budgetService.setUpBudget(userId, request);
 
         //then
         then(categoryService).should(times(1)).validateCategory(anyList());
         then(budgetRepository).should(times(1))
-            .existsByUserIdAndBudgetYearMonthAndInCategories(anyString(), any(YearMonth.class), anyList());
+            .existsByUserAndBudgetYearMonthAndCategories(anyString(), any(YearMonth.class), anyList());
         then(budgetRepository).should(times(1)).saveAll(anyList());
 
-        assertThat(responseDto.getBudgetList()).hasSize(2);
-        assertThat(responseDto.getBudgetList()).extracting("categoryId").contains(1L, 2L);
-        assertThat(responseDto.getBudgetList()).extracting("type")
-            .contains(FOOD, CategoryType.TRAFFIC);
-        assertThat(responseDto.getBudgetList()).extracting("amount").contains(10000L, 5000L);
+        assertThat(response.getBudgetList()).hasSize(2);
+        assertThat(response.getBudgetList()).extracting("categoryId").contains(1L, 2L);
+        assertThat(response.getBudgetList()).extracting("type")
+            .contains(FOOD, TRAFFIC);
+        assertThat(response.getBudgetList()).extracting("amount").contains(10000L, 5000L);
     }
 
     @DisplayName("월별 예산 설정 서비스 테스트 : 실패 - 같은 날짜, 같은 카테고리의 기존 예산 설정 내역 존재")
     @Test
     void setUpBudget_fail() {
         //given
-        given(budgetRepository.existsByUserIdAndBudgetYearMonthAndInCategories(
+        given(budgetRepository.existsByUserAndBudgetYearMonthAndCategories(
             anyString(), any(YearMonth.class), anyList())).willReturn(true);
 
         //when
         String userId = "testUserId";
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.of(2023, 11),
-            List.of(new BudgetByCategory(1L, FOOD, 10000L),
-                new BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
+        BudgetSetUpRequest request = new BudgetSetUpRequest(YearMonth.of(2023, 11),
+            List.of(new BudgetOfCategoryRequest(1L, FOOD, 10000L),
+                new BudgetOfCategoryRequest(2L, TRAFFIC, 5000L)));
 
         //then
-        assertThatThrownBy(() -> budgetService.setUpBudget(userId, requestDto))
+        assertThatThrownBy(() -> budgetService.setUpBudget(userId, request))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(ALREADY_EXISTS_BUDGET);
         then(categoryService).should(times(1)).validateCategory(anyList());
         then(budgetRepository).should(times(1))
-            .existsByUserIdAndBudgetYearMonthAndInCategories(anyString(), any(YearMonth.class), anyList());
+            .existsByUserAndBudgetYearMonthAndCategories(anyString(), any(YearMonth.class), anyList());
         then(budgetRepository).should(times(0)).saveAll(anyList());
     }
 
@@ -116,26 +118,26 @@ class BudgetServiceTest {
         //given
         String userId = "testUserId";
         Long budgetId = 1L;
+        long amount = 10000;
         YearMonth now = YearMonth.now();
-        Budget budget = Budget.builder().id(budgetId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(FOOD).build())
-            .amount(10000L).budgetYearMonth(now).build();
+        Budget budget = aBudget().id(budgetId)
+            .user(anUser().id(userId).build())
+            .amount(amount).budgetYearMonth(now).build();
         given(budgetRepository.findById(anyLong())).willReturn(Optional.of(budget));
         given(budgetRepository.findByUserAndCategoryAndBudgetYearMonthFetch(anyString(), anyLong(), any(YearMonth.class)))
             .willReturn(Optional.empty());
 
         //when
-        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(now.plusMonths(1),
-            2L, CategoryType.TRAFFIC, 20000L);
-        BudgetUpdateResponseDto responseDto = budgetService.updateBudget(userId, budgetId, requestDto);
+        BudgetUpdateRequest request = new BudgetUpdateRequest(now.plusMonths(1),
+            2L, TRAFFIC, amount * 2);
+        BudgetUpdateResponse response = budgetService.updateBudget(userId, budgetId, request);
 
         //then
-        assertThat(responseDto.getBudgetId()).isEqualTo(budgetId);
-        assertThat(responseDto.getBudgetYearMonth()).isEqualTo(requestDto.getBudgetYearMonth());
-        assertThat(responseDto.getCategoryId()).isEqualTo(requestDto.getCategoryId());
-        assertThat(responseDto.getType()).isEqualTo(requestDto.getType());
-        assertThat(responseDto.getAmount()).isEqualTo(requestDto.getAmount());
+        assertThat(response.getBudgetId()).isEqualTo(budgetId);
+        assertThat(response.getBudgetYearMonth()).isEqualTo(request.getBudgetYearMonth());
+        assertThat(response.getCategoryId()).isEqualTo(request.getCategoryId());
+        assertThat(response.getType()).isEqualTo(request.getType());
+        assertThat(response.getAmount()).isEqualTo(request.getAmount());
     }
 
     @DisplayName("월별 예산 수정 서비스 테스트 : 성공 - 수정하려는 카테고리, 년월의 기존 예산 내역 존재하는 경우(기존 예산 내역에 금액 추가)")
@@ -147,28 +149,28 @@ class BudgetServiceTest {
         Long anotherBudgetId = 2L;
         Long amount = 10000L;
         YearMonth now = YearMonth.now();
-        Budget budget = Budget.builder().id(budgetId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(FOOD).build())
+        Budget budget = aBudget().id(budgetId)
+            .user(anUser().id(userId).build())
+            .category(aCategory().id(1L).type(FOOD).build())
             .amount(amount).budgetYearMonth(now).build();
-        Budget anotherBudget = Budget.builder().id(anotherBudgetId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(2L).type(CategoryType.TRAFFIC).build())
+        Budget anotherBudget = aBudget().id(anotherBudgetId)
+            .user(anUser().id(userId).build())
+            .category(aCategory().id(2L).type(TRAFFIC).build())
             .amount(amount).budgetYearMonth(now).build();
         given(budgetRepository.findById(anyLong())).willReturn(Optional.of(budget));
         given(budgetRepository.findByUserAndCategoryAndBudgetYearMonthFetch(anyString(), anyLong(), any(YearMonth.class)))
             .willReturn(Optional.of(anotherBudget));
 
         //when
-        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(now, 2L, CategoryType.TRAFFIC, 20000L);
-        BudgetUpdateResponseDto responseDto = budgetService.updateBudget(userId, budgetId, requestDto);
+        BudgetUpdateRequest request = new BudgetUpdateRequest(now, 2L, TRAFFIC, 20000L);
+        BudgetUpdateResponse response = budgetService.updateBudget(userId, budgetId, request);
 
         //then
-        assertThat(responseDto.getBudgetId()).isEqualTo(anotherBudgetId);
-        assertThat(responseDto.getBudgetYearMonth()).isEqualTo(anotherBudget.getBudgetYearMonth());
-        assertThat(responseDto.getCategoryId()).isEqualTo(anotherBudget.getCategory().getId());
-        assertThat(responseDto.getType()).isEqualTo(anotherBudget.getCategory().getType());
-        assertThat(responseDto.getAmount()).isEqualTo(amount + requestDto.getAmount());
+        assertThat(response.getBudgetId()).isEqualTo(anotherBudgetId);
+        assertThat(response.getBudgetYearMonth()).isEqualTo(anotherBudget.getBudgetYearMonth());
+        assertThat(response.getCategoryId()).isEqualTo(anotherBudget.getCategory().getId());
+        assertThat(response.getType()).isEqualTo(anotherBudget.getCategory().getType());
+        assertThat(response.getAmount()).isEqualTo(amount + request.getAmount());
         then(budgetRepository).should(times(1)).deleteById(budgetId);
     }
 
@@ -179,14 +181,12 @@ class BudgetServiceTest {
         String userId = "testUserId";
         String anotherUserId = "otherUserId";
         Long budgetId = 1L;
-        Budget budget = Budget.builder().id(budgetId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(FOOD).build())
-            .amount(10000L).budgetYearMonth(YearMonth.now()).build();
+        Budget budget = aBudget().id(budgetId)
+            .user(anUser().id(anotherUserId).build()).build();
         given(budgetRepository.findById(anyLong())).willReturn(Optional.of(budget));
 
         //when, then
-        assertThatThrownBy(() -> budgetService.getValidBudget(anotherUserId, budgetId))
+        assertThatThrownBy(() -> budgetService.getValidBudget(userId, budgetId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(FORBIDDEN_BUDGET);
         then(budgetRepository).should(times(1)).findById(anyLong());
@@ -212,23 +212,25 @@ class BudgetServiceTest {
         //given
         String userId = "testUserId";
         Long totalAmount = 1000_000L;
-        List<TotalAmountByCategoryResponseDto> totalAmountByCategoryList = List.of(
-            new TotalAmountByCategoryResponseDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(3L).type(RESIDENCE).build(), 500_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(4L).type(CLOTHING).build(), 100_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(5L).type(LEISURE).build(), 50_000L),
-            new TotalAmountByCategoryResponseDto(Category.builder().id(6L).type(ETC).build(), 5_000L));
+        List<BudgetAmountOfCategoryDto> budgetAmountOfCategoryList = List.of(
+            new BudgetAmountOfCategoryDto(aCategory().id(1L).type(FOOD).build(), 150_000L),
+            new BudgetAmountOfCategoryDto(aCategory().id(2L).type(TRAFFIC).build(), 100_000L),
+            new BudgetAmountOfCategoryDto(aCategory().id(3L).type(RESIDENCE).build(), 500_000L),
+            new BudgetAmountOfCategoryDto(aCategory().id(4L).type(CLOTHING).build(), 100_000L),
+            new BudgetAmountOfCategoryDto(aCategory().id(5L).type(LEISURE).build(), 50_000L),
+            new BudgetAmountOfCategoryDto(aCategory().id(6L).type(ETC).build(), 5_000L));
+        BudgetAmountOfCategoryListDto budgetAmountOfCategoryListDto = new BudgetAmountOfCategoryListDto(budgetAmountOfCategoryList);
         given(budgetRepository.existsByUser(anyString())).willReturn(true);
-        given(budgetRepository.getTotalAmountByCategoryList(anyString())).willReturn(totalAmountByCategoryList);
+        given(budgetRepository.findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(anyString(), isNull(YearMonth.class)))
+            .willReturn(budgetAmountOfCategoryListDto);
 
         //when
-        BudgetConsultResponseDto responseDto = budgetService.consultBudget(userId, totalAmount);
+        BudgetConsultResponse response = budgetService.consultBudget(userId, totalAmount);
 
         //then
         then(budgetRepository).should(times(1)).existsByUser(anyString());
-        then(budgetRepository).should(times(1)).getTotalAmountByCategoryList(anyString());
-        assertThat(responseDto.getBudgetConsultList()).satisfiesExactly(
+        then(budgetRepository).should(times(1)).findBudgetAmountOfCategoryListByUserAndBudgetYearMonth(anyString(), isNull(YearMonth.class));
+        assertThat(response.getBudgetConsultList()).satisfiesExactly(
                 item1 -> assertThat(item1).extracting("type", "amount").containsExactly(FOOD, 165700L),
                 item2 -> assertThat(item2).extracting("type", "amount").containsExactly(TRAFFIC, 110400L),
                 item3 -> assertThat(item3).extracting("type", "amount").containsExactly(RESIDENCE, 552400L),

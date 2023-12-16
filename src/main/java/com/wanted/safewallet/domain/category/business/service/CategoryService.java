@@ -2,11 +2,11 @@ package com.wanted.safewallet.domain.category.business.service;
 
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_CATEGORY;
 
-import com.wanted.safewallet.domain.category.business.dto.request.CategoryValidRequestDto;
+import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
 import com.wanted.safewallet.domain.category.business.mapper.CategoryMapper;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.repository.CategoryRepository;
-import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponseDto;
+import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import java.util.Map;
@@ -22,29 +22,29 @@ public class CategoryService {
     private final CategoryMapper categoryMapper;
     private final CategoryRepository categoryRepository;
 
-    public CategoryListResponseDto getCategoryList() {
+    public CategoryListResponse getCategoryList() {
         List<Category> categoryList = categoryRepository.findAll();
         return categoryMapper.toDto(categoryList);
     }
 
-    public void validateCategory(CategoryValidRequestDto category) {
+    public void validateCategory(CategoryValidationDto categoryValidationDto) {
         Map<Long, Category> categoryMap = categoryRepository.findAllMap();
-        if (!existsCategory(categoryMap, category)) {
+        if (!existsCategory(categoryMap, categoryValidationDto)) {
             throw new BusinessException(NOT_FOUND_CATEGORY);
         }
     }
 
-    public void validateCategory(List<CategoryValidRequestDto> categoryList) {
+    public void validateCategory(List<CategoryValidationDto> categoryValidationDtoList) {
         Map<Long, Category> categoryMap = categoryRepository.findAllMap();
-        categoryList.forEach(category -> {
-            if (!existsCategory(categoryMap, category)) {
+        categoryValidationDtoList.forEach(categoryValidationDto -> {
+            if (!existsCategory(categoryMap, categoryValidationDto)) {
                 throw new BusinessException(NOT_FOUND_CATEGORY);
             }
         });
     }
 
-    private boolean existsCategory(Map<Long, Category> categoryMap, CategoryValidRequestDto category) {
-        return categoryMap.containsKey(category.getCategoryId())
-            && categoryMap.get(category.getCategoryId()).getType() == category.getType();
+    private boolean existsCategory(Map<Long, Category> categoryMap, CategoryValidationDto categoryValidationDto) {
+        return categoryMap.containsKey(categoryValidationDto.getCategoryId())
+            && categoryMap.get(categoryValidationDto.getCategoryId()).getType() == categoryValidationDto.getType();
     }
 }

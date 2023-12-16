@@ -4,24 +4,23 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureConsultVo;
-import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureDailyStatsVo;
-import com.wanted.safewallet.domain.expenditure.persistence.dto.response.StatsByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto.TodayExpenditureDailyStatsOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponse.ExpenditureResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse.ConsumptionRateOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse.TodayExpenditureConsultOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse.YesterdayExpenditureDailyStatsOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureAmountOfCategoryResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.dto.response.PageResponse;
@@ -35,21 +34,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExpenditureMapper {
 
-    public Expenditure toEntity(String userId, ExpenditureCreateRequestDto requestDto) {
+    public Expenditure toEntity(String userId, ExpenditureCreateRequest request) {
         return Expenditure.builder()
             .user(User.builder().id(userId).build())
-            .category(Category.builder().id(requestDto.getCategoryId()).build())
-            .expenditureDate(requestDto.getExpenditureDate())
-            .amount(requestDto.getAmount())
-            .note(requestDto.getNote()).build();
+            .category(Category.builder().id(request.getCategoryId()).build())
+            .expenditureDate(request.getExpenditureDate())
+            .amount(request.getAmount())
+            .note(request.getNote()).build();
     }
 
-    public ExpenditureCreateResponseDto toCreateDto(Expenditure expenditure) {
-        return new ExpenditureCreateResponseDto(expenditure.getId());
+    public ExpenditureCreateResponse toCreateDto(Expenditure expenditure) {
+        return new ExpenditureCreateResponse(expenditure.getId());
     }
 
-    public ExpenditureDetailsResponseDto toDetailsDto(Expenditure expenditure) {
-        return ExpenditureDetailsResponseDto.builder()
+    public ExpenditureDetailsResponse toDetailsDto(Expenditure expenditure) {
+        return ExpenditureDetailsResponse.builder()
             .expenditureDate(expenditure.getExpenditureDate())
             .amount(expenditure.getAmount())
             .categoryId(expenditure.getCategory().getId())
@@ -59,68 +58,68 @@ public class ExpenditureMapper {
             .imageUrls(expenditure.getImageUrls()).build();
     }
 
-    public ExpenditureSearchResponseDto toSearchDto(long totalAmount,
-        List<StatsByCategoryResponseDto> statsByCategory, Page<Expenditure> expenditurePage) {
+    public ExpenditureSearchResponse toSearchDto(long totalAmount,
+        Map<Category, Long> expenditureAmountByCategory, Page<Expenditure> expenditurePage) {
         Map<LocalDate, List<Expenditure>> expenditureListByDate = expenditurePage.getContent().stream()
             .collect(groupingBy(expenditure -> expenditure.getExpenditureDate().toLocalDate(), toList()));
-        return ExpenditureSearchResponseDto.builder()
+        return ExpenditureSearchResponse.builder()
             .totalAmount(totalAmount)
-            .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
+            .expenditureAmountOfCategoryList(toListOfCategoryDto(expenditureAmountByCategory))
             .expenditureListByDate(toListByDateDto(expenditureListByDate))
             .paging(new PageResponse(expenditurePage)).build();
     }
 
-    public ExpenditureSearchExceptsResponseDto toSearchExceptsDto(long totalAmount,
-        List<StatsByCategoryResponseDto> statsByCategory) {
-        return ExpenditureSearchExceptsResponseDto.builder()
+    public ExpenditureSearchExceptsResponse toSearchExceptsDto(long totalAmount,
+        Map<Category, Long> expenditureAmountByCategory) {
+        return ExpenditureSearchExceptsResponse.builder()
             .totalAmount(totalAmount)
-            .totalAmountListByCategory(toListByCategoryDto(statsByCategory))
+            .expenditureAmountOfCategoryList(toListOfCategoryDto(expenditureAmountByCategory))
             .build();
     }
 
-    public ExpenditureStatsResponseDto toDto(LocalDate currentStartDate, LocalDate currentEndDate,
+    public ExpenditureStatsResponse toDto(LocalDate currentStartDate, LocalDate currentEndDate,
         LocalDate criteriaStartDate, LocalDate criteriaEndDate, Long totalConsumptionRate,
         Map<Category, Long> consumptionRateByCategory) {
-        List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory =
+        List<ConsumptionRateOfCategoryResponse> consumptionRateOfCategoryList =
             consumptionRateByCategory.keySet().stream()
                 .sorted(Comparator.comparing(Category::getId))
-                .map(category -> new ConsumptionRateByCategoryResponseDto(category.getId(), category.getType(),
+                .map(category -> new ConsumptionRateOfCategoryResponse(category.getId(), category.getType(),
                     consumptionRateByCategory.get(category)))
                 .toList();
-        return ExpenditureStatsResponseDto.builder()
+        return ExpenditureStatsResponse.builder()
             .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
             .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
             .totalConsumptionRate(totalConsumptionRate)
-            .consumptionRateListByCategory(consumptionRateListByCategory).build();
+            .consumptionRateOfCategoryList(consumptionRateOfCategoryList).build();
     }
 
-    private List<TotalAmountByCategoryResponseDto> toListByCategoryDto(
-        List<StatsByCategoryResponseDto> statsByCategory) {
-        return statsByCategory.stream()
-            .sorted(Comparator.comparing(StatsByCategoryResponseDto::getCategoryId))
-            .map(stats -> TotalAmountByCategoryResponseDto.builder()
-                .categoryId(stats.getCategoryId())
-                .type(stats.getType())
-                .totalAmount(stats.getTotalAmount())
+    private List<ExpenditureAmountOfCategoryResponse> toListOfCategoryDto(
+        Map<Category, Long> expenditureAmountByCategory) {
+        return expenditureAmountByCategory.keySet().stream()
+            .sorted(Comparator.comparing(Category::getId))
+            .map(category -> ExpenditureAmountOfCategoryResponse.builder()
+                .categoryId(category.getId())
+                .type(category.getType())
+                .amount(expenditureAmountByCategory.get(category))
                 .build())
             .toList();
     }
 
-    private List<ExpenditureListByDateResponseDto> toListByDateDto(
+    private List<ExpenditureListByDateResponse> toListByDateDto(
         Map<LocalDate, List<Expenditure>> expenditureListByDate) {
         return expenditureListByDate.keySet().stream()
             .sorted(Comparator.reverseOrder())
-            .map(date -> ExpenditureListByDateResponseDto.builder()
+            .map(date -> ExpenditureListByDateResponse.builder()
                 .expenditureDate(date)
                 .expenditureList(toSubListByDateDto(expenditureListByDate.get(date)))
                 .build())
             .toList();
     }
 
-    private List<ExpenditureResponseDto> toSubListByDateDto(List<Expenditure> expenditureList) {
+    private List<ExpenditureResponse> toSubListByDateDto(List<Expenditure> expenditureList) {
         return expenditureList.stream()
             .sorted((e1, e2) -> e2.getAmount().compareTo(e1.getAmount()))
-            .map(expenditure -> ExpenditureResponseDto.builder()
+            .map(expenditure -> ExpenditureResponse.builder()
                 .expenditureId(expenditure.getId())
                 .amount(expenditure.getAmount())
                 .categoryId(expenditure.getCategory().getId())
@@ -130,28 +129,28 @@ public class ExpenditureMapper {
             .toList();
     }
 
-    public TodayExpenditureConsultResponseDto toDto(long todayTotalAmount, FinanceStatus totalFinanceStatus,
-        Map<Category, TodayExpenditureConsultVo> todayExpenditureConsultByCategory) {
-        List<TodayExpenditureConsultOfCategoryResponseDto> todayExpenditureConsultOfCategoryList =
+    public TodayExpenditureConsultResponse toDto(long totalAmount, FinanceStatus totalFinanceStatus,
+        Map<Category, TodayExpenditureConsultDto> todayExpenditureConsultByCategory) {
+        List<TodayExpenditureConsultOfCategoryResponse> todayExpenditureConsultOfCategoryList =
             todayExpenditureConsultByCategory.keySet().stream()
                 .sorted(Comparator.comparing(Category::getId))
-                .map(category -> new TodayExpenditureConsultOfCategoryResponseDto(category.getId(), category.getType(),
-                    todayExpenditureConsultByCategory.get(category).todayTotalAmount(),
+                .map(category -> new TodayExpenditureConsultOfCategoryResponse(category.getId(), category.getType(),
+                    todayExpenditureConsultByCategory.get(category).amount(),
                     todayExpenditureConsultByCategory.get(category).financeStatus()))
                 .toList();
-        return new TodayExpenditureConsultResponseDto(todayTotalAmount, totalFinanceStatus, todayExpenditureConsultOfCategoryList);
+        return new TodayExpenditureConsultResponse(totalAmount, totalFinanceStatus, todayExpenditureConsultOfCategoryList);
     }
 
-    public TodayExpenditureDailyStatsResponseDto toDto(Long todayTotalAmount,
-        Map<Category, TodayExpenditureDailyStatsVo> todayExpenditureDailyStatsByCategory) {
-        List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList =
-            todayExpenditureDailyStatsByCategory.keySet().stream()
+    public YesterdayExpenditureDailyStatsResponse toDto(Long totalAmount,
+        Map<Category, YesterdayExpenditureDailyStatsDto> yesterdayExpenditureDailyStatsByCategory) {
+        List<YesterdayExpenditureDailyStatsOfCategoryResponse> yesterdayExpenditureDailyStatsOfCategoryList =
+            yesterdayExpenditureDailyStatsByCategory.keySet().stream()
                 .sorted(Comparator.comparing(Category::getId))
-                .map(category -> new TodayExpenditureDailyStatsOfCategoryResponseDto(category.getId(), category.getType(),
-                    todayExpenditureDailyStatsByCategory.get(category).consultedTotalAmount(),
-                    todayExpenditureDailyStatsByCategory.get(category).todayTotalAmount(),
-                    todayExpenditureDailyStatsByCategory.get(category).consumptionRate()))
+                .map(category -> new YesterdayExpenditureDailyStatsOfCategoryResponse(category.getId(), category.getType(),
+                    yesterdayExpenditureDailyStatsByCategory.get(category).consultedAmount(),
+                    yesterdayExpenditureDailyStatsByCategory.get(category).expendedAmount(),
+                    yesterdayExpenditureDailyStatsByCategory.get(category).consumptionRate()))
                 .toList();
-        return new TodayExpenditureDailyStatsResponseDto(todayTotalAmount, todayExpenditureDailyStatsOfCategoryList);
+        return new YesterdayExpenditureDailyStatsResponse(totalAmount, yesterdayExpenditureDailyStatsOfCategoryList);
     }
 }

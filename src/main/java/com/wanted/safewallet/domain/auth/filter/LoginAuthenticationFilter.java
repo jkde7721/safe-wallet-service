@@ -2,7 +2,7 @@ package com.wanted.safewallet.domain.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wanted.safewallet.domain.auth.exception.IllegalLoginFormException;
-import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequestDto;
+import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequest;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +20,9 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
         HttpServletResponse response) throws AuthenticationException {
-        LoginRequestDto requestDto = getUsernameAndPassword(request);
+        LoginRequest loginRequest = getUsernameAndPassword(request);
         UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken
-            .unauthenticated(requestDto.getUsername(), requestDto.getPassword());
+            .unauthenticated(loginRequest.getUsername(), loginRequest.getPassword());
         return getAuthenticationManager().authenticate(authRequest);
     }
 
@@ -38,9 +38,9 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         getFailureHandler().onAuthenticationFailure(request, response, authException);
     }
 
-    private LoginRequestDto getUsernameAndPassword(HttpServletRequest request) {
+    private LoginRequest getUsernameAndPassword(HttpServletRequest request) {
         try {
-            return objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
+            return objectMapper.readValue(request.getInputStream(), LoginRequest.class);
         } catch (IOException e) {
             throw new IllegalLoginFormException("잘못된 로그인 요청 형식입니다.");
         }

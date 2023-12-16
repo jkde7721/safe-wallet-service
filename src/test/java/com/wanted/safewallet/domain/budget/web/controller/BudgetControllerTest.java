@@ -34,13 +34,14 @@ import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.budget.business.service.BudgetService;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequestDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponseDto.BudgetConsultByCategoryResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponseDto.BudgetByCategory;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponseDto;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse.BudgetConsultOfCategoryResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse.BudgetOfCategoryResponse;
+import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponse;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.YearMonth;
@@ -68,17 +69,17 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     @Test
     void setUpBudget() throws Exception {
         //given
-        BudgetSetUpResponseDto responseDto = new BudgetSetUpResponseDto(List.of(
-            new BudgetByCategory(1L, 1L, CategoryType.FOOD, 10000L),
-            new BudgetByCategory(2L, 2L, CategoryType.TRAFFIC, 5000L)));
-        given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequestDto.class))).willReturn(responseDto);
+        BudgetSetUpResponse response = new BudgetSetUpResponse(List.of(
+            new BudgetOfCategoryResponse(1L, 1L, CategoryType.FOOD, 10000L),
+            new BudgetOfCategoryResponse(2L, 2L, CategoryType.TRAFFIC, 5000L)));
+        given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequest.class))).willReturn(response);
 
         //when, then
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(YearMonth.now(),
-            List.of(new BudgetSetUpRequestDto.BudgetByCategory(1L, CategoryType.FOOD, 10000L),
-                new BudgetSetUpRequestDto.BudgetByCategory(2L, CategoryType.TRAFFIC, 5000L)));
+        BudgetSetUpRequest request = new BudgetSetUpRequest(YearMonth.now(),
+            List.of(new BudgetOfCategoryRequest(1L, CategoryType.FOOD, 10000L),
+                new BudgetOfCategoryRequest(2L, CategoryType.TRAFFIC, 5000L)));
         restDocsMockMvc.perform(post("/api/budgets")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -103,19 +104,19 @@ class BudgetControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("budgetList[].type").description("생성된 예산 카테고리 타입"),
                     fieldWithPath("budgetList[].amount").description("생성된 예산 금액"))));
         then(budgetService).should(times(1))
-            .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
+            .setUpBudget(anyString(), any(BudgetSetUpRequest.class));
     }
 
     @DisplayName("월별 예산 설정 컨트롤러 테스트 : 실패")
     @Test
     void setUpBudget_validation_fail() throws Exception {
         //given
-        BudgetSetUpRequestDto requestDto = new BudgetSetUpRequestDto(
+        BudgetSetUpRequest request = new BudgetSetUpRequest(
             YearMonth.now().minusMonths(1), List.of());
 
         //when, then
         mockMvc.perform(post("/api/budgets")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -124,7 +125,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
                 containsString("budgetYearMonth"), containsString("budgetList"))))
             .andDo(print());
         then(budgetService).should(times(0))
-            .setUpBudget(anyString(), any(BudgetSetUpRequestDto.class));
+            .setUpBudget(anyString(), any(BudgetSetUpRequest.class));
     }
 
     @DisplayName("월별 예산 수정 컨트롤러 테스트 : 성공")
@@ -132,16 +133,16 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     void updateBudget() throws Exception {
         //given
         Long budgetId = 1L;
-        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(YearMonth.now(),
+        BudgetUpdateRequest request = new BudgetUpdateRequest(YearMonth.now(),
             2L, CategoryType.TRAFFIC, 20000L);
-        BudgetUpdateResponseDto responseDto = new BudgetUpdateResponseDto(budgetId,
-            requestDto.getBudgetYearMonth(), requestDto.getCategoryId(), requestDto.getType(), requestDto.getAmount());
-        given(budgetService.updateBudget(anyString(), anyLong(), any(BudgetUpdateRequestDto.class)))
-            .willReturn(responseDto);
+        BudgetUpdateResponse response = new BudgetUpdateResponse(budgetId,
+            request.getBudgetYearMonth(), request.getCategoryId(), request.getType(), request.getAmount());
+        given(budgetService.updateBudget(anyString(), anyLong(), any(BudgetUpdateRequest.class)))
+            .willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(put("/api/budgets/" + budgetId)
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -171,12 +172,12 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     void updateBudget_validation_fail() throws Exception {
         //given
         Long budgetId = 1L;
-        BudgetUpdateRequestDto requestDto = new BudgetUpdateRequestDto(null,
+        BudgetUpdateRequest request = new BudgetUpdateRequest(null,
             2L, CategoryType.TRAFFIC, -1L);
 
         //when, then
         mockMvc.perform(put("/api/budgets/" + budgetId)
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -192,15 +193,15 @@ class BudgetControllerTest extends AbstractRestDocsTest {
     void consultBudget() throws Exception {
         //given
         Long totalAmount = 1_000_000L;
-        List<BudgetConsultByCategoryResponseDto> budgetConsultList = List.of(
-            new BudgetConsultByCategoryResponseDto(1L, FOOD, 200_000L),
-            new BudgetConsultByCategoryResponseDto(2L, TRAFFIC, 150_000L),
-            new BudgetConsultByCategoryResponseDto(3L, RESIDENCE, 500_000L),
-            new BudgetConsultByCategoryResponseDto(4L, CLOTHING, 100_000L),
-            new BudgetConsultByCategoryResponseDto(5L, LEISURE, 30_000L),
-            new BudgetConsultByCategoryResponseDto(6L, ETC, 20_000L));
-        BudgetConsultResponseDto responseDto = new BudgetConsultResponseDto(budgetConsultList);
-        given(budgetService.consultBudget(anyString(), anyLong())).willReturn(responseDto);
+        List<BudgetConsultOfCategoryResponse> budgetConsultList = List.of(
+            new BudgetConsultOfCategoryResponse(1L, FOOD, 200_000L),
+            new BudgetConsultOfCategoryResponse(2L, TRAFFIC, 150_000L),
+            new BudgetConsultOfCategoryResponse(3L, RESIDENCE, 500_000L),
+            new BudgetConsultOfCategoryResponse(4L, CLOTHING, 100_000L),
+            new BudgetConsultOfCategoryResponse(5L, LEISURE, 30_000L),
+            new BudgetConsultOfCategoryResponse(6L, ETC, 20_000L));
+        BudgetConsultResponse response = new BudgetConsultResponse(budgetConsultList);
+        given(budgetService.consultBudget(anyString(), anyLong())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/budgets/consult")

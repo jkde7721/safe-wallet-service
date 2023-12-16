@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.auth.handler;
 
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.utils.CookieUtils;
 import com.wanted.safewallet.domain.auth.utils.HeaderUtils;

@@ -5,12 +5,13 @@ import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.business.vo.TodayExpenditureDailyStatsVo;
+import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse.TodayExpenditureConsultOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,40 +26,47 @@ public class ExpenditureDailyStatsService {
     private final ExpenditureConsultService expenditureConsultService;
     private final ExpenditureRepository expenditureRepository;
 
-    public TodayExpenditureDailyStatsResponseDto produceTodayExpenditureDailyStats(String userId) {
-        LocalDate now = LocalDate.now().minusDays(1); //오늘 지출 안내는 다음날 계산하므로 -1
-        TodayExpenditureConsultResponseDto todayExpenditureConsult = expenditureConsultService.consultTodayExpenditure(userId);
-        Map<Category, Long> budgetAmountPerDayByCategory = convertToBudgetAmountPerDayByCategory(todayExpenditureConsult);
-        Map<Category, Long> todayExpenditureTotalAmountByCategory = expenditureRepository.findTotalAmountMapByUserAndExpenditureDate(userId, now);
+    public YesterdayExpenditureDailyStatsResponse produceYesterdayExpenditureDailyStats(String userId) {
+        LocalDate yesterday = LocalDate.now().minusDays(1); //ex. 10일이 어제라면 현재는 11일
+        TodayExpenditureConsultResponse yesterdayExpenditureConsult = expenditureConsultService.consultTodayExpenditure(userId); //캐싱
+        Map<Category, Long> dailyConsultedExpenditureAmountByCategory = convertToDailyConsultedExpenditureAmountByCategory(yesterdayExpenditureConsult);
+        Map<Category, Long> yesterdayExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, yesterday);
 
-        Long todayTotalAmount = calculateTodayTotalAmount(todayExpenditureTotalAmountByCategory);
-        Map<Category, TodayExpenditureDailyStatsVo> todayExpenditureDailyStatsByCategory =
-            getTodayExpenditureDailyStatsByCategory(budgetAmountPerDayByCategory, todayExpenditureTotalAmountByCategory);
-        return expenditureMapper.toDto(todayTotalAmount, todayExpenditureDailyStatsByCategory);
+        Long totalAmount = calculateTotalAmount(yesterdayExpenditureAmountByCategory);
+        Map<Category, YesterdayExpenditureDailyStatsDto> yesterdayExpenditureDailyStatsByCategory =
+            getYesterdayExpenditureDailyStatsByCategory(dailyConsultedExpenditureAmountByCategory, yesterdayExpenditureAmountByCategory);
+        return expenditureMapper.toDto(totalAmount, yesterdayExpenditureDailyStatsByCategory);
     }
 
-    private Map<Category, Long> convertToBudgetAmountPerDayByCategory(TodayExpenditureConsultResponseDto todayExpenditureConsult) {
-        return todayExpenditureConsult.getTodayExpenditureConsultOfCategoryList().stream()
+    private Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate date) {
+        LocalDateTime startInclusive = date.atStartOfDay();
+        LocalDateTime endExclusive = date.plusDays(1).atStartOfDay();
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            userId, startInclusive, endExclusive).toMapByCategory();
+    }
+
+    private Map<Category, Long> convertToDailyConsultedExpenditureAmountByCategory(
+        TodayExpenditureConsultResponse yesterdayExpenditureConsult) {
+        return yesterdayExpenditureConsult.getTodayExpenditureConsultOfCategoryList().stream()
             .collect(toMap(consult -> Category.builder().id(consult.getCategoryId()).type(consult.getType()).build(),
-                TodayExpenditureConsultOfCategoryResponseDto::getTodayTotalAmount));
+                TodayExpenditureConsultOfCategoryResponse::getAmount));
     }
 
-    private Long calculateTodayTotalAmount(Map<Category, Long> todayExpenditureTotalAmountByCategory) {
-        return todayExpenditureTotalAmountByCategory.values().stream().mapToLong(Long::longValue).sum();
+    private Long calculateTotalAmount(Map<Category, Long> amountByCategory) {
+        return amountByCategory.values().stream().mapToLong(Long::longValue).sum();
     }
 
-    private Map<Category, TodayExpenditureDailyStatsVo> getTodayExpenditureDailyStatsByCategory(
-        Map<Category, Long> budgetAmountPerDayByCategory, Map<Category, Long> todayExpenditureTotalAmountByCategory) {
-        return budgetAmountPerDayByCategory.keySet().stream()
-            .collect(toMap(identity(), category -> new TodayExpenditureDailyStatsVo(
-                budgetAmountPerDayByCategory.get(category), todayExpenditureTotalAmountByCategory.get(category),
-                calculateConsumptionRate(budgetAmountPerDayByCategory.get(category),
-                    todayExpenditureTotalAmountByCategory.get(category)))));
+    private Map<Category, YesterdayExpenditureDailyStatsDto> getYesterdayExpenditureDailyStatsByCategory(
+        Map<Category, Long> dailyConsultedExpenditureAmountByCategory, Map<Category, Long> yesterdayExpenditureAmountByCategory) {
+        return dailyConsultedExpenditureAmountByCategory.keySet().stream()
+            .collect(toMap(identity(), category -> new YesterdayExpenditureDailyStatsDto(
+                dailyConsultedExpenditureAmountByCategory.get(category), yesterdayExpenditureAmountByCategory.get(category),
+                calculateConsumptionRate(dailyConsultedExpenditureAmountByCategory.get(category),
+                    yesterdayExpenditureAmountByCategory.get(category)))));
     }
 
-    //TODO: ExpenditureService 내 메소드와 중복되므로 제거
-    private Long calculateConsumptionRate(Long budgetAmount, Long expenditureAmount) {
-        if (budgetAmount == 0) budgetAmount = 1L;
-        return Math.round((double) expenditureAmount / budgetAmount * 100); //% 단위로 변환하기 위해 곱하기 100
+    private Long calculateConsumptionRate(Long consultedAmount, Long expendedAmount) {
+        if (consultedAmount == 0) consultedAmount = 1L;
+        return Math.round((double) expendedAmount / consultedAmount * 100); //% 단위로 변환하기 위해 곱하기 100
     }
 }

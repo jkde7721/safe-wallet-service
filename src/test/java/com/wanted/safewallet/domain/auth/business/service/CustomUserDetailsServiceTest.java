@@ -1,11 +1,12 @@
 package com.wanted.safewallet.domain.auth.business.service;
 
+import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import java.util.Optional;
@@ -30,19 +31,16 @@ class CustomUserDetailsServiceTest {
     @Test
     void loadUserByUsername() {
         //given
-        String userId = "testUserId";
-        String username = "testUsername";
-        String password = "testPassword";
-        User user = User.builder().id(userId).username(username).password(password).build();
+        User user = anUser().build();
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
 
         //when
-        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(username);
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
 
         //then
-        assertThat(userDetails.getUserId()).isEqualTo(userId);
-        assertThat(userDetails.getUsername()).isEqualTo(username);
-        assertThat(userDetails.getPassword()).isEqualTo(password);
+        assertThat(userDetails.getUserId()).isEqualTo(user.getId());
+        assertThat(userDetails.getUsername()).isEqualTo(user.getUsername());
+        assertThat(userDetails.getPassword()).isEqualTo(user.getPassword());
     }
 
     @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 해당 유저 없음")

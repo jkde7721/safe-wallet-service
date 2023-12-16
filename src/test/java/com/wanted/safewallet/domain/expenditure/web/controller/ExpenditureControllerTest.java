@@ -48,22 +48,22 @@ import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
 import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequestDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequestDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponseDto.ExpenditureResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponseDto.ConsumptionRateByCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponseDto.TodayExpenditureConsultOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureDailyStatsResponseDto.TodayExpenditureDailyStatsOfCategoryResponseDto;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TotalAmountByCategoryResponseDto;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureListByDateResponse.ExpenditureResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse.ConsumptionRateOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse.TodayExpenditureConsultOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpenditureDailyStatsResponse.YesterdayExpenditureDailyStatsOfCategoryResponse;
+import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureAmountOfCategoryResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
@@ -100,10 +100,10 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @Test
     void getExpenditureDetails() throws Exception {
         //given
-        ExpenditureDetailsResponseDto responseDto = new ExpenditureDetailsResponseDto(
+        ExpenditureDetailsResponse response = new ExpenditureDetailsResponse(
             LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!",
             List.of("https://image1", "https://image2", "https://image3"));
-        given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(responseDto);
+        given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/1")
@@ -130,25 +130,25 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @Test
     void searchExpenditure() throws Exception {
         //given
-        ExpenditureSearchResponseDto responseDto = ExpenditureSearchResponseDto.builder()
+        ExpenditureSearchResponse response = ExpenditureSearchResponse.builder()
             .totalAmount(30000L)
-            .totalAmountListByCategory(List.of(
-                TotalAmountByCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
-                    .totalAmount(25000L).build(),
-                TotalAmountByCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
-                    .totalAmount(5000L).build()))
+            .expenditureAmountOfCategoryList(List.of(
+                ExpenditureAmountOfCategoryResponse.builder().categoryId(1L).type(CategoryType.FOOD)
+                    .amount(25000L).build(),
+                ExpenditureAmountOfCategoryResponse.builder().categoryId(2L).type(CategoryType.TRAFFIC)
+                    .amount(5000L).build()))
             .expenditureListByDate(List.of(
-                ExpenditureListByDateResponseDto.builder()
+                ExpenditureListByDateResponse.builder()
                     .expenditureDate(LocalDate.of(2023, 11, 17))
                     .expenditureList(List.of(
-                        ExpenditureResponseDto.builder().expenditureId(3L).amount(5000L)
+                        ExpenditureResponse.builder().expenditureId(3L).amount(5000L)
                             .categoryId(2L).type(CategoryType.TRAFFIC).title("하루 교통비").build(),
-                        ExpenditureResponseDto.builder().expenditureId(2L).amount(4000L)
+                        ExpenditureResponse.builder().expenditureId(2L).amount(4000L)
                             .categoryId(1L).type(CategoryType.FOOD).title("편의점 점심").build())).build(),
-                ExpenditureListByDateResponseDto.builder()
+                ExpenditureListByDateResponse.builder()
                     .expenditureDate(LocalDate.of(2023, 11, 15))
                     .expenditureList(List.of(
-                        ExpenditureResponseDto.builder().expenditureId(1L).amount(21000L)
+                        ExpenditureResponse.builder().expenditureId(1L).amount(21000L)
                             .categoryId(1L).type(CategoryType.FOOD).title("점심 커피챗").build())).build()))
             .paging(PageResponse.builder()
                 .pageNumber(1).pageSize(3).numberOfElements(3).totalPages(4).totalElements(12L)
@@ -160,7 +160,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         Long minAmount = 1000L;
         Long maxAmount = 50000L;
         given(expenditureService.searchExpenditure(anyString(), any(ExpenditureSearchCond.class),
-            any(Pageable.class))).willReturn(responseDto);
+            any(Pageable.class))).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures")
@@ -195,13 +195,13 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
                     fieldWithPath("totalAmount").description("총 지출 합계"),
-                    fieldWithPath("totalAmountListByCategory").description("카테고리 별 지출 합계 목록"),
-                    fieldWithPath("totalAmountListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("totalAmountListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("totalAmountListByCategory[].totalAmount").description("카테고리 별 지출 합계"),
+                    fieldWithPath("expenditureAmountOfCategoryList").description("카테고리 별 지출 금액 목록"),
+                    fieldWithPath("expenditureAmountOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("expenditureAmountOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("expenditureAmountOfCategoryList[].amount").description("카테고리 별 지출 금액"),
                     fieldWithPath("expenditureListByDate").description("날짜 별 지출 상세 목록"),
                     fieldWithPath("expenditureListByDate[].expenditureDate").description("지출 날짜"),
-                    fieldWithPath("expenditureListByDate[].expenditureList").description("날짜 별 지출"),
+                    fieldWithPath("expenditureListByDate[].expenditureList").description("지출 상세 목록"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].expenditureId").description("지출 id"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].amount").description("지출 금액"),
                     fieldWithPath("expenditureListByDate[].expenditureList[].categoryId").description("카테고리 id"),
@@ -214,13 +214,13 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @Test
     void searchExpenditureExcepts() throws Exception {
         //given
-        ExpenditureSearchExceptsResponseDto responseDto = ExpenditureSearchExceptsResponseDto.builder()
+        ExpenditureSearchExceptsResponse response = ExpenditureSearchExceptsResponse.builder()
             .totalAmount(26000L)
-            .totalAmountListByCategory(List.of(
-                TotalAmountByCategoryResponseDto.builder().categoryId(1L).type(CategoryType.FOOD)
-                    .totalAmount(21000L).build(),
-                TotalAmountByCategoryResponseDto.builder().categoryId(2L).type(CategoryType.TRAFFIC)
-                    .totalAmount(5000L).build()))
+            .expenditureAmountOfCategoryList(List.of(
+                ExpenditureAmountOfCategoryResponse.builder().categoryId(1L).type(CategoryType.FOOD)
+                    .amount(21000L).build(),
+                ExpenditureAmountOfCategoryResponse.builder().categoryId(2L).type(CategoryType.TRAFFIC)
+                    .amount(5000L).build()))
             .build();
         LocalDate startDate = LocalDate.of(2023, 11, 1);
         LocalDate endDate = LocalDate.of(2023, 11, 30);
@@ -229,7 +229,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         Long maxAmount = 50000L;
         List<Long> excepts = List.of(2L);
         given(expenditureService.searchExpenditureExcepts(anyString(), any(ExpenditureSearchCond.class)))
-            .willReturn(responseDto);
+            .willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/excepts")
@@ -265,11 +265,11 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
                     fieldWithPath("totalAmount").description("총 지출 합계(excepts 파라미터에서 지정한 지출은 제외)"),
-                    fieldWithPath("totalAmountListByCategory").description("카테고리 별 지출 합계 목록"),
-                    fieldWithPath("totalAmountListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("totalAmountListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("totalAmountListByCategory[].totalAmount")
-                        .description("카테고리 별 지출 합계(excepts 파라미터에서 지정한 지출은 제외)"))));
+                    fieldWithPath("expenditureAmountOfCategoryList").description("카테고리 별 지출 금액 목록"),
+                    fieldWithPath("expenditureAmountOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("expenditureAmountOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("expenditureAmountOfCategoryList[].amount")
+                        .description("카테고리 별 지출 금액(excepts 파라미터에서 지정한 지출은 제외)"))));
     }
 
     @DisplayName("지출 내역 목록 조회 컨트롤러 테스트 : 실패 - 가능한 검색 기간 초과")
@@ -313,15 +313,15 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @Test
     void createExpenditure() throws Exception {
         //given
-        ExpenditureCreateResponseDto responseDto = new ExpenditureCreateResponseDto(1L);
-        given(expenditureService.createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class)))
-            .willReturn(responseDto);
+        ExpenditureCreateResponse response = new ExpenditureCreateResponse(1L);
+        given(expenditureService.createExpenditure(anyString(), any(ExpenditureCreateRequest.class)))
+            .willReturn(response);
 
         //when, then
-        ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
+        ExpenditureCreateRequest request = new ExpenditureCreateRequest(
             LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
         restDocsMockMvc.perform(post("/api/expenditures")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -340,19 +340,20 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
                     fieldWithPath("expenditureId").description("생성된 지출 id"))));
-        then(expenditureService).should(times(1)).createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class));
+        then(expenditureService).should(times(1)).createExpenditure(anyString(), any(
+            ExpenditureCreateRequest.class));
     }
 
     @DisplayName("지출 내역 생성 컨트롤러 테스트 : 실패")
     @Test
     void createExpenditure_validation_fail() throws Exception {
         //given
-        ExpenditureCreateRequestDto requestDto = new ExpenditureCreateRequestDto(
+        ExpenditureCreateRequest request = new ExpenditureCreateRequest(
             null, -1L, 1L, CategoryType.FOOD, "점심 커피챗", "");
 
         //when, then
         mockMvc.perform(post("/api/expenditures")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -360,19 +361,20 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
-        then(expenditureService).should(times(0)).createExpenditure(anyString(), any(ExpenditureCreateRequestDto.class));
+        then(expenditureService).should(times(0)).createExpenditure(anyString(), any(
+            ExpenditureCreateRequest.class));
     }
 
     @DisplayName("지출 내역 수정 컨트롤러 테스트 : 성공")
     @Test
     void updateExpenditure() throws Exception {
         //given
-        ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
+        ExpenditureUpdateRequest request = new ExpenditureUpdateRequest(
             LocalDateTime.now().withNano(0), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!");
 
         //when, then
         restDocsMockMvc.perform(put("/api/expenditures/1")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -388,19 +390,19 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("title").description("지출 제목"),
                     fieldWithPath("note").description("지출 관련 메모").optional())));
         then(expenditureService).should(times(1)).updateExpenditure(
-            anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
+            anyString(), anyLong(), any(ExpenditureUpdateRequest.class));
     }
 
     @DisplayName("지출 내역 수정 컨트롤러 테스트 : 실패")
     @Test
     void updateExpenditure_validation_fail() throws Exception {
         //given
-        ExpenditureUpdateRequestDto requestDto = new ExpenditureUpdateRequestDto(
+        ExpenditureUpdateRequest request = new ExpenditureUpdateRequest(
             null, -1L, 1L, CategoryType.FOOD, "점심 커피챗", "");
 
         //when, then
         mockMvc.perform(put("/api/expenditures/1")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
@@ -409,7 +411,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
         then(expenditureService).should(times(0)).updateExpenditure(
-            anyString(), anyLong(), any(ExpenditureUpdateRequestDto.class));
+            anyString(), anyLong(), any(ExpenditureUpdateRequest.class));
     }
 
     @DisplayName("지출 내역 삭제 컨트롤러 테스트 : 성공")
@@ -433,20 +435,20 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         LocalDate criteriaStartDate = currentStartDate.minusMonths(1);
         LocalDate criteriaEndDate = criteriaStartDate.plusDays(DAYS.between(currentStartDate, currentEndDate));
         Long totalConsumptionRate = 110L;
-        List<ConsumptionRateByCategoryResponseDto> consumptionRateListByCategory = List.of(
-            new ConsumptionRateByCategoryResponseDto(1L, FOOD, 150L),
-            new ConsumptionRateByCategoryResponseDto(2L, TRAFFIC, 130L),
-            new ConsumptionRateByCategoryResponseDto(3L, RESIDENCE, 100L),
-            new ConsumptionRateByCategoryResponseDto(4L, CLOTHING, 70L),
-            new ConsumptionRateByCategoryResponseDto(5L, LEISURE, 55L),
-            new ConsumptionRateByCategoryResponseDto(6L, ETC, 100L));
-        ExpenditureStatsResponseDto responseDto = ExpenditureStatsResponseDto.builder()
+        List<ConsumptionRateOfCategoryResponse> consumptionRateOfCategoryList = List.of(
+            new ConsumptionRateOfCategoryResponse(1L, FOOD, 150L),
+            new ConsumptionRateOfCategoryResponse(2L, TRAFFIC, 130L),
+            new ConsumptionRateOfCategoryResponse(3L, RESIDENCE, 100L),
+            new ConsumptionRateOfCategoryResponse(4L, CLOTHING, 70L),
+            new ConsumptionRateOfCategoryResponse(5L, LEISURE, 55L),
+            new ConsumptionRateOfCategoryResponse(6L, ETC, 100L));
+        ExpenditureStatsResponse response = ExpenditureStatsResponse.builder()
             .currentStartDate(currentStartDate).currentEndDate(currentEndDate)
             .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
             .totalConsumptionRate(totalConsumptionRate)
-            .consumptionRateListByCategory(consumptionRateListByCategory).build();
+            .consumptionRateOfCategoryList(consumptionRateOfCategoryList).build();
         given(expenditureService.produceExpenditureStats(anyString(), any(StatsCriteria.class)))
-            .willReturn(responseDto);
+            .willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/stats")
@@ -464,10 +466,10 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("criteriaStartDate").description("지출 통계 기준 시작일"),
                     fieldWithPath("criteriaEndDate").description("지출 통계 기준 종료일"),
                     fieldWithPath("totalConsumptionRate").description("지난 년도, 달, 주 대비 전체 소비율(%)"),
-                    fieldWithPath("consumptionRateListByCategory").description("카테고리 별 소비율 목록"),
-                    fieldWithPath("consumptionRateListByCategory[].categoryId").description("카테고리 id"),
-                    fieldWithPath("consumptionRateListByCategory[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("consumptionRateListByCategory[].consumptionRate")
+                    fieldWithPath("consumptionRateOfCategoryList").description("카테고리 별 소비율 목록"),
+                    fieldWithPath("consumptionRateOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("consumptionRateOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("consumptionRateOfCategoryList[].consumptionRate")
                         .description("지난 년도, 달, 주 대비 해당 카테고리의 소비율(%)"))
             ));
     }
@@ -476,16 +478,16 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     @Test
     void consultTodayExpenditure() throws Exception {
         //given
-        List<TodayExpenditureConsultOfCategoryResponseDto> todayExpenditureConsultOfCategoryList = List.of(
-            new TodayExpenditureConsultOfCategoryResponseDto(1L, FOOD, 10800L, EXCELLENT),
-            new TodayExpenditureConsultOfCategoryResponseDto(2L, TRAFFIC, 7200L, EXCELLENT),
-            new TodayExpenditureConsultOfCategoryResponseDto(3L, RESIDENCE, 300000L, GOOD),
-            new TodayExpenditureConsultOfCategoryResponseDto(4L, CLOTHING, 15000L, BAD),
-            new TodayExpenditureConsultOfCategoryResponseDto(5L, LEISURE, 10000L, GOOD),
-            new TodayExpenditureConsultOfCategoryResponseDto(6L, ETC, 3600L, EXCELLENT));
-        TodayExpenditureConsultResponseDto responseDto = new TodayExpenditureConsultResponseDto(
+        List<TodayExpenditureConsultOfCategoryResponse> todayExpenditureConsultOfCategoryList = List.of(
+            new TodayExpenditureConsultOfCategoryResponse(1L, FOOD, 10800L, EXCELLENT),
+            new TodayExpenditureConsultOfCategoryResponse(2L, TRAFFIC, 7200L, EXCELLENT),
+            new TodayExpenditureConsultOfCategoryResponse(3L, RESIDENCE, 300000L, GOOD),
+            new TodayExpenditureConsultOfCategoryResponse(4L, CLOTHING, 15000L, BAD),
+            new TodayExpenditureConsultOfCategoryResponse(5L, LEISURE, 10000L, GOOD),
+            new TodayExpenditureConsultOfCategoryResponse(6L, ETC, 3600L, EXCELLENT));
+        TodayExpenditureConsultResponse response = new TodayExpenditureConsultResponse(
             346600L, EXCELLENT, todayExpenditureConsultOfCategoryList);
-        given(expenditureConsultService.consultTodayExpenditure(anyString())).willReturn(responseDto);
+        given(expenditureConsultService.consultTodayExpenditure(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/consult")
@@ -495,46 +497,46 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document(
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
-                    fieldWithPath("todayTotalAmount").description("오늘 지출 추천 총액"),
+                    fieldWithPath("totalAmount").description("오늘 지출 추천 총액"),
                     fieldWithPath("totalFinanceStatus").description(generatePopupLink(FINANCE_STATUS)),
                     fieldWithPath("todayExpenditureConsultOfCategoryList").description("카테고리 별 오늘 지출 추천 목록"),
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].categoryId").description("카테고리 id"),
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("todayExpenditureConsultOfCategoryList[].todayTotalAmount").description("카테고리 별 오늘 지출 추천 금액"),
+                    fieldWithPath("todayExpenditureConsultOfCategoryList[].amount").description("오늘 지출 추천 금액"),
                     fieldWithPath("todayExpenditureConsultOfCategoryList[].financeStatus").description(generatePopupLink(FINANCE_STATUS)))
             ));
     }
 
-    @DisplayName("오늘 지출 안내 컨트롤러 테스트 : 성공")
+    @DisplayName("어제 지출 안내 컨트롤러 테스트 : 성공")
     @Test
-    void produceTodayExpenditureDailyStats() throws Exception {
+    void produceYesterdayExpenditureDailyStats() throws Exception {
         //given
-        List<TodayExpenditureDailyStatsOfCategoryResponseDto> todayExpenditureDailyStatsOfCategoryList = List.of(
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(1L, FOOD, 9600L, 9600L, 100L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(2L, TRAFFIC, 6400L, 3200L, 50L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(3L, RESIDENCE, 0L, 0L, 0L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(4L, CLOTHING, 50000L, 35000L, 70L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(5L, LEISURE, 10000L, 0L, 0L),
-            new TodayExpenditureDailyStatsOfCategoryResponseDto(6L, ETC, 3200L, 4800L, 150L));
-        TodayExpenditureDailyStatsResponseDto responseDto = new TodayExpenditureDailyStatsResponseDto(
-            52600L, todayExpenditureDailyStatsOfCategoryList);
-        given(expenditureDailyStatsService.produceTodayExpenditureDailyStats(anyString())).willReturn(responseDto);
+        List<YesterdayExpenditureDailyStatsOfCategoryResponse> yesterdayExpenditureDailyStatsOfCategoryList = List.of(
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(1L, FOOD, 9600L, 9600L, 100L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(2L, TRAFFIC, 6400L, 3200L, 50L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(3L, RESIDENCE, 0L, 0L, 0L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(4L, CLOTHING, 50000L, 35000L, 70L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(5L, LEISURE, 10000L, 0L, 0L),
+            new YesterdayExpenditureDailyStatsOfCategoryResponse(6L, ETC, 3200L, 4800L, 150L));
+        YesterdayExpenditureDailyStatsResponse response = new YesterdayExpenditureDailyStatsResponse(
+            52600L, yesterdayExpenditureDailyStatsOfCategoryList);
+        given(expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/daily-stats")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.todayExpenditureDailyStatsOfCategoryList", hasSize(6)))
+            .andExpect(jsonPath("$.data.yesterdayExpenditureDailyStatsOfCategoryList", hasSize(6)))
             .andDo(restDocs.document(
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
-                    fieldWithPath("todayTotalAmount").description("오늘 지출 총액"),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList").description("카테고리 별 오늘 지출 안내 목록"),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].categoryId").description("카테고리 id"),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].consultedTotalAmount").description("오늘 적정 지출 금액"),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].todayTotalAmount").description("오늘 실제 지출 금액"),
-                    fieldWithPath("todayExpenditureDailyStatsOfCategoryList[].consumptionRate")
+                    fieldWithPath("totalAmount").description("어제 지출 총액"),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList").description("카테고리 별 어제 지출 안내 목록"),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList[].categoryId").description("카테고리 id"),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList[].type").description(generatePopupLink(CATEGORY_TYPE)),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList[].consultedAmount").description("어제 적정 지출 금액"),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList[].expendedAmount").description("어제 실제 지출 금액"),
+                    fieldWithPath("yesterdayExpenditureDailyStatsOfCategoryList[].consumptionRate")
                         .description("소비율(적정 지출 금액 대비 실제 지출 금액의 비율, % 단위)"))
             ));
     }

@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.auth.web.controller;
 
+import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,14 +23,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
-import com.wanted.safewallet.domain.auth.business.dto.response.CustomUserDetails;
-import com.wanted.safewallet.domain.auth.business.dto.response.JwtResponseDto;
+import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
+import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
 import com.wanted.safewallet.domain.auth.business.service.AuthService;
 import com.wanted.safewallet.domain.auth.business.service.CustomUserDetailsService;
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.config.AuthTestConfig;
 import com.wanted.safewallet.domain.auth.utils.JwtProperties;
-import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequestDto;
+import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequest;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
@@ -66,18 +67,16 @@ class AuthControllerTest extends AbstractRestDocsTest {
     @Test
     void login() throws Exception {
         //given
-        String userId = "testUserId";
-        String username = "testUsername";
-        String password = "hello12345!";
-        User user = User.builder().id(userId).username(username)
-            .password(passwordEncoder.encode(password)).build();
+        String password = "password";
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = anUser().password(encodedPassword).build();
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         given(customUserDetailsService.loadUserByUsername(anyString())).willReturn(customUserDetails);
 
         //when, then
-        LoginRequestDto requestDto = new LoginRequestDto(username, password);
+        LoginRequest request = new LoginRequest(user.getUsername(), password);
         authRestDocsMockMvc.perform(post("/api/auth/login")
-                .content(asJsonString(requestDto))
+                .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(header().string(AUTHORIZATION_HEADER_NAME, startsWith(jwtProperties.prefix())))
@@ -130,7 +129,7 @@ class AuthControllerTest extends AbstractRestDocsTest {
         String newAccessToken = "newAccessToken";
         String newRefreshToken = "newRefreshToken";
         given(authService.reissueToken(accessToken, refreshToken))
-            .willReturn(new JwtResponseDto(newAccessToken, newRefreshToken));
+            .willReturn(new JwtDto(newAccessToken, newRefreshToken));
 
         //when, then
         authRestDocsMockMvc.perform(put("/api/auth/refresh")

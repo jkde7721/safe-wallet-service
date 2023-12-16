@@ -1,12 +1,12 @@
 package com.wanted.safewallet.domain.user.business.mapper;
 
-import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponseDto;
+import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
 
-    public UsernameCheckResponseDto toDto(boolean isDuplicatedUsername) {
-        return new UsernameCheckResponseDto(isDuplicatedUsername);
+    public UsernameCheckResponse toDto(boolean isDuplicatedUsername) {
+        return new UsernameCheckResponse(isDuplicatedUsername);
     }
 }
