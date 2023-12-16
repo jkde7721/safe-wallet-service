@@ -4,6 +4,7 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
 import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
+import static com.wanted.safewallet.utils.Fixtures.aCategory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,13 +56,13 @@ class ExpenditureConsultServiceTest {
         //given
         String userId = "testUserId";
         Map<Category, Long> budgetAmountByCategory = Map.of(
-            Category.builder().id(1L).type(FOOD).build(), 300_000L,
-            Category.builder().id(2L).type(TRAFFIC).build(), 200_000L,
-            Category.builder().id(3L).type(ETC).build(), 100_000L);
+            aCategory().id(1L).type(FOOD).build(), 300_000L,
+            aCategory().id(2L).type(TRAFFIC).build(), 200_000L,
+            aCategory().id(3L).type(ETC).build(), 100_000L);
         List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList = List.of(
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(1L).type(FOOD).build(), 30_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(2L).type(TRAFFIC).build(), 20_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(3L).type(ETC).build(), 10_000L));
+            new ExpenditureAmountOfCategoryDto(aCategory().id(1L).type(FOOD).build(), 30_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(2L).type(TRAFFIC).build(), 20_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(3L).type(ETC).build(), 10_000L));
         ExpenditureAmountOfCategoryListDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListDto(expenditureAmountOfCategoryList);
         given(budgetService.getBudgetAmountByCategory(anyString(), any(YearMonth.class)))
             .willReturn(budgetAmountByCategory);

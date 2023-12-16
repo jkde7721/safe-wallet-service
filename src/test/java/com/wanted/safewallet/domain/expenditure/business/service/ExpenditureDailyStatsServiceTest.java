@@ -5,6 +5,7 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
 import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
 import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.GOOD;
+import static com.wanted.safewallet.utils.Fixtures.aCategory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,7 +13,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
@@ -57,9 +57,9 @@ class ExpenditureDailyStatsServiceTest {
         TodayExpenditureConsultResponse todayExpenditureConsult = new TodayExpenditureConsultResponse(
             19200L, GOOD, todayExpenditureConsultOfCategoryList);
         List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList = List.of(
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(1L).type(FOOD).build(), 9600L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(2L).type(TRAFFIC).build(), 3200L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(3L).type(ETC).build(), 4800L));
+            new ExpenditureAmountOfCategoryDto(aCategory().id(1L).type(FOOD).build(), 9600L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(2L).type(TRAFFIC).build(), 3200L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(3L).type(ETC).build(), 4800L));
         ExpenditureAmountOfCategoryListDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListDto(expenditureAmountOfCategoryList);
         given(expenditureConsultService.consultTodayExpenditure(anyString())).willReturn(todayExpenditureConsult);
         given(expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))

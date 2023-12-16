@@ -8,6 +8,9 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_EXPENDITURE;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_EXPENDITURE;
+import static com.wanted.safewallet.utils.Fixtures.aCategory;
+import static com.wanted.safewallet.utils.Fixtures.anExpenditure;
+import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +24,6 @@ import static org.mockito.Mockito.times;
 
 import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
 import com.wanted.safewallet.domain.category.business.service.CategoryService;
-import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
@@ -34,7 +36,6 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCrea
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
-import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -68,10 +69,9 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         LocalDateTime now = LocalDateTime.now();
-        Expenditure expenditure = Expenditure.builder().id(1L)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(now).amount(10000L).note("").build();
+        Expenditure expenditure = anExpenditure().id(1L)
+            .user(anUser().id(userId).build())
+            .expenditureDate(now).amount(10000L).title("점심 커피챗").note("").build();
         given(expenditureRepository.save(any(Expenditure.class))).willReturn(expenditure);
 
         //when
@@ -94,15 +94,15 @@ class ExpenditureServiceTest {
         String userId = "testUserId";
         Long expenditureId = 1L;
         LocalDateTime now = LocalDateTime.now();
-        Expenditure expenditure = Expenditure.builder().id(expenditureId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(now).amount(10000L).note("").build();
+        long amount = 10000;
+        Expenditure expenditure = anExpenditure().id(expenditureId)
+            .user(anUser().id(userId).build())
+            .expenditureDate(now).amount(amount).build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
         ExpenditureUpdateRequest request = new ExpenditureUpdateRequest(
-            now.plusDays(2), 5000L, 2L, CategoryType.TRAFFIC, "하루 교통비", "지출을 줄이자");
+            now.plusDays(2), amount / 2, 2L, CategoryType.TRAFFIC, "하루 교통비", "지출을 줄이자");
         expenditureService.updateExpenditure(userId, expenditureId, request);
 
         //then
@@ -111,6 +111,7 @@ class ExpenditureServiceTest {
         assertThat(expenditure.getExpenditureDate()).isEqualTo(request.getExpenditureDate());
         assertThat(expenditure.getAmount()).isEqualTo(request.getAmount());
         assertThat(expenditure.getCategory().getId()).isEqualTo(request.getCategoryId());
+        assertThat(expenditure.getTitle()).isEqualTo(request.getTitle());
         assertThat(expenditure.getNote()).isEqualTo(request.getNote());
     }
 
@@ -119,15 +120,14 @@ class ExpenditureServiceTest {
     void getValidExpenditure_forbidden_fail() {
         //given
         String userId = "testUserId";
+        String anotherUserId = "otherUserId";
         Long expenditureId = 1L;
-        Expenditure expenditure = Expenditure.builder().id(expenditureId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
+        Expenditure expenditure = anExpenditure().id(expenditureId)
+            .user(anUser().id(anotherUserId).build()).build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getValidExpenditure("wrong " + userId, expenditureId))
+        assertThatThrownBy(() -> expenditureService.getValidExpenditure(userId, expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(FORBIDDEN_EXPENDITURE);
     }
@@ -151,10 +151,8 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
-        Expenditure expenditure = Expenditure.builder().id(expenditureId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
+        Expenditure expenditure = anExpenditure().id(expenditureId)
+            .user(anUser().id(userId).build()).build();
         given(expenditureRepository.findById(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -171,10 +169,8 @@ class ExpenditureServiceTest {
         //given
         String userId = "testUserId";
         Long expenditureId = 1L;
-        Expenditure expenditure = Expenditure.builder().id(expenditureId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
+        Expenditure expenditure = anExpenditure().id(expenditureId)
+            .user(anUser().id(userId).build()).build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when
@@ -186,28 +182,26 @@ class ExpenditureServiceTest {
         assertThat(response).isNotNull();
     }
 
-    @DisplayName("현재 로그인한 사용자의 유효한 지출 내역 조회 테스트 with 카테고리 : 실패 - 접근 권한 없는 지출 내역")
+    @DisplayName("현재 로그인한 사용자의 유효한 지출 내역 조회 테스트 with 카테고리, 이미지 : 실패 - 접근 권한 없는 지출 내역")
     @Test
-    void getValidExpenditureWithCategoryAndImages() {
+    void getValidExpenditureWithCategoryAndImages_forbidden_fail() {
         //given
         String userId = "testUserId";
+        String anotherUserId = "otherUserId";
         Long expenditureId = 1L;
-        Expenditure expenditure = Expenditure.builder().id(expenditureId)
-            .user(User.builder().id(userId).build())
-            .category(Category.builder().id(1L).type(CategoryType.FOOD).build())
-            .expenditureDate(LocalDateTime.now()).amount(10000L).note("").build();
+        Expenditure expenditure = anExpenditure().id(expenditureId)
+            .user(anUser().id(anotherUserId).build()).build();
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.of(expenditure));
 
         //when, then
-        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategoryAndImages(
-            "wrong " + userId, expenditureId))
+        assertThatThrownBy(() -> expenditureService.getValidExpenditureWithCategoryAndImages(userId, expenditureId))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(FORBIDDEN_EXPENDITURE);
     }
 
-    @DisplayName("해당 지출 내역 식별자로 조회 테스트 with 카테고리 : 실패 - 해당 지출 내역 존재하지 않음")
+    @DisplayName("해당 지출 내역 식별자로 조회 테스트 with 카테고리, 이미지 : 실패 - 해당 지출 내역 존재하지 않음")
     @Test
-    void getExpenditureWithCategoryAndImages() {
+    void getExpenditureWithCategoryAndImages_notFound_fail() {
         //given
         Long expenditureId = 1L;
         given(expenditureRepository.findByIdFetch(anyLong())).willReturn(Optional.empty());
@@ -225,12 +219,12 @@ class ExpenditureServiceTest {
         String userId = "testUserId";
         StatsCriteria criteria = StatsCriteria.LAST_MONTH;
         List<ExpenditureAmountOfCategoryDto> expenditureAmountOfCategoryList = List.of(
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(1L).type(FOOD).build(), 150_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(2L).type(TRAFFIC).build(), 100_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(3L).type(RESIDENCE).build(), 500_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(4L).type(CLOTHING).build(), 100_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(5L).type(LEISURE).build(), 50_000L),
-            new ExpenditureAmountOfCategoryDto(Category.builder().id(6L).type(ETC).build(), 5_000L));
+            new ExpenditureAmountOfCategoryDto(aCategory().id(1L).type(FOOD).build(), 150_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(2L).type(TRAFFIC).build(), 100_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(3L).type(RESIDENCE).build(), 500_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(4L).type(CLOTHING).build(), 100_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(5L).type(LEISURE).build(), 50_000L),
+            new ExpenditureAmountOfCategoryDto(aCategory().id(6L).type(ETC).build(), 5_000L));
         ExpenditureAmountOfCategoryListDto expenditureAmountOfCategoryListDto = new ExpenditureAmountOfCategoryListDto(expenditureAmountOfCategoryList);
         given(expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
             anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))

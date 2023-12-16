@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.auth.web.controller;
 
+import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -66,16 +67,14 @@ class AuthControllerTest extends AbstractRestDocsTest {
     @Test
     void login() throws Exception {
         //given
-        String userId = "testUserId";
-        String username = "testUsername";
-        String password = "hello12345!";
-        User user = User.builder().id(userId).username(username)
-            .password(passwordEncoder.encode(password)).build();
+        String password = "password";
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = anUser().password(encodedPassword).build();
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         given(customUserDetailsService.loadUserByUsername(anyString())).willReturn(customUserDetails);
 
         //when, then
-        LoginRequest request = new LoginRequest(username, password);
+        LoginRequest request = new LoginRequest(user.getUsername(), password);
         authRestDocsMockMvc.perform(post("/api/auth/login")
                 .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON))
