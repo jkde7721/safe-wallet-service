@@ -87,8 +87,8 @@ public class ExpenditureService {
         validateRequest(request);
         Expenditure expenditure = getValidExpenditure(userId, expenditureId);
         LocalDateTime originalExpenditureDate = expenditure.getExpenditureDate();
-        expenditure.update(request.getCategoryId(), request.getExpenditureDate(),
-            request.getAmount(), request.getNote());
+        expenditure.update(request.getCategoryId(), request.getExpenditureDate(), request.getAmount(),
+            request.getTitle(), request.getNote());
         return new ExpenditureDateUpdateDto(originalExpenditureDate, request.getExpenditureDate());
     }
 
