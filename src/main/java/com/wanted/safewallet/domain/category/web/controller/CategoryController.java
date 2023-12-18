@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.category.web.controller;
 
-import com.wanted.safewallet.domain.category.business.service.CategoryService;
+import com.wanted.safewallet.domain.category.business.facade.CategoryFacadeService;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CategoryController {
 
-    private final CategoryService categoryService;
+    private final CategoryFacadeService categoryFacadeService;
 
     @GetMapping
     public CategoryListResponse getCategoryList() {
-        return categoryService.getCategoryList();
+        return categoryFacadeService.getCategoryList();
     }
 }
