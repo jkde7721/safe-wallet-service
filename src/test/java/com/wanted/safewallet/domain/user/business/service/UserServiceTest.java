@@ -8,11 +8,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import com.wanted.safewallet.domain.user.business.mapper.UserMapper;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
-import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
-import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.global.config.PasswordEncoderConfig;
 import com.wanted.safewallet.global.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -35,9 +31,6 @@ class UserServiceTest {
 
     UserService userService;
 
-    @Spy
-    UserMapper userMapper;
-
     @Mock
     UserRepository userRepository;
 
@@ -49,22 +42,7 @@ class UserServiceTest {
 
     @BeforeEach
     void init() {
-        userService = new UserService(userMapper, userRepository, passwordEncoder);
-    }
-
-    @DisplayName("유저 계정명 중복 여부 확인 테스트 : 성공")
-    @Test
-    void isDuplicatedUsername() {
-        //given
-        String username = "testUsername";
-        given(userRepository.existsByUsername(anyString())).willReturn(true);
-
-        //when
-        UsernameCheckResponse response = userService.isDuplicatedUsername(username);
-
-        //then
-        then(userRepository).should(times(1)).existsByUsername(username);
-        assertThat(response.getIsDuplicatedUsername()).isTrue();
+        userService = new UserService(userRepository, passwordEncoder);
     }
 
     @DisplayName("유저 회원가입 서비스 테스트 : 성공")
@@ -72,11 +50,11 @@ class UserServiceTest {
     void joinUser() {
         //given
         String username = "testUsername";
-        UserJoinRequest request = new UserJoinRequest(username, "testPassword");
+        String password = "testPassword";
         given(userRepository.existsByUsername(anyString())).willReturn(false);
 
         //when
-        userService.joinUser(request);
+        userService.joinUser(username, password);
 
         //then
         then(userRepository).should(times(1)).existsByUsername(anyString());
