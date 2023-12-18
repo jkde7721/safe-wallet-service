@@ -3,11 +3,8 @@ package com.wanted.safewallet.domain.user.business.service;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_USERNAME;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_USER;
 
-import com.wanted.safewallet.domain.user.business.mapper.UserMapper;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
-import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
-import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,21 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
-    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UsernameCheckResponse isDuplicatedUsername(String username) {
-        boolean isDuplicatedUsername = userRepository.existsByUsername(username);
-        return userMapper.toDto(isDuplicatedUsername);
+    public boolean isDuplicatedUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     @Transactional
-    public void joinUser(UserJoinRequest request) {
-        checkForUsername(request.getUsername());
-        String username = request.getUsername();
-        String password = passwordEncoder.encode(request.getPassword());
-        User user = User.builder().username(username).password(password).build();
+    public void joinUser(String username, String password) {
+        checkForUsername(username);
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = User.builder().username(username).password(encodedPassword).build();
         userRepository.save(user);
     }
 
