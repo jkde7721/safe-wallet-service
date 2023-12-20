@@ -11,7 +11,7 @@ import static org.springframework.util.StringUtils.uncapitalize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
+import com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.io.IOException;
