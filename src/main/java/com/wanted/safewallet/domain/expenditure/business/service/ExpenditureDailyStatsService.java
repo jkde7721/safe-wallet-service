@@ -7,12 +7,8 @@ import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureTotalDailyStatsDto;
 import com.wanted.safewallet.domain.expenditure.business.dto.YesterdayExpenditureDailyStatsDto;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class ExpenditureDailyStatsService {
 
