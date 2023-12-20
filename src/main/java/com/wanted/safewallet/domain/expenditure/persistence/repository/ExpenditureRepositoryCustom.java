@@ -1,8 +1,8 @@
 package com.wanted.safewallet.domain.expenditure.persistence.repository;
 
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureSearchCond;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
