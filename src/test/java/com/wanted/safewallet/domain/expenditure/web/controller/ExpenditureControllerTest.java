@@ -11,9 +11,9 @@ import static com.wanted.safewallet.domain.category.persistence.entity.CategoryT
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.LEISURE;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.RESIDENCE;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.BAD;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.GOOD;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.BAD;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.EXCELLENT;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.GOOD;
 import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_MONTH;
 import static com.wanted.safewallet.utils.JsonUtils.asJsonString;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -45,11 +45,9 @@ import static org.springframework.util.StringUtils.collectionToCommaDelimitedStr
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
+import com.wanted.safewallet.domain.expenditure.business.facade.ExpenditureFacadeService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
@@ -85,13 +83,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @MockBean
-    ExpenditureService expenditureService;
-
-    @MockBean
-    ExpenditureConsultService expenditureConsultService;
-
-    @MockBean
-    ExpenditureDailyStatsService expenditureDailyStatsService;
+    ExpenditureFacadeService expenditureFacadeService;
 
     @Autowired
     MockMvc mockMvc;
@@ -103,7 +95,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         ExpenditureDetailsResponse response = new ExpenditureDetailsResponse(
             LocalDateTime.now(), 20000L, 1L, CategoryType.FOOD, "점심 커피챗", "식비를 줄이자!",
             List.of("https://image1", "https://image2", "https://image3"));
-        given(expenditureService.getExpenditureDetails(anyString(), anyLong())).willReturn(response);
+        given(expenditureFacadeService.getExpenditureDetails(anyString(), anyLong())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/1")
@@ -122,7 +114,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("imageUrls").description("지출 이미지 URL")
                 )
             ));
-        then(expenditureService).should(times(1))
+        then(expenditureFacadeService).should(times(1))
             .getExpenditureDetails(anyString(), anyLong());
     }
 
@@ -159,7 +151,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         List<Long> categories = List.of(1L, 2L);
         Long minAmount = 1000L;
         Long maxAmount = 50000L;
-        given(expenditureService.searchExpenditure(anyString(), any(ExpenditureSearchCond.class),
+        given(expenditureFacadeService.searchExpenditure(anyString(), any(ExpenditureSearchRequest.class),
             any(Pageable.class))).willReturn(response);
 
         //when, then
@@ -228,7 +220,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         Long minAmount = 1000L;
         Long maxAmount = 50000L;
         List<Long> excepts = List.of(2L);
-        given(expenditureService.searchExpenditureExcepts(anyString(), any(ExpenditureSearchCond.class)))
+        given(expenditureFacadeService.searchExpenditureExcepts(anyString(), any(ExpenditureSearchRequest.class)))
             .willReturn(response);
 
         //when, then
@@ -314,7 +306,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
     void createExpenditure() throws Exception {
         //given
         ExpenditureCreateResponse response = new ExpenditureCreateResponse(1L);
-        given(expenditureService.createExpenditure(anyString(), any(ExpenditureCreateRequest.class)))
+        given(expenditureFacadeService.createExpenditure(anyString(), any(ExpenditureCreateRequest.class)))
             .willReturn(response);
 
         //when, then
@@ -340,7 +332,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
                     fieldWithPath("expenditureId").description("생성된 지출 id"))));
-        then(expenditureService).should(times(1)).createExpenditure(anyString(), any(
+        then(expenditureFacadeService).should(times(1)).createExpenditure(anyString(), any(
             ExpenditureCreateRequest.class));
     }
 
@@ -361,7 +353,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
-        then(expenditureService).should(times(0)).createExpenditure(anyString(), any(
+        then(expenditureFacadeService).should(times(0)).createExpenditure(anyString(), any(
             ExpenditureCreateRequest.class));
     }
 
@@ -389,7 +381,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("type").description(generatePopupLink(CATEGORY_TYPE)),
                     fieldWithPath("title").description("지출 제목"),
                     fieldWithPath("note").description("지출 관련 메모").optional())));
-        then(expenditureService).should(times(1)).updateExpenditure(
+        then(expenditureFacadeService).should(times(1)).updateExpenditure(
             anyString(), anyLong(), any(ExpenditureUpdateRequest.class));
     }
 
@@ -410,7 +402,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("expenditureDate"), containsString("amount"))))
             .andDo(print());
-        then(expenditureService).should(times(0)).updateExpenditure(
+        then(expenditureFacadeService).should(times(0)).updateExpenditure(
             anyString(), anyLong(), any(ExpenditureUpdateRequest.class));
     }
 
@@ -422,7 +414,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         restDocsMockMvc.perform(delete("/api/expenditures/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data").doesNotExist());
-        then(expenditureService).should(times(1))
+        then(expenditureFacadeService).should(times(1))
             .deleteExpenditure(anyString(), anyLong());
     }
 
@@ -447,7 +439,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             .criteriaStartDate(criteriaStartDate).criteriaEndDate(criteriaEndDate)
             .totalConsumptionRate(totalConsumptionRate)
             .consumptionRateOfCategoryList(consumptionRateOfCategoryList).build();
-        given(expenditureService.produceExpenditureStats(anyString(), any(StatsCriteria.class)))
+        given(expenditureFacadeService.produceExpenditureStats(anyString(), any(StatsCriteria.class)))
             .willReturn(response);
 
         //when, then
@@ -487,7 +479,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             new TodayExpenditureConsultOfCategoryResponse(6L, ETC, 3600L, EXCELLENT));
         TodayExpenditureConsultResponse response = new TodayExpenditureConsultResponse(
             346600L, EXCELLENT, todayExpenditureConsultOfCategoryList);
-        given(expenditureConsultService.consultTodayExpenditure(anyString())).willReturn(response);
+        given(expenditureFacadeService.consultTodayExpenditure(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/consult")
@@ -520,7 +512,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
             new YesterdayExpenditureDailyStatsOfCategoryResponse(6L, ETC, 3200L, 4800L, 150L));
         YesterdayExpenditureDailyStatsResponse response = new YesterdayExpenditureDailyStatsResponse(
             52600L, yesterdayExpenditureDailyStatsOfCategoryList);
-        given(expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(anyString())).willReturn(response);
+        given(expenditureFacadeService.produceYesterdayExpenditureDailyStats(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures/daily-stats")
