@@ -18,7 +18,7 @@ public class UserFacadeService {
 
     public UsernameCheckResponse checkForUsername(String username) {
         boolean isDuplicatedUsername = userService.isDuplicatedUsername(username);
-        return userMapper.toDto(isDuplicatedUsername);
+        return userMapper.toResponse(isDuplicatedUsername);
     }
 
     @Transactional

@@ -46,7 +46,7 @@ class CategoryFacadeServiceTest {
 
         //then
         then(categoryService).should(times(1)).getCategoryList();
-        then(categoryMapper).should(times(1)).toDto(categoryList);
+        then(categoryMapper).should(times(1)).toResponse(categoryList);
         assertThat(response.getCategoryList()).hasSize(2);
         assertThat(response.getCategoryList())
             .extracting("categoryId").contains(1L, 2L);

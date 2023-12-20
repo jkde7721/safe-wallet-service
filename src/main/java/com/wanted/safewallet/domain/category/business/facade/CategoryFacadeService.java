@@ -19,6 +19,6 @@ public class CategoryFacadeService {
 
     public CategoryListResponse getCategoryList() {
         List<Category> categoryList = categoryService.getCategoryList();
-        return categoryMapper.toDto(categoryList);
+        return categoryMapper.toResponse(categoryList);
     }
 }

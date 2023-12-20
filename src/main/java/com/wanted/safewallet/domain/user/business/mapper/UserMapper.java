@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public UsernameCheckResponse toDto(boolean isDuplicatedUsername) {
+    public UsernameCheckResponse toResponse(boolean isDuplicatedUsername) {
         return new UsernameCheckResponse(isDuplicatedUsername);
     }
 }
