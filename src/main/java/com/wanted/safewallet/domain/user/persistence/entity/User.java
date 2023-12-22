@@ -4,6 +4,7 @@ import com.wanted.safewallet.global.audit.BaseTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +36,10 @@ public class User extends BaseTime {
     @ColumnDefault("0")
     private Boolean deleted = Boolean.FALSE;
 
+    private LocalDateTime deletedDate;
+
     public void softDelete() {
         this.deleted = Boolean.TRUE;
+        this.deletedDate = LocalDateTime.now();
     }
 }
