@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.budget.web.controller;
 
-import com.wanted.safewallet.domain.budget.facade.BudgetFacadeService;
+import com.wanted.safewallet.domain.budget.business.facade.BudgetFacadeService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;

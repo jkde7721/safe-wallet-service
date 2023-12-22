@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
-import com.wanted.safewallet.domain.budget.facade.BudgetFacadeService;
+import com.wanted.safewallet.domain.budget.business.facade.BudgetFacadeService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;

@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.budget.facade;
+package com.wanted.safewallet.domain.budget.business.facade;
 
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.FOOD;
 import static com.wanted.safewallet.domain.category.persistence.entity.CategoryType.TRAFFIC;

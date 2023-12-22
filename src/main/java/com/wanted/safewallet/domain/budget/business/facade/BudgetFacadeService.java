@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.budget.facade;
+package com.wanted.safewallet.domain.budget.business.facade;
 
 import com.wanted.safewallet.domain.budget.business.dto.BudgetUpdateDto;
 import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
