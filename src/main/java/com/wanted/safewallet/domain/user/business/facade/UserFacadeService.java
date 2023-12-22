@@ -33,7 +33,7 @@ public class UserFacadeService {
     }
 
     @Transactional
-    public void withdrawUser(String userId) {
+    public void deactivateUser(String userId) {
         User user = userService.getUser(userId);
         userService.deleteUser(user);
     }

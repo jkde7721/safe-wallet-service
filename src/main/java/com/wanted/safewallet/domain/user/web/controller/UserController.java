@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @DeleteMapping
-    public void withdrawUser(@CurrentUserId String userId) {
-        userFacadeService.withdrawUser(userId);
+    public void deactivateUser(@CurrentUserId String userId) {
+        userFacadeService.deactivateUser(userId);
     }
 }
