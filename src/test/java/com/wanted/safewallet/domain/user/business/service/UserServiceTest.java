@@ -3,6 +3,7 @@ package com.wanted.safewallet.domain.user.business.service;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_USERNAME;
 import static com.wanted.safewallet.global.exception.ErrorCode.PASSWORD_ENCODING_ERROR;
 import static com.wanted.safewallet.utils.Fixtures.anUser;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -53,5 +54,18 @@ class UserServiceTest {
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(ALREADY_EXISTS_USERNAME);
         then(userRepository).should(times(1)).existsByUsername(username);
+    }
+
+    @DisplayName("유저 권한 String 값 반환 테스트")
+    @Test
+    void getCommaDelimitedAuthorities() {
+        //given
+        User user = anUser().build();
+
+        //when
+        String authorities = userService.getCommaDelimitedAuthorities(user);
+
+        //then
+        assertThat(authorities).isEqualTo("ROLE_USER");
     }
 }

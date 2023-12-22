@@ -7,9 +7,12 @@ import static com.wanted.safewallet.global.exception.ErrorCode.PASSWORD_ENCODING
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import com.wanted.safewallet.global.exception.BusinessException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,5 +43,11 @@ public class UserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
             .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
+    }
+
+    //TODO: User 엔티티에 권한 관련 필드 추가 후 실제 구현 (현재는 임의의 ROLE_USER 권한만 반환)
+    public String getCommaDelimitedAuthorities(User user) {
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return StringUtils.collectionToCommaDelimitedString(authorities);
     }
 }
