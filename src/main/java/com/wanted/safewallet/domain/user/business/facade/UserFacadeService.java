@@ -31,4 +31,10 @@ public class UserFacadeService {
         User user = userMapper.toEntity(request, encodedPassword);
         userService.saveUser(user);
     }
+
+    @Transactional
+    public void withdrawUser(String userId) {
+        User user = userService.getUser(userId);
+        userService.deleteUser(user);
+    }
 }

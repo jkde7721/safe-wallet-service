@@ -26,7 +26,7 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    @Transactional
+
     public void saveUser(User user) {
         if (!user.getPassword().startsWith(ENCODED_PASSWORD_PREFIX)) {
             throw new BusinessException(PASSWORD_ENCODING_ERROR);
@@ -34,10 +34,20 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void deleteUser(User user) {
+        user.softDelete();
+    }
+
     public void checkForUsername(String username) {
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ALREADY_EXISTS_USERNAME);
         }
+    }
+
+    public User getUser(String userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
     }
 
     public User getUserByUsername(String username) {
