@@ -1,7 +1,8 @@
-package com.wanted.safewallet.domain.auth.business.service;
+package com.wanted.safewallet.domain.auth.business.facade;
 
 import static com.wanted.safewallet.global.exception.ErrorCode.UNAUTHORIZED_JWT_TOKEN;
 
+import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.utils.JwtUtils;
 import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
 import com.wanted.safewallet.domain.user.business.service.UserService;
@@ -16,7 +17,7 @@ import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Service
-public class AuthService {
+public class AuthFacadeService {
 
     private final JwtUtils jwtTokenUtils;
     private final UserService userService;

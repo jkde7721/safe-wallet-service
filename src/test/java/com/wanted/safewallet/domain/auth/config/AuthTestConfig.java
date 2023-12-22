@@ -1,7 +1,7 @@
 package com.wanted.safewallet.domain.auth.config;
 
 import com.wanted.safewallet.config.JwtPropertiesConfiguration;
-import com.wanted.safewallet.domain.auth.business.service.AuthService;
+import com.wanted.safewallet.domain.auth.business.facade.AuthFacadeService;
 import com.wanted.safewallet.domain.auth.business.service.CustomUserDetailsService;
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.handler.JwtAuthenticationFailureHandler;
@@ -27,7 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
     LoginAuthenticationSuccessHandler.class, LoginAuthenticationFailureHandler.class,
     JwtAuthenticationFailureHandler.class, JwtAuthorizationFailureHandler.class,
     JwtLogoutSuccessHandler.class, PasswordEncoderConfig.class, SecurityConfig.class})
-@MockBean(classes = {AuthService.class, CustomUserDetailsService.class, RefreshTokenService.class})
+@MockBean(classes = {AuthFacadeService.class, CustomUserDetailsService.class, RefreshTokenService.class})
 @JwtPropertiesConfiguration
 @TestConfiguration
 public class AuthTestConfig {
