@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.user.web.controller;
 
-import com.wanted.safewallet.domain.user.business.service.UserService;
+import com.wanted.safewallet.domain.user.business.facade.UserFacadeService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -20,16 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    private final UserService userService;
+    private final UserFacadeService userFacadeService;
 
     @GetMapping("/{username}")
     public UsernameCheckResponse checkForUsername(@PathVariable String username) {
-        return userService.isDuplicatedUsername(username);
+        return userFacadeService.checkForUsername(username);
     }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
     public void joinUser(@RequestBody @Valid UserJoinRequest request) {
-        userService.joinUser(request);
+        userFacadeService.joinUser(request);
     }
 }

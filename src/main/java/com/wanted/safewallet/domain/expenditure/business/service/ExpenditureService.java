@@ -1,39 +1,25 @@
 package com.wanted.safewallet.domain.expenditure.business.service;
 
-import static com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService.CACHE_NAME;
-import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_MONTH;
-import static com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria.LAST_YEAR;
 import static com.wanted.safewallet.global.exception.ErrorCode.FORBIDDEN_EXPENDITURE;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_EXPENDITURE;
-import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.TemporalAdjusters.previousOrSame;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
-import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
-import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
-import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureDateUpdateDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureSearchCond;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureSearchDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureSearchExceptsDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureStatsDateDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureStatsDto;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureUpdateDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchResponse;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureSearchExceptsResponse;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureStatsResponse;
-import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.exception.BusinessException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,83 +30,72 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ExpenditureService {
 
-    private final ExpenditureMapper expenditureMapper;
-    private final CategoryService categoryService;
     private final ExpenditureRepository expenditureRepository;
 
-    public ExpenditureDetailsResponse getExpenditureDetails(String userId, Long expenditureId) {
-        Expenditure expenditure = getValidExpenditureWithCategoryAndImages(userId, expenditureId);
-        return expenditureMapper.toDetailsDto(expenditure);
-    }
-
-    public ExpenditureSearchResponse searchExpenditure(String userId,
-        ExpenditureSearchCond searchCond, Pageable pageable) {
+    public ExpenditureSearchDto searchExpenditure(String userId, ExpenditureSearchCond searchCond,
+        Pageable pageable) {
         long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
         Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
         Page<Expenditure> expenditurePage = expenditureRepository.findAllByUserAndSearchCondFetch(userId, searchCond, pageable);
-        return expenditureMapper.toSearchDto(totalAmount, expenditureAmountByCategory, expenditurePage);
+        return ExpenditureSearchDto.builder().totalAmount(totalAmount)
+            .expenditureAmountByCategory(expenditureAmountByCategory)
+            .expenditurePage(expenditurePage).build();
     }
 
-    public ExpenditureSearchExceptsResponse searchExpenditureExcepts(String userId,
+    public ExpenditureSearchExceptsDto searchExpenditureExcepts(String userId,
         ExpenditureSearchCond searchCond) {
         long totalAmount = expenditureRepository.findTotalAmountByUserAndSearchCond(userId, searchCond);
         Map<Category, Long> expenditureAmountByCategory = getExpenditureAmountByCategory(userId, searchCond);
-        return expenditureMapper.toSearchExceptsDto(totalAmount, expenditureAmountByCategory);
+        return ExpenditureSearchExceptsDto.builder().totalAmount(totalAmount)
+            .expenditureAmountByCategory(expenditureAmountByCategory).build();
     }
 
-    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
-        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#request.expenditureDate)")
     @Transactional
-    public ExpenditureCreateResponse createExpenditure(String userId,
-        ExpenditureCreateRequest request) {
-        validateRequest(request);
-        Expenditure expenditure = expenditureMapper.toEntity(userId, request);
-        Expenditure savedExpenditure = expenditureRepository.save(expenditure);
-        return expenditureMapper.toCreateDto(savedExpenditure);
+    public Expenditure saveExpenditure(Expenditure expenditure) {
+        return expenditureRepository.save(expenditure);
     }
 
-    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition = """
-        #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.originalExpenditureDate()) ||
-        #root.target.isCurrentYearMonthAndBeforeCurrentDate(#result.updatedExpenditureDate())""")
     @Transactional
-    public ExpenditureDateUpdateDto updateExpenditure(String userId, Long expenditureId, ExpenditureUpdateRequest request) {
-        validateRequest(request);
-        Expenditure expenditure = getValidExpenditure(userId, expenditureId);
-        LocalDateTime originalExpenditureDate = expenditure.getExpenditureDate();
-        expenditure.update(request.getCategoryId(), request.getExpenditureDate(), request.getAmount(),
-            request.getTitle(), request.getNote());
-        return new ExpenditureDateUpdateDto(originalExpenditureDate, request.getExpenditureDate());
+    public void updateExpenditure(Expenditure expenditure, ExpenditureUpdateDto updateDto) {
+        expenditure.update(updateDto.getCategoryId(), updateDto.getType(), updateDto.getExpenditureDate(),
+            updateDto.getAmount(), updateDto.getTitle(), updateDto.getNote());
     }
 
-    @CacheEvict(cacheNames = CACHE_NAME, key = "#userId", condition =
-        "#root.target.isCurrentYearMonthAndBeforeCurrentDate(#result)")
     @Transactional
-    public LocalDateTime deleteExpenditure(String userId, Long expenditureId) {
-        Expenditure expenditure = getValidExpenditure(userId, expenditureId);
+    public void deleteExpenditure(Expenditure expenditure) {
         expenditure.softDelete();
-        return expenditure.getExpenditureDate();
     }
 
-    public ExpenditureStatsResponse produceExpenditureStats(String userId, StatsCriteria criteria) {
-        LocalDate currentEndDate = LocalDate.now();
-        LocalDate currentStartDate = getCurrentStartDate(currentEndDate, criteria);
-        LocalDate criteriaStartDate = getCriteriaStartDate(currentStartDate, criteria);
-        LocalDate criteriaEndDate = getCriteriaEndDate(criteriaStartDate, DAYS.between(currentStartDate, currentEndDate));
-
-        Map<Category, Long> currentExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, currentStartDate, currentEndDate);
-        Map<Category, Long> criteriaExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, criteriaStartDate, criteriaEndDate);
-        Long totalConsumptionRate = calculateTotalConsumptionRate(currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
-        Map<Category, Long> consumptionRateByCategory = calculateConsumptionRateByCategory(currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
-        return expenditureMapper.toDto(currentStartDate, currentEndDate, criteriaStartDate, criteriaEndDate,
-            totalConsumptionRate, consumptionRateByCategory);
+    public ExpenditureStatsDto produceExpenditureStats(String userId, ExpenditureStatsDateDto expenditureStatsDateDto) {
+        Map<Category, Long> currentExpenditureAmountByCategory = getExpenditureAmountByCategory(userId,
+            expenditureStatsDateDto.getCurrentStartDate(), expenditureStatsDateDto.getCurrentEndDate());
+        Map<Category, Long> criteriaExpenditureAmountByCategory = getExpenditureAmountByCategory(userId,
+            expenditureStatsDateDto.getCriteriaStartDate(), expenditureStatsDateDto.getCriteriaEndDate());
+        Long totalConsumptionRate = calculateTotalConsumptionRate(
+            currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
+        Map<Category, Long> consumptionRateByCategory = calculateConsumptionRateByCategory(
+            currentExpenditureAmountByCategory, criteriaExpenditureAmountByCategory);
+        return ExpenditureStatsDto.builder()
+            .totalConsumptionRate(totalConsumptionRate)
+            .consumptionRateByCategory(consumptionRateByCategory).build();
     }
 
-    public boolean isCurrentYearMonthAndBeforeCurrentDate(LocalDateTime expenditureDate) {
-        LocalDate now = LocalDate.now();
-        LocalDateTime startDateTime = now.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDateTime = now.atStartOfDay();
-        return (expenditureDate.isEqual(startDateTime) || expenditureDate.isAfter(startDateTime)) &&
-            expenditureDate.isBefore(endDateTime);
+    public Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate date) {
+        LocalDateTime startInclusive = date.atStartOfDay();
+        LocalDateTime endExclusive = date.plusDays(1).atStartOfDay();
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            userId, startInclusive, endExclusive).toMapByCategory();
+    }
+
+    public Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate startInclusive, LocalDate endInclusive) {
+        LocalDateTime endExclusive = endInclusive.plusDays(1).atStartOfDay();
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
+            userId, startInclusive.atStartOfDay(), endExclusive).toMapByCategory();
+    }
+
+    public Map<Category, Long> getExpenditureAmountByCategory(String userId, ExpenditureSearchCond searchCond) {
+        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndSearchCond(
+            userId, searchCond).toMapByCategory();
     }
 
     public Expenditure getValidExpenditure(String userId, Long expenditureId) {
@@ -149,79 +124,28 @@ public class ExpenditureService {
             .orElseThrow(() -> new BusinessException(NOT_FOUND_EXPENDITURE));
     }
 
-    private Map<Category, Long> getExpenditureAmountByCategory(String userId, ExpenditureSearchCond searchCond) {
-        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndSearchCond(userId, searchCond).toMapByCategory();
-    }
-
-    private Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startInclusive = startDate.atStartOfDay();
-        LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
-        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
-            userId, startInclusive, endExclusive).toMapByCategory();
-    }
-
-    private LocalDate getCurrentStartDate(LocalDate currentEndDate, StatsCriteria criteria) {
-        if (criteria == LAST_YEAR) {
-            return LocalDate.of(currentEndDate.getYear(), 1, 1);
-        }
-        else if (criteria == LAST_MONTH) {
-            return LocalDate.of(currentEndDate.getYear(), currentEndDate.getMonth(), 1);
-        }
-        else {
-            return currentEndDate.with(previousOrSame(DayOfWeek.MONDAY));
-        }
-    }
-
-    private LocalDate getCriteriaStartDate(LocalDate currentStartDate, StatsCriteria criteria) {
-        if (criteria == LAST_YEAR) {
-            return currentStartDate.minusYears(1);
-        }
-        else if (criteria == LAST_MONTH) {
-            return currentStartDate.minusMonths(1);
-        }
-        else {
-            return currentStartDate.minusWeeks(1);
-        }
-    }
-
-    private LocalDate getCriteriaEndDate(LocalDate criteriaStartDate, long durationOfDays) {
-        return criteriaStartDate.plusDays(durationOfDays);
-    }
-
     private Long calculateTotalConsumptionRate(
         Map<Category, Long> currentExpenditureAmountByCategory,
         Map<Category, Long> criteriaExpenditureAmountByCategory) {
-        long currentExpenditureTotalAmount = calculateTotalAmount(currentExpenditureAmountByCategory);
-        long criteriaExpenditureTotalAmount = calculateTotalAmount(criteriaExpenditureAmountByCategory);
-        return calculateConsumptionRate(currentExpenditureTotalAmount, criteriaExpenditureTotalAmount);
-    }
-
-    private Map<Category, Long> calculateConsumptionRateByCategory(
-        Map<Category, Long> currentExpenditureAmountByCategory,
-        Map<Category, Long> criteriaExpenditureAmountByCategory) {
-        return currentExpenditureAmountByCategory.keySet().stream().collect(toMap(Function.identity(),
-            category -> calculateConsumptionRate(currentExpenditureAmountByCategory.get(category),
-                criteriaExpenditureAmountByCategory.get(category))));
+        long currentTotalAmount = calculateTotalAmount(currentExpenditureAmountByCategory);
+        long criteriaTotalAmount = calculateTotalAmount(criteriaExpenditureAmountByCategory);
+        return calculateConsumptionRate(currentTotalAmount, criteriaTotalAmount);
     }
 
     private long calculateTotalAmount(Map<Category, Long> amountByCategory) {
         return amountByCategory.values().stream().mapToLong(Long::longValue).sum();
     }
 
+    private Map<Category, Long> calculateConsumptionRateByCategory(
+        Map<Category, Long> currentExpenditureAmountByCategory,
+        Map<Category, Long> criteriaExpenditureAmountByCategory) {
+        return currentExpenditureAmountByCategory.keySet().stream().collect(toMap(identity(),
+            category -> calculateConsumptionRate(currentExpenditureAmountByCategory.get(category),
+                criteriaExpenditureAmountByCategory.get(category))));
+    }
+
     private Long calculateConsumptionRate(Long currentAmount, Long criteriaAmount) {
         if (criteriaAmount == 0) criteriaAmount = 1L;
         return Math.round((double) currentAmount / criteriaAmount * 100); //% 단위로 변환하기 위해 곱하기 100
-    }
-
-    private void validateRequest(ExpenditureCreateRequest request) {
-        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
-            request.getCategoryId(), request.getType());
-        categoryService.validateCategory(categoryValidationDto);
-    }
-
-    private void validateRequest(ExpenditureUpdateRequest request) {
-        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
-            request.getCategoryId(), request.getType());
-        categoryService.validateCategory(categoryValidationDto);
     }
 }

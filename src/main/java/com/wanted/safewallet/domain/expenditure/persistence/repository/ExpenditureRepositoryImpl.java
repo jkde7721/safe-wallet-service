@@ -8,11 +8,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureSearchCond;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -103,11 +102,6 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
 
     private BooleanExpression userIdEq(String userId) {
         return userId == null ? alwaysFalse() : expenditure.user.id.eq(userId);
-    }
-
-    private BooleanExpression expenditureDateBetween(LocalDate startInclusive, LocalDate endInclusive) {
-        LocalDateTime endExclusive = endInclusive.plusDays(1).atStartOfDay();
-        return expenditureDateBetween(startInclusive.atStartOfDay(), endExclusive);
     }
 
     private BooleanExpression expenditureDateBetween(LocalDateTime startInclusive, LocalDateTime endExclusive) {

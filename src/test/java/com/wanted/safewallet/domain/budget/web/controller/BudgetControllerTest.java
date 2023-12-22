@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
-import com.wanted.safewallet.domain.budget.business.service.BudgetService;
+import com.wanted.safewallet.domain.budget.business.facade.BudgetFacadeService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
@@ -60,7 +60,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class BudgetControllerTest extends AbstractRestDocsTest {
 
     @MockBean
-    BudgetService budgetService;
+    BudgetFacadeService budgetFacadeService;
 
     @Autowired
     MockMvc mockMvc;
@@ -72,7 +72,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
         BudgetSetUpResponse response = new BudgetSetUpResponse(List.of(
             new BudgetOfCategoryResponse(1L, 1L, CategoryType.FOOD, 10000L),
             new BudgetOfCategoryResponse(2L, 2L, CategoryType.TRAFFIC, 5000L)));
-        given(budgetService.setUpBudget(anyString(), any(BudgetSetUpRequest.class))).willReturn(response);
+        given(budgetFacadeService.setUpBudget(anyString(), any(BudgetSetUpRequest.class))).willReturn(response);
 
         //when, then
         BudgetSetUpRequest request = new BudgetSetUpRequest(YearMonth.now(),
@@ -103,7 +103,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("budgetList[].categoryId").description("생성된 예산 카테고리 id"),
                     fieldWithPath("budgetList[].type").description("생성된 예산 카테고리 타입"),
                     fieldWithPath("budgetList[].amount").description("생성된 예산 금액"))));
-        then(budgetService).should(times(1))
+        then(budgetFacadeService).should(times(1))
             .setUpBudget(anyString(), any(BudgetSetUpRequest.class));
     }
 
@@ -124,7 +124,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
             .andExpect(jsonPath("$.message", AllOf.allOf(
                 containsString("budgetYearMonth"), containsString("budgetList"))))
             .andDo(print());
-        then(budgetService).should(times(0))
+        then(budgetFacadeService).should(times(0))
             .setUpBudget(anyString(), any(BudgetSetUpRequest.class));
     }
 
@@ -137,7 +137,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
             2L, CategoryType.TRAFFIC, 20000L);
         BudgetUpdateResponse response = new BudgetUpdateResponse(budgetId,
             request.getBudgetYearMonth(), request.getCategoryId(), request.getType(), request.getAmount());
-        given(budgetService.updateBudget(anyString(), anyLong(), any(BudgetUpdateRequest.class)))
+        given(budgetFacadeService.updateBudget(anyString(), anyLong(), any(BudgetUpdateRequest.class)))
             .willReturn(response);
 
         //when, then
@@ -201,7 +201,7 @@ class BudgetControllerTest extends AbstractRestDocsTest {
             new BudgetConsultOfCategoryResponse(5L, LEISURE, 30_000L),
             new BudgetConsultOfCategoryResponse(6L, ETC, 20_000L));
         BudgetConsultResponse response = new BudgetConsultResponse(budgetConsultList);
-        given(budgetService.consultBudget(anyString(), anyLong())).willReturn(response);
+        given(budgetFacadeService.consultBudget(anyString(), anyLong())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/budgets/consult")

@@ -1,6 +1,7 @@
 package com.wanted.safewallet.domain.expenditure.persistence.entity;
 
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
+import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.global.audit.BaseTime;
 import jakarta.persistence.CascadeType;
@@ -77,8 +78,9 @@ public class Expenditure extends BaseTime {
         image.updateExpenditure(this);
     }
 
-    public void update(Long categoryId, LocalDateTime expenditureDate, Long amount, String title, String note) {
-        this.category = Category.builder().id(categoryId).build();
+    public void update(Long categoryId, CategoryType type, LocalDateTime expenditureDate,
+        Long amount, String title, String note) {
+        this.category = Category.builder().id(categoryId).type(type).build();
         this.expenditureDate = expenditureDate;
         this.amount = amount;
         this.title = title;

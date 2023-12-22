@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CategoryMapper {
 
-    public CategoryListResponse toDto(List<Category> categoryList) {
+    public CategoryListResponse toResponse(List<Category> categoryList) {
         return new CategoryListResponse(categoryList.stream()
             .map(c -> new CategoryResponse(c.getId(), c.getType()))
             .toList());

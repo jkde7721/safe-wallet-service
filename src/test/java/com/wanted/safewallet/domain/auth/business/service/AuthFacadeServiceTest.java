@@ -4,6 +4,7 @@ import static com.wanted.safewallet.global.exception.ErrorCode.UNAUTHORIZED_JWT_
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+import com.wanted.safewallet.domain.auth.business.facade.AuthFacadeService;
 import com.wanted.safewallet.domain.auth.utils.JwtUtils;
 import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.global.exception.BusinessException;
@@ -15,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+class AuthFacadeServiceTest {
 
     @InjectMocks
-    AuthService authService;
+    AuthFacadeService authFacadeService;
 
     @Mock
     JwtUtils jwtTokenUtils;
@@ -38,7 +39,7 @@ class AuthServiceTest {
         given(jwtTokenUtils.validateExpiredToken(accessToken)).willReturn(false);
 
         //when, then
-        assertThatThrownBy(() -> authService.reissueToken(accessToken, refreshToken))
+        assertThatThrownBy(() -> authFacadeService.reissueToken(accessToken, refreshToken))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(UNAUTHORIZED_JWT_TOKEN);
     }
@@ -53,7 +54,7 @@ class AuthServiceTest {
         given(jwtTokenUtils.validateToken(refreshToken)).willReturn(false);
 
         //when, then
-        assertThatThrownBy(() -> authService.reissueToken(accessToken, refreshToken))
+        assertThatThrownBy(() -> authFacadeService.reissueToken(accessToken, refreshToken))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(UNAUTHORIZED_JWT_TOKEN);
     }
@@ -71,7 +72,7 @@ class AuthServiceTest {
         given(jwtTokenUtils.getUsername(refreshToken)).willReturn(username.toUpperCase());
 
         //when, then
-        assertThatThrownBy(() -> authService.reissueToken(accessToken, refreshToken))
+        assertThatThrownBy(() -> authFacadeService.reissueToken(accessToken, refreshToken))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(UNAUTHORIZED_JWT_TOKEN);
     }
@@ -90,7 +91,7 @@ class AuthServiceTest {
         given(refreshTokenService.validateToken(refreshToken)).willReturn(false);
 
         //when, then
-        assertThatThrownBy(() -> authService.reissueToken(accessToken, refreshToken))
+        assertThatThrownBy(() -> authFacadeService.reissueToken(accessToken, refreshToken))
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(UNAUTHORIZED_JWT_TOKEN);
     }

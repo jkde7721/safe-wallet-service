@@ -3,7 +3,7 @@ package com.wanted.safewallet.docs.common.enums;
 import static java.util.stream.Collectors.toMap;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
+import com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.enums.EnumType;
 import java.util.Arrays;

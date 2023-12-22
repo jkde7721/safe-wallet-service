@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExpenditureSearchCond {
+public class ExpenditureSearchRequest {
 
     private LocalDate startDate = LocalDate.now().minusMonths(1);
 

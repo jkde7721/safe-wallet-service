@@ -1,10 +1,8 @@
 package com.wanted.safewallet.domain.expenditure.web.controller;
 
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureConsultService;
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureDailyStatsService;
-import com.wanted.safewallet.domain.expenditure.business.service.ExpenditureService;
+import com.wanted.safewallet.domain.expenditure.business.facade.ExpenditureFacadeService;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureCreateRequest;
-import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchCond;
+import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureSearchRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.request.ExpenditureUpdateRequest;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureCreateResponse;
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureDetailsResponse;
@@ -37,60 +35,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ExpenditureController {
 
-    private final ExpenditureService expenditureService;
-    private final ExpenditureConsultService expenditureConsultService;
-    private final ExpenditureDailyStatsService expenditureDailyStatsService;
+    private final ExpenditureFacadeService expenditureFacadeService;
 
     @GetMapping("/{expenditureId}")
-    public ExpenditureDetailsResponse getExpenditureDetails(@PathVariable Long expenditureId,
-        @CurrentUserId String userId) {
-        return expenditureService.getExpenditureDetails(userId, expenditureId);
+    public ExpenditureDetailsResponse getExpenditureDetails(@CurrentUserId String userId,
+        @PathVariable Long expenditureId) {
+        return expenditureFacadeService.getExpenditureDetails(userId, expenditureId);
     }
 
     @GetMapping
     public ExpenditureSearchResponse searchExpenditure(@CurrentUserId String userId,
-        @ModelAttribute @Valid ExpenditureSearchCond searchCond, Pageable pageable) {
-        return expenditureService.searchExpenditure(userId, searchCond, pageable);
+        @ModelAttribute @Valid ExpenditureSearchRequest request, Pageable pageable) {
+        return expenditureFacadeService.searchExpenditure(userId, request, pageable);
     }
 
     @GetMapping("/excepts")
     public ExpenditureSearchExceptsResponse searchExpenditureExcepts(@CurrentUserId String userId,
-        @ModelAttribute @Valid ExpenditureSearchCond searchCond) {
-        return expenditureService.searchExpenditureExcepts(userId, searchCond);
+        @ModelAttribute @Valid ExpenditureSearchRequest request) {
+        return expenditureFacadeService.searchExpenditureExcepts(userId, request);
     }
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
-    public ExpenditureCreateResponse createExpenditure(@RequestBody @Valid ExpenditureCreateRequest request,
-        @CurrentUserId String userId) {
-        return expenditureService.createExpenditure(userId, request);
+    public ExpenditureCreateResponse createExpenditure(@CurrentUserId String userId,
+        @RequestBody @Valid ExpenditureCreateRequest request) {
+        return expenditureFacadeService.createExpenditure(userId, request);
     }
 
     @PutMapping("/{expenditureId}")
-    public void updateExpenditure(@PathVariable Long expenditureId,
-        @RequestBody @Valid ExpenditureUpdateRequest request,
-        @CurrentUserId String userId) {
-        expenditureService.updateExpenditure(userId, expenditureId, request);
+    public void updateExpenditure(@CurrentUserId String userId, @PathVariable Long expenditureId,
+        @RequestBody @Valid ExpenditureUpdateRequest request) {
+        expenditureFacadeService.updateExpenditure(userId, expenditureId, request);
     }
 
     @DeleteMapping("/{expenditureId}")
-    public void deleteExpenditure(@PathVariable Long expenditureId, @CurrentUserId String userId) {
-        expenditureService.deleteExpenditure(userId, expenditureId);
+    public void deleteExpenditure(@CurrentUserId String userId, @PathVariable Long expenditureId) {
+        expenditureFacadeService.deleteExpenditure(userId, expenditureId);
     }
 
     @GetMapping("/stats")
     public ExpenditureStatsResponse produceExpenditureStats(@CurrentUserId String userId,
         @RequestParam(defaultValue = "LAST_MONTH") StatsCriteria criteria) {
-        return expenditureService.produceExpenditureStats(userId, criteria);
+        return expenditureFacadeService.produceExpenditureStats(userId, criteria);
     }
 
     @GetMapping("/consult")
     public TodayExpenditureConsultResponse consultTodayExpenditure(@CurrentUserId String userId) {
-        return expenditureConsultService.consultTodayExpenditure(userId);
+        return expenditureFacadeService.consultTodayExpenditure(userId);
     }
 
     @GetMapping("/daily-stats")
     public YesterdayExpenditureDailyStatsResponse produceYesterdayExpenditureDailyStats(@CurrentUserId String userId) {
-        return expenditureDailyStatsService.produceYesterdayExpenditureDailyStats(userId);
+        return expenditureFacadeService.produceYesterdayExpenditureDailyStats(userId);
     }
 }

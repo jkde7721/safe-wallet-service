@@ -1,6 +1,6 @@
 package com.wanted.safewallet.domain.budget.web.controller;
 
-import com.wanted.safewallet.domain.budget.business.service.BudgetService;
+import com.wanted.safewallet.domain.budget.business.facade.BudgetFacadeService;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
@@ -29,24 +29,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BudgetController {
 
-    private final BudgetService budgetService;
+    private final BudgetFacadeService budgetFacadeService;
 
     @CommonResponseContent(status = HttpStatus.CREATED)
     @PostMapping
-    public BudgetSetUpResponse setUpBudget(@RequestBody @Valid BudgetSetUpRequest request,
-        @CurrentUserId String userId) {
-        return budgetService.setUpBudget(userId, request);
+    public BudgetSetUpResponse setUpBudget(@CurrentUserId String userId,
+        @RequestBody @Valid BudgetSetUpRequest request) {
+        return budgetFacadeService.setUpBudget(userId, request);
     }
 
     @PutMapping("/{budgetId}")
-    public BudgetUpdateResponse updateBudget(@PathVariable Long budgetId,
-        @RequestBody @Valid BudgetUpdateRequest request, @CurrentUserId String userId) {
-        return budgetService.updateBudget(userId, budgetId, request);
+    public BudgetUpdateResponse updateBudget(@CurrentUserId String userId, @PathVariable Long budgetId,
+        @RequestBody @Valid BudgetUpdateRequest request) {
+        return budgetFacadeService.updateBudget(userId, budgetId, request);
     }
 
     @GetMapping("/consult")
     public BudgetConsultResponse consultBudget(@CurrentUserId String userId,
         @RequestParam(required = false) @ValidTotalAmountForConsult Long totalAmount) {
-        return budgetService.consultBudget(userId, totalAmount);
+        return budgetFacadeService.consultBudget(userId, totalAmount);
     }
 }

@@ -1,4 +1,4 @@
-package com.wanted.safewallet.domain.expenditure.web.enums;
+package com.wanted.safewallet.domain.expenditure.business.enums;
 
 import com.wanted.safewallet.global.enums.EnumType;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.wanted.safewallet.domain.expenditure.web.dto.response;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
-import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
+import com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

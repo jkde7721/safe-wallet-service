@@ -3,10 +3,8 @@ package com.wanted.safewallet.domain.category.business.service;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_CATEGORY;
 
 import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
-import com.wanted.safewallet.domain.category.business.mapper.CategoryMapper;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.repository.CategoryRepository;
-import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CategoryService {
 
-    private final CategoryMapper categoryMapper;
     private final CategoryRepository categoryRepository;
 
-    public CategoryListResponse getCategoryList() {
-        List<Category> categoryList = categoryRepository.findAll();
-        return categoryMapper.toDto(categoryList);
+    public List<Category> getCategoryList() {
+        return categoryRepository.findAll();
     }
 
     public void validateCategory(CategoryValidationDto categoryValidationDto) {

@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
-import com.wanted.safewallet.domain.category.business.service.CategoryService;
+import com.wanted.safewallet.domain.category.business.facade.CategoryFacadeService;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse;
 import com.wanted.safewallet.domain.category.web.dto.response.CategoryListResponse.CategoryResponse;
@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 class CategoryControllerTest extends AbstractRestDocsTest {
 
     @MockBean
-    CategoryService categoryService;
+    CategoryFacadeService categoryFacadeService;
 
     @DisplayName("카테고리 목록 조회 테스트 : 성공")
     @Test
@@ -40,7 +40,7 @@ class CategoryControllerTest extends AbstractRestDocsTest {
         CategoryListResponse dto = new CategoryListResponse(
             List.of(new CategoryResponse(1L, CategoryType.FOOD),
                 new CategoryResponse(2L, CategoryType.TRAFFIC)));
-        given(categoryService.getCategoryList()).willReturn(dto);
+        given(categoryFacadeService.getCategoryList()).willReturn(dto);
 
         //when, then
         restDocsMockMvc.perform(get("/api/categories")
@@ -55,6 +55,6 @@ class CategoryControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("categoryList[].type").description(DocsPopupLinkGenerator
                         .generatePopupLink(DocsPopupInfo.CATEGORY_TYPE)))
             ));
-        then(categoryService).should(times(1)).getCategoryList();
+        then(categoryFacadeService).should(times(1)).getCategoryList();
     }
 }

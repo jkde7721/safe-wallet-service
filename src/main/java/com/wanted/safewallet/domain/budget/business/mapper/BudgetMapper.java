@@ -1,7 +1,9 @@
 package com.wanted.safewallet.domain.budget.business.mapper;
 
+import com.wanted.safewallet.domain.budget.business.dto.BudgetUpdateDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
+import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse.BudgetConsultOfCategoryResponse;
 import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
@@ -28,7 +30,15 @@ public class BudgetMapper {
             .toList();
     }
 
-    public BudgetSetUpResponse toDto(List<Budget> budgetList) {
+    public BudgetUpdateDto toDto(BudgetUpdateRequest request) {
+        return BudgetUpdateDto.builder()
+            .budgetYearMonth(request.getBudgetYearMonth())
+            .categoryId(request.getCategoryId())
+            .type(request.getType())
+            .amount(request.getAmount()).build();
+    }
+
+    public BudgetSetUpResponse toResponse(List<Budget> budgetList) {
         List<BudgetOfCategoryResponse> budgetOfCategoryList = budgetList.stream()
             .map(budget -> new BudgetOfCategoryResponse(budget.getId(), budget.getCategory().getId(),
                 budget.getCategory().getType(), budget.getAmount()))
@@ -36,7 +46,7 @@ public class BudgetMapper {
         return new BudgetSetUpResponse(budgetOfCategoryList);
     }
 
-    public BudgetUpdateResponse toDto(Budget budget) {
+    public BudgetUpdateResponse toResponse(Budget budget) {
         return BudgetUpdateResponse.builder()
             .budgetId(budget.getId())
             .budgetYearMonth(budget.getBudgetYearMonth())
@@ -45,7 +55,7 @@ public class BudgetMapper {
             .amount(budget.getAmount()).build();
     }
 
-    public BudgetConsultResponse toDto(Map<Category, Long> budgetAmountByCategory) {
+    public BudgetConsultResponse toResponse(Map<Category, Long> budgetAmountByCategory) {
         List<BudgetConsultOfCategoryResponse> budgetConsultList = budgetAmountByCategory.keySet()
             .stream().sorted(Comparator.comparing(Category::getId))
             .map(category -> new BudgetConsultOfCategoryResponse(category.getId(), category.getType(),

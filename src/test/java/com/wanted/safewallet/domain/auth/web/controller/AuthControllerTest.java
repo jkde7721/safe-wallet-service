@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
 import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
-import com.wanted.safewallet.domain.auth.business.service.AuthService;
+import com.wanted.safewallet.domain.auth.business.facade.AuthFacadeService;
 import com.wanted.safewallet.domain.auth.business.service.CustomUserDetailsService;
 import com.wanted.safewallet.domain.auth.business.service.RefreshTokenService;
 import com.wanted.safewallet.domain.auth.config.AuthTestConfig;
@@ -49,7 +49,7 @@ class AuthControllerTest extends AbstractRestDocsTest {
     static final String AUTHORIZATION_HEADER_NAME = "Authorization";
 
     @Autowired
-    AuthService authService;
+    AuthFacadeService authFacadeService;
 
     @Autowired
     CustomUserDetailsService customUserDetailsService;
@@ -128,7 +128,7 @@ class AuthControllerTest extends AbstractRestDocsTest {
         String refreshToken = "testRefreshToken";
         String newAccessToken = "newAccessToken";
         String newRefreshToken = "newRefreshToken";
-        given(authService.reissueToken(accessToken, refreshToken))
+        given(authFacadeService.reissueToken(accessToken, refreshToken))
             .willReturn(new JwtDto(newAccessToken, newRefreshToken));
 
         //when, then

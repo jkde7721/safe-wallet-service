@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
-import com.wanted.safewallet.domain.user.business.service.UserService;
+import com.wanted.safewallet.domain.user.business.facade.UserFacadeService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class UserControllerTest extends AbstractRestDocsTest {
 
     @MockBean
-    UserService userService;
+    UserFacadeService userFacadeService;
 
     @Autowired
     MockMvc mockMvc;
@@ -50,7 +50,7 @@ class UserControllerTest extends AbstractRestDocsTest {
         //given
         String username = "testUsername";
         UsernameCheckResponse response = new UsernameCheckResponse(true);
-        given(userService.isDuplicatedUsername(anyString())).willReturn(response);
+        given(userFacadeService.checkForUsername(anyString())).willReturn(response);
 
         //when, then
         restDocsMockMvc.perform(get("/api/users/" + username)
@@ -61,7 +61,7 @@ class UserControllerTest extends AbstractRestDocsTest {
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),
                     fieldWithPath("isDuplicatedUsername").description("계정명 중복 여부"))));
-        then(userService).should(times(1)).isDuplicatedUsername(anyString());
+        then(userFacadeService).should(times(1)).checkForUsername(anyString());
     }
 
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 성공")
@@ -86,7 +86,7 @@ class UserControllerTest extends AbstractRestDocsTest {
                     fieldWithPath("password").description("비밀번호")
                         .attributes(key("constraints").value(DocsPopupLinkGenerator
                             .generatePopupLink(DocsPopupInfo.PASSWORD_CONSTRAINTS))))));
-        then(userService).should(times(1))
+        then(userFacadeService).should(times(1))
             .joinUser(any(UserJoinRequest.class));
     }
 

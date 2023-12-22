@@ -1,7 +1,7 @@
 package com.wanted.safewallet.domain.auth.web.controller;
 
 import com.wanted.safewallet.domain.auth.business.dto.JwtDto;
-import com.wanted.safewallet.domain.auth.business.service.AuthService;
+import com.wanted.safewallet.domain.auth.business.facade.AuthFacadeService;
 import com.wanted.safewallet.domain.auth.utils.CookieUtils;
 import com.wanted.safewallet.domain.auth.utils.HeaderUtils;
 import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthFacadeService authFacadeService;
     private final HeaderUtils headerUtils;
     private final CookieUtils cookieUtils;
 
@@ -26,7 +26,7 @@ public class AuthController {
     public void refresh(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = headerUtils.getToken(request);
         String refreshToken = cookieUtils.getToken(request);
-        JwtDto jwtDto = authService.reissueToken(accessToken, refreshToken);
+        JwtDto jwtDto = authFacadeService.reissueToken(accessToken, refreshToken);
         storeTokenToResponse(response, jwtDto);
     }
 

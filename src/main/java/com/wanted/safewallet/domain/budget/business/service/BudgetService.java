@@ -6,17 +6,9 @@ import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_BUDGET;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
-import com.wanted.safewallet.domain.budget.business.mapper.BudgetMapper;
+import com.wanted.safewallet.domain.budget.business.dto.BudgetUpdateDto;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.repository.BudgetRepository;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetSetUpRequest.BudgetOfCategoryRequest;
-import com.wanted.safewallet.domain.budget.web.dto.request.BudgetUpdateRequest;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetConsultResponse;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetSetUpResponse;
-import com.wanted.safewallet.domain.budget.web.dto.response.BudgetUpdateResponse;
-import com.wanted.safewallet.domain.category.business.dto.CategoryValidationDto;
-import com.wanted.safewallet.domain.category.business.service.CategoryService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.global.exception.BusinessException;
@@ -33,44 +25,41 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BudgetService {
 
-    private final BudgetMapper budgetMapper;
-    private final CategoryService categoryService;
     private final BudgetRepository budgetRepository;
 
     @Transactional
-    public BudgetSetUpResponse setUpBudget(String userId, BudgetSetUpRequest request) {
-        validateRequest(userId, request);
-        List<Budget> budgetList = budgetMapper.toEntityList(userId, request);
-        budgetRepository.saveAll(budgetList);
-        return budgetMapper.toDto(budgetList);
+    public List<Budget> saveBudgetList(List<Budget> budgetList) {
+        return budgetRepository.saveAll(budgetList);
     }
 
     @Transactional
-    public BudgetUpdateResponse updateBudget(String userId, Long budgetId,
-        BudgetUpdateRequest request) {
-        validateRequest(request);
+    public Budget updateBudget(String userId, Long budgetId, BudgetUpdateDto updateDto) {
         Budget budget = getValidBudget(userId, budgetId);
-
         Budget anotherBudget = budgetRepository.findByUserAndCategoryAndBudgetYearMonthFetch(
-            userId, request.getCategoryId(), request.getBudgetYearMonth())
+            userId, updateDto.getCategoryId(), updateDto.getBudgetYearMonth())
             .orElse(budget);
+
         if (Objects.equals(anotherBudget.getId(), budgetId)) {
-            anotherBudget.update(request.getCategoryId(), request.getType(),
-                request.getAmount(), request.getBudgetYearMonth());
+            anotherBudget.update(updateDto.getCategoryId(), updateDto.getType(),
+                updateDto.getAmount(), updateDto.getBudgetYearMonth());
         }
         else {
             budgetRepository.deleteById(budgetId);
-            anotherBudget.addAmount(request.getAmount());
+            anotherBudget.addAmount(updateDto.getAmount());
         }
-        return budgetMapper.toDto(anotherBudget);
+        return anotherBudget;
     }
 
-    //TODO: Redis Cache 적용
-    public BudgetConsultResponse consultBudget(String userId, Long totalAmountForConsult) {
+    public Map<Category, Long> consultBudget(String userId, Long totalAmountForConsult) {
         Map<Category, Long> prevBudgetAmountByCategory = budgetRepository.existsByUser(userId) ?
             getBudgetAmountByCategory(userId) : getBudgetAmountByCategory();
-        Map<Category, Long> consultedBudgetAmountByCategory = consultBudgetAmount(totalAmountForConsult, prevBudgetAmountByCategory);
-        return budgetMapper.toDto(consultedBudgetAmountByCategory);
+        return consultBudgetAmount(totalAmountForConsult, prevBudgetAmountByCategory);
+    }
+
+    public void checkForDuplicatedBudget(String userId, YearMonth budgetYearMonth, List<Long> categoryIds) {
+        if (budgetRepository.existsByUserAndBudgetYearMonthAndCategories(userId, budgetYearMonth, categoryIds)) {
+            throw new BusinessException(ALREADY_EXISTS_BUDGET);
+        }
     }
 
     public Map<Category, Long> getBudgetAmountByCategory(String userId, YearMonth budgetYearMonth) {
@@ -126,24 +115,5 @@ public class BudgetService {
             .mapToLong(Long::longValue).sum();
         Category etcCategory = Category.builder().type(CategoryType.ETC).build();
         budgetAmountByCategory.replace(etcCategory, remainedAmount);
-    }
-
-    private void validateRequest(String userId, BudgetSetUpRequest request) {
-        List<CategoryValidationDto> categoryValidationDtoList = request.getBudgetList().stream()
-            .map(b -> new CategoryValidationDto(b.getCategoryId(), b.getType())).toList();
-        List<Long> categoryIds = request.getBudgetList().stream().map(
-            BudgetOfCategoryRequest::getCategoryId).toList();
-
-        categoryService.validateCategory(categoryValidationDtoList);
-        if (budgetRepository.existsByUserAndBudgetYearMonthAndCategories(
-            userId, request.getBudgetYearMonth(), categoryIds)) {
-            throw new BusinessException(ALREADY_EXISTS_BUDGET);
-        }
-    }
-
-    private void validateRequest(BudgetUpdateRequest request) {
-        CategoryValidationDto categoryValidationDto = new CategoryValidationDto(
-            request.getCategoryId(), request.getType());
-        categoryService.validateCategory(categoryValidationDto);
     }
 }

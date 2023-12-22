@@ -1,67 +1,52 @@
 package com.wanted.safewallet.domain.expenditure.business.service;
 
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.BAD;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.EXCELLENT;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.GOOD;
-import static com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus.WARN;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.BAD;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.EXCELLENT;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.GOOD;
+import static com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus.WARN;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
-import com.wanted.safewallet.domain.budget.business.service.BudgetService;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
+import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDateDto;
 import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureConsultDto;
-import com.wanted.safewallet.domain.expenditure.business.mapper.ExpenditureMapper;
-import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
-import com.wanted.safewallet.domain.expenditure.web.dto.response.TodayExpenditureConsultResponse;
-import com.wanted.safewallet.domain.expenditure.web.enums.FinanceStatus;
+import com.wanted.safewallet.domain.expenditure.business.dto.TodayExpenditureTotalConsultDto;
+import com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class ExpenditureConsultService {
 
-    private final ExpenditureMapper expenditureMapper;
-    private final BudgetService budgetService;
-    private final ExpenditureRepository expenditureRepository;
-    public static final String CACHE_NAME = "today-expenditure-consult";
-
-    @Cacheable(cacheNames = CACHE_NAME, key = "#userId")
-    public TodayExpenditureConsultResponse consultTodayExpenditure(String userId) {
-        LocalDate expenditureEndDate = LocalDate.now();
-        YearMonth currentYearMonth = YearMonth.of(expenditureEndDate.getYear(), expenditureEndDate.getMonth());
-        LocalDate expenditureStartDate = currentYearMonth.atDay(1);
-        int daysOfCurrentMonth = currentYearMonth.lengthOfMonth();
-        int leftDaysOfCurrentMonth = daysOfCurrentMonth - expenditureEndDate.getDayOfMonth() + 1;
-        //월별 총 예산 (카테고리 별)
-        Map<Category, Long> monthlyBudgetAmountByCategory = budgetService.getBudgetAmountByCategory(userId, currentYearMonth);
+    public TodayExpenditureTotalConsultDto consultTodayExpenditure(
+        TodayExpenditureConsultDateDto todayExpenditureConsultDateDto,
+        Map<Category, Long> monthlyBudgetAmountByCategory,
+        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory) {
         //일별 적정 예산 (카테고리 별)
-        Map<Category, Long> dailyBudgetAmountByCategory = getDailyBudgetAmountByCategory(monthlyBudgetAmountByCategory, daysOfCurrentMonth);
-        //현재 월 내에서 어제까지 총 지출 (카테고리 별)
-        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory = getExpenditureAmountByCategory(userId, expenditureStartDate, expenditureEndDate);
+        Map<Category, Long> dailyBudgetAmountByCategory = getDailyBudgetAmountByCategory(
+            monthlyBudgetAmountByCategory, todayExpenditureConsultDateDto.getDaysOfCurrentMonth());
         //현재 월 내에서 남은 기간 동안 일별 적정 지출 (카테고리 별)
         Map<Category, Long> dailyConsultedExpenditureAmountByCategory = getDailyConsultedExpenditureAmountByCategory(
-            monthlyExpendedExpenditureAmountByCategory, monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, leftDaysOfCurrentMonth);
+            monthlyExpendedExpenditureAmountByCategory, monthlyBudgetAmountByCategory,
+            dailyBudgetAmountByCategory, todayExpenditureConsultDateDto.getLeftDaysOfCurrentMonth());
 
         long totalAmount = calculateTotalAmount(dailyConsultedExpenditureAmountByCategory);
-        FinanceStatus totalFinanceStatus = getTotalFinanceStatus(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, expenditureEndDate);
-        Map<Category, TodayExpenditureConsultDto> todayExpenditureConsultByCategory =
-            getTodayExpenditureConsultByCategory(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, dailyConsultedExpenditureAmountByCategory);
-        return expenditureMapper.toDto(totalAmount, totalFinanceStatus, todayExpenditureConsultByCategory);
+        FinanceStatus totalFinanceStatus = getTotalFinanceStatus(monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory,
+            monthlyExpendedExpenditureAmountByCategory, todayExpenditureConsultDateDto.getNow());
+        Map<Category, TodayExpenditureConsultDto> todayExpenditureConsultByCategory = getTodayExpenditureConsultByCategory(
+            monthlyBudgetAmountByCategory, dailyBudgetAmountByCategory, monthlyExpendedExpenditureAmountByCategory, dailyConsultedExpenditureAmountByCategory);
+        return TodayExpenditureTotalConsultDto.builder().totalAmount(totalAmount)
+            .totalFinanceStatus(totalFinanceStatus)
+            .todayExpenditureConsultByCategory(todayExpenditureConsultByCategory).build();
     }
 
-    private Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startInclusive = startDate.atStartOfDay();
-        LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
-        return expenditureRepository.findExpenditureAmountOfCategoryListByUserAndExpenditureDateBetween(
-            userId, startInclusive, endExclusive).toMapByCategory();
+    public Map<Category, Long> getDailyConsultedExpenditureAmountByCategory(
+        Map<Category, Long> monthlyExpendedExpenditureAmountByCategory, Map<Category, Long> monthlyBudgetAmountByCategory,
+        int daysOfCurrentMonth, int leftDaysOfCurrentMonth) {
+        Map<Category, Long> dailyBudgetAmountByCategory = getDailyBudgetAmountByCategory(monthlyBudgetAmountByCategory, daysOfCurrentMonth);
+        return getDailyConsultedExpenditureAmountByCategory(monthlyExpendedExpenditureAmountByCategory, monthlyBudgetAmountByCategory,
+            dailyBudgetAmountByCategory, leftDaysOfCurrentMonth);
     }
 
     private Map<Category, Long> getDailyBudgetAmountByCategory(Map<Category, Long> monthlyBudgetAmountByCategory, int daysOfCurrentMonth) {
