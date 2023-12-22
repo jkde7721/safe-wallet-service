@@ -7,7 +7,10 @@ import static com.wanted.safewallet.global.exception.ErrorCode.PASSWORD_ENCODING
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import com.wanted.safewallet.global.exception.BusinessException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -21,11 +24,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private static final String ENCODED_PASSWORD_PREFIX = "{bcrypt}";
+    private static final int EXPIRY_MONTH = 3;
 
     public boolean isDuplicatedUsername(String username) {
         return userRepository.existsByUsername(username);
     }
-
 
     public void saveUser(User user) {
         if (!user.getPassword().startsWith(ENCODED_PASSWORD_PREFIX)) {
@@ -37,6 +40,17 @@ public class UserService {
     @Transactional
     public void deleteUser(User user) {
         user.softDelete();
+    }
+
+    @Transactional
+    public Optional<User> getRestoredUserByUsername(String username) {
+        Optional<User> optionalUser = userRepository.findInactiveUserByUsername(username);
+        if (optionalUser.isEmpty() || !isWithinExpiryDate(optionalUser.get().getDeletedDate())) {
+            return Optional.empty();
+        }
+        User inactiveUser = optionalUser.get();
+        inactiveUser.restore();
+        return Optional.of(inactiveUser);
     }
 
     public void checkForUsername(String username) {
@@ -55,9 +69,19 @@ public class UserService {
             .orElseThrow(() -> new BusinessException(NOT_FOUND_USER));
     }
 
+    public Optional<User> getActiveUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     //TODO: User 엔티티에 권한 관련 필드 추가 후 실제 구현 (현재는 임의의 ROLE_USER 권한만 반환)
     public String getCommaDelimitedAuthorities(User user) {
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
         return StringUtils.collectionToCommaDelimitedString(authorities);
+    }
+
+    private boolean isWithinExpiryDate(LocalDateTime deletedDate) {
+        LocalDate expiryDate = deletedDate.plusMonths(EXPIRY_MONTH).toLocalDate();
+        LocalDate now = LocalDate.now();
+        return now.isBefore(expiryDate) || now.isEqual(expiryDate);
     }
 }

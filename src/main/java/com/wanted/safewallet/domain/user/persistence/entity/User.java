@@ -42,4 +42,9 @@ public class User extends BaseTime {
         this.deleted = Boolean.TRUE;
         this.deletedDate = LocalDateTime.now();
     }
+
+    public void restore() {
+        this.deleted = Boolean.FALSE;
+        this.deletedDate = null;
+    }
 }
