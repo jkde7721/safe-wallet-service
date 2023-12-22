@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
 @Getter
@@ -28,4 +29,13 @@ public class User extends BaseTime {
 
     @Column(nullable = false)
     private String password;
+
+    @Builder.Default
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Boolean deleted = Boolean.FALSE;
+
+    public void softDelete() {
+        this.deleted = Boolean.TRUE;
+    }
 }
