@@ -59,8 +59,7 @@ public class Expenditure extends BaseTime {
     private String note;
 
     @Builder.Default
-    @OneToMany(mappedBy = "expenditure",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "expenditure", cascade = CascadeType.PERSIST)
     private List<ExpenditureImage> images = List.of();
 
     public List<String> getImageUrls() {
