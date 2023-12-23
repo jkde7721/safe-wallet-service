@@ -1,12 +1,14 @@
 package com.wanted.safewallet.domain.user.persistence.repository;
 
 import com.wanted.safewallet.domain.user.persistence.entity.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String>, UserRepositoryCustom {
 
     //Soft Delete 유저의 계정명도 조회 대상
     @Query("SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM User u WHERE u.username = :username")
@@ -20,4 +22,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("select u from User u where u.username = :username and u.deleted = false")
     Optional<User> findByUsername(@Param("username") String username);
+
+    @Modifying
+    @Query("delete from User u where u.id in :ids")
+    void deleteAllByIdIn(@Param("ids") List<String> ids);
 }
