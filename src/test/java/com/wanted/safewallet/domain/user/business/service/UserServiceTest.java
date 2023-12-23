@@ -129,17 +129,4 @@ class UserServiceTest {
             .isInstanceOf(BusinessException.class)
             .extracting("errorCode").isEqualTo(NOT_FOUND_USER);
     }
-
-    @DisplayName("유저 권한 String 값 반환 테스트")
-    @Test
-    void getCommaDelimitedAuthorities() {
-        //given
-        User user = anUser().build();
-
-        //when
-        String authorities = userService.getCommaDelimitedAuthorities(user);
-
-        //then
-        assertThat(authorities).isEqualTo("ROLE_USER");
-    }
 }

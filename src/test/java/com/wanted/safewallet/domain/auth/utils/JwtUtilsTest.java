@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.auth.utils;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
@@ -20,7 +21,7 @@ class JwtUtilsTest {
 
     static final String USERNAME = "testUsername";
     static final String USER_ID = "testUserId";
-    static final String AUTHORITIES = "ROLE_USER";
+    static final String AUTHORITIES = USER.getAuthorities();
     static final String SECRET_KEY = "vinJ4piZLXCEu7TMXkKl1TGJQlpjKsdj";
     static final long AT_EXPIRY_SEC = 30 * 60;
     static final long RT_EXPIRY_SEC = 5 * 24 * 60 * 60;
