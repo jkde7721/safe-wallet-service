@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
@@ -28,6 +29,7 @@ import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureUpdateDt
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto;
 import com.wanted.safewallet.domain.expenditure.persistence.dto.ExpenditureAmountOfCategoryListDto.ExpenditureAmountOfCategoryDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
+import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureImageRepository;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
@@ -38,6 +40,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,6 +53,9 @@ class ExpenditureServiceTest {
 
     @Mock
     ExpenditureRepository expenditureRepository;
+
+    @Mock
+    ExpenditureImageRepository expenditureImageRepository;
 
     @DisplayName("지출 내역 수정 서비스 테스트 : 성공")
     @Test
@@ -86,7 +92,9 @@ class ExpenditureServiceTest {
         expenditureService.deleteExpenditure(expenditure);
 
         //then
-        assertThat(expenditure.getDeleted()).isTrue();
+        InOrder inOrder = inOrder(expenditureImageRepository, expenditureRepository);
+        inOrder.verify(expenditureImageRepository, times(1)).deleteAllByExpenditure(expenditure.getId());
+        inOrder.verify(expenditureRepository, times(1)).delete(expenditure);
     }
 
     @DisplayName("지출 통계 서비스 테스트 : 성공")
