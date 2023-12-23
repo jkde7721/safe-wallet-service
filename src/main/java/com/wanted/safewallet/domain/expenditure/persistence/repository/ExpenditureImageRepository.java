@@ -12,4 +12,8 @@ public interface ExpenditureImageRepository extends JpaRepository<ExpenditureIma
     @Modifying
     @Query("delete from ExpenditureImage ei where ei.expenditure.id in :expenditureIds")
     void deleteAllByExpenditureIn(@Param("expenditureIds") List<Long> expenditureIds);
+
+    @Modifying
+    @Query("delete from ExpenditureImage ei where ei.expenditure.id = :expenditureId")
+    void deleteAllByExpenditure(@Param("expenditureId") Long expenditureId);
 }

@@ -66,7 +66,8 @@ public class ExpenditureService {
 
     @Transactional
     public void deleteExpenditure(Expenditure expenditure) {
-        expenditure.softDelete();
+        expenditureImageRepository.deleteAllByExpenditure(expenditure.getId());
+        expenditureRepository.delete(expenditure);
     }
 
     public ExpenditureStatsDto produceExpenditureStats(String userId, ExpenditureStatsDateDto expenditureStatsDateDto) {
