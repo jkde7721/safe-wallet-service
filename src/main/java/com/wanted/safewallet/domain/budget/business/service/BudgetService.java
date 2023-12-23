@@ -56,6 +56,11 @@ public class BudgetService {
         return consultBudgetAmount(totalAmountForConsult, prevBudgetAmountByCategory);
     }
 
+    @Transactional
+    public void deleteByUserIds(List<String> userIds) {
+        budgetRepository.deleteAllByUserIn(userIds);
+    }
+
     public void checkForDuplicatedBudget(String userId, YearMonth budgetYearMonth, List<Long> categoryIds) {
         if (budgetRepository.existsByUserAndBudgetYearMonthAndCategories(userId, budgetYearMonth, categoryIds)) {
             throw new BusinessException(ALREADY_EXISTS_BUDGET);

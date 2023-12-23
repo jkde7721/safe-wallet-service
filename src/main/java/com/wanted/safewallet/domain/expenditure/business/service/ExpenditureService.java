@@ -13,10 +13,12 @@ import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureStatsDat
 import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureStatsDto;
 import com.wanted.safewallet.domain.expenditure.business.dto.ExpenditureUpdateDto;
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
+import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureImageRepository;
 import com.wanted.safewallet.domain.expenditure.persistence.repository.ExpenditureRepository;
 import com.wanted.safewallet.global.exception.BusinessException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExpenditureService {
 
     private final ExpenditureRepository expenditureRepository;
+    private final ExpenditureImageRepository expenditureImageRepository;
 
     public ExpenditureSearchDto searchExpenditure(String userId, ExpenditureSearchCond searchCond,
         Pageable pageable) {
@@ -78,6 +81,13 @@ public class ExpenditureService {
         return ExpenditureStatsDto.builder()
             .totalConsumptionRate(totalConsumptionRate)
             .consumptionRateByCategory(consumptionRateByCategory).build();
+    }
+
+    @Transactional
+    public void deleteByUserIds(List<String> userIds) {
+        List<Long> expenditureIds = expenditureRepository.findIdsByUser(userIds);
+        expenditureImageRepository.deleteAllByExpenditureIn(expenditureIds);
+        expenditureRepository.deleteAllByUserIn(userIds);
     }
 
     public Map<Category, Long> getExpenditureAmountByCategory(String userId, LocalDate date) {

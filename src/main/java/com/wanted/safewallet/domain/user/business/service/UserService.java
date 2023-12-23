@@ -53,6 +53,16 @@ public class UserService {
         return Optional.of(inactiveUser);
     }
 
+    @Transactional
+    public void withdrawByIds(List<String> ids) {
+        userRepository.deleteAllByIdIn(ids);
+    }
+
+    public List<String> getWithdrawnUserIds() {
+        LocalDateTime minDeletedDate = LocalDate.now().minusMonths(EXPIRY_MONTH).atStartOfDay();
+        return userRepository.findIdsByDeletedAndDeletedDate(minDeletedDate);
+    }
+
     public void checkForUsername(String username) {
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ALREADY_EXISTS_USERNAME);
