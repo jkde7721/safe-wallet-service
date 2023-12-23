@@ -31,7 +31,7 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
         return Optional.ofNullable(queryFactory.selectFrom(expenditure)
             .join(expenditure.category).fetchJoin()
             .leftJoin(expenditure.images).fetchJoin()
-            .where(expenditure.id.eq(expenditureId), notDeleted())
+            .where(expenditure.id.eq(expenditureId))
             .fetchOne());
     }
 
@@ -83,21 +83,16 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
                     category, expenditure.amount.coalesce(0L).sum()))
                 .from(expenditure)
                 .rightJoin(expenditure.category, category)
-                .on(userIdEq(userId), expenditureDateBetween(startInclusive, endExclusive), notDeleted())
+                .on(userIdEq(userId), expenditureDateBetween(startInclusive, endExclusive))
                 .groupBy(category.id)
                 .fetch());
-    }
-
-    private BooleanExpression notDeleted() {
-        return expenditure.deleted.isFalse();
     }
 
     private BooleanExpression expenditureSearchExpression(String userId, ExpenditureSearchCond searchCond) {
         return userIdEq(userId)
             .and(expenditureDateBetween(searchCond.getStartDate(), searchCond.getEndDate()))
             .and(categoryIdIn(searchCond.getCategories()))
-            .and(amountBetween(searchCond.getMinAmount(), searchCond.getMaxAmount()))
-            .and(notDeleted());
+            .and(amountBetween(searchCond.getMinAmount(), searchCond.getMaxAmount()));
     }
 
     private BooleanExpression userIdEq(String userId) {

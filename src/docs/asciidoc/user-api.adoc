@@ -11,3 +11,12 @@ operation::user-controller-test/check-for-username[snippets="http-request,respon
 === 사용자 회원가입 API
 ==== `POST /api/users`
 operation::user-controller-test/join-user[snippets="request-body,request-fields,response-body"]
+
+=== 사용자 탈퇴 API
+==== `DELETE /api/users`
+
+- 바로 탈퇴 처리하는 것이 아닌 계정 비활성화
+- 사용자 계정 비활성화 후 3개월 이내에 재로그인하지 않으면 탈퇴 처리 (사용자 관련 데이터 모두 삭제)
+- 3개월 이내에 재로그인 시 비활성화된 계정 복구
+
+operation::user-controller-test/deactivate-user[snippets="response-body"]

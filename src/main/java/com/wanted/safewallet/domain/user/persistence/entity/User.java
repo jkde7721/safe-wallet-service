@@ -4,11 +4,13 @@ import com.wanted.safewallet.global.audit.BaseTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
 @Getter
@@ -28,4 +30,21 @@ public class User extends BaseTime {
 
     @Column(nullable = false)
     private String password;
+
+    @Builder.Default
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Boolean deleted = Boolean.FALSE;
+
+    private LocalDateTime deletedDate;
+
+    public void softDelete() {
+        this.deleted = Boolean.TRUE;
+        this.deletedDate = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.deleted = Boolean.FALSE;
+        this.deletedDate = null;
+    }
 }
