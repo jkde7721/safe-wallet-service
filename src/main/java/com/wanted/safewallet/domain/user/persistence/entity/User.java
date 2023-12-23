@@ -3,6 +3,8 @@ package com.wanted.safewallet.domain.user.persistence.entity;
 import com.wanted.safewallet.global.audit.BaseTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -32,11 +34,20 @@ public class User extends BaseTime {
     private String password;
 
     @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.ANONYMOUS;
+
+    @Builder.Default
     @Column(nullable = false)
     @ColumnDefault("0")
     private Boolean deleted = Boolean.FALSE;
 
     private LocalDateTime deletedDate;
+
+    public String getAuthorities() {
+        return this.role.getAuthorities();
+    }
 
     public void softDelete() {
         this.deleted = Boolean.TRUE;
