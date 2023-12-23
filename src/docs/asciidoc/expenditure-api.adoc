@@ -43,7 +43,7 @@ operation::expenditure-controller-test/update-expenditure[snippets="request-body
 ==== `DELETE /api/expenditures/{expenditureId}`
 
 - `지출` 을 생성한 유저만 권한
-- **Soft Delete** 수행
+- `지출 이미지 목록` 또한 모두 삭제
 
 operation::expenditure-controller-test/delete-expenditure[snippets="response-body"]
 
