@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -60,11 +59,6 @@ public class Expenditure extends BaseTime {
     private String note;
 
     @Builder.Default
-    @Column(nullable = false)
-    @ColumnDefault("0")
-    private Boolean deleted = Boolean.FALSE;
-
-    @Builder.Default
     @OneToMany(mappedBy = "expenditure",
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ExpenditureImage> images = List.of();
@@ -85,9 +79,5 @@ public class Expenditure extends BaseTime {
         this.amount = amount;
         this.title = title;
         this.note = note;
-    }
-
-    public void softDelete() {
-        this.deleted = Boolean.TRUE;
     }
 }

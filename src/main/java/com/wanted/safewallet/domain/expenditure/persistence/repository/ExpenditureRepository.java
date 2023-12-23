@@ -2,16 +2,12 @@ package com.wanted.safewallet.domain.expenditure.persistence.repository;
 
 import com.wanted.safewallet.domain.expenditure.persistence.entity.Expenditure;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ExpenditureRepository extends JpaRepository<Expenditure, Long>, ExpenditureRepositoryCustom {
-
-    @Query("select e from Expenditure e where e.id = :expenditureId and e.deleted = false")
-    Optional<Expenditure> findById(@Param("expenditureId") Long expenditureId);
 
     @Query("select e.id from Expenditure e where e.user.id in :userIds")
     List<Long> findIdsByUser(@Param("userIds") List<String> userIds);
