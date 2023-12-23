@@ -13,6 +13,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -88,6 +89,17 @@ class UserControllerTest extends AbstractRestDocsTest {
                             .generatePopupLink(DocsPopupInfo.PASSWORD_CONSTRAINTS))))));
         then(userFacadeService).should(times(1))
             .joinUser(any(UserJoinRequest.class));
+    }
+
+    @DisplayName("유저 계정 비활성화 컨트롤러 테스트 : 성공")
+    @Test
+    void deactivateUser() throws Exception {
+        //given
+        //when, then
+        restDocsMockMvc.perform(delete("/api/users")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(restDocs.document());
     }
 
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 계정명 공백")

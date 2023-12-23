@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
 
 import com.wanted.safewallet.domain.auth.business.dto.CustomUserDetails;
+import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
-import com.wanted.safewallet.domain.user.persistence.repository.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,14 +27,14 @@ class CustomUserDetailsServiceTest {
     CustomUserDetailsService customUserDetailsService;
 
     @Mock
-    UserRepository userRepository;
+    UserService userService;
 
-    @DisplayName("계정명으로 유저 조회 테스트 : 성공")
+    @DisplayName("계정명으로 유저 조회 테스트 : 성공 - 활성화 계정 조회")
     @Test
-    void loadUserByUsername() {
+    void loadUserByUsername_withActiveUser() {
         //given
         User user = anUser().build();
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.of(user));
 
         //when
         CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
@@ -41,6 +43,27 @@ class CustomUserDetailsServiceTest {
         assertThat(userDetails.getUserId()).isEqualTo(user.getId());
         assertThat(userDetails.getUsername()).isEqualTo(user.getUsername());
         assertThat(userDetails.getPassword()).isEqualTo(user.getPassword());
+        then(userService).should(times(1)).getActiveUserByUsername(anyString());
+        then(userService).should(times(0)).getRestoredUserByUsername(anyString());
+    }
+
+    @DisplayName("계정명으로 유저 조회 테스트 : 성공 - 비활성화 계정 조회")
+    @Test
+    void loadUserByUsername_withInactiveUser() {
+        //given
+        User user = anUser().build();
+        given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.empty());
+        given(userService.getRestoredUserByUsername(anyString())).willReturn(Optional.of(user));
+
+        //when
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
+
+        //then
+        assertThat(userDetails.getUserId()).isEqualTo(user.getId());
+        assertThat(userDetails.getUsername()).isEqualTo(user.getUsername());
+        assertThat(userDetails.getPassword()).isEqualTo(user.getPassword());
+        then(userService).should(times(1)).getActiveUserByUsername(anyString());
+        then(userService).should(times(1)).getRestoredUserByUsername(anyString());
     }
 
     @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 해당 유저 없음")
@@ -48,7 +71,8 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_no_user() {
         //given
         String username = "testUsername";
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+        given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.empty());
+        given(userService.getRestoredUserByUsername(anyString())).willReturn(Optional.empty());
 
         //when, then
         assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(username))
