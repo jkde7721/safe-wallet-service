@@ -17,7 +17,7 @@ public class UserSchedulerService {
     private final BudgetService budgetService;
     private final ExpenditureService expenditureService;
 
-    @Scheduled(cron = "0 0 23 ? * SUN *") //매주 일요일 23시마다
+    @Scheduled(cron = "0 0 23 ? * SUN") //매주 일요일 23시마다
     @Transactional
     public void withdrawUsers() {
         List<String> userIds = userService.getWithdrawnUserIds();
