@@ -61,6 +61,9 @@ dependencies {
 	//Spring Rest Docs 의존성
 	asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+	//SMTP 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 ext {
