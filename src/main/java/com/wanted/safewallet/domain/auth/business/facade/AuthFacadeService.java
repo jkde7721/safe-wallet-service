@@ -25,9 +25,8 @@ public class AuthFacadeService {
 
         String username = jwtTokenUtils.getUsername(refreshToken);
         User user = userService.getUserByUsername(username);
-        String authorities = userService.getCommaDelimitedAuthorities(user);
 
-        String newAccessToken = jwtTokenUtils.generateAccessToken(username, user.getId(), authorities);
+        String newAccessToken = jwtTokenUtils.generateAccessToken(username, user.getId(), user.getAuthorities());
         String newRefreshToken = jwtTokenUtils.generateRefreshToken(username);
         refreshTokenService.replaceToken(refreshToken, newRefreshToken);
         return new JwtDto(newAccessToken, newRefreshToken);

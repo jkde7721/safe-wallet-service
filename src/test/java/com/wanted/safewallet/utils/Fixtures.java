@@ -1,5 +1,7 @@
 package com.wanted.safewallet.utils;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.USER;
+
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget;
 import com.wanted.safewallet.domain.budget.persistence.entity.Budget.BudgetBuilder;
 import com.wanted.safewallet.domain.category.persistence.entity.Category;
@@ -44,6 +46,7 @@ public abstract class Fixtures {
         return User.builder()
             .id("userId")
             .username("username")
-            .password("password");
+            .password("password")
+            .role(USER);
     }
 }

@@ -12,10 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -81,12 +79,6 @@ public class UserService {
 
     public Optional<User> getActiveUserByUsername(String username) {
         return userRepository.findByUsername(username);
-    }
-
-    //TODO: User 엔티티에 권한 관련 필드 추가 후 실제 구현 (현재는 임의의 ROLE_USER 권한만 반환)
-    public String getCommaDelimitedAuthorities(User user) {
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-        return StringUtils.collectionToCommaDelimitedString(authorities);
     }
 
     private boolean isWithinExpiryDate(LocalDateTime deletedDate) {
