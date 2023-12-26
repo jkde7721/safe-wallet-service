@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: dev
   datasource:
     url: ${DATABASE_URL}
     password: ${DATABASE_PASSWORD}
@@ -33,7 +35,7 @@ spring:
           timeout: 5000
           starttls:
             enable: true
-mail-confirm-expiry-sec: 600
+mail-auth-expiry-sec: 600
 
 logging:
   level:
@@ -45,3 +47,19 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expiry-sec: 1800 #30(min) * 60(sec)
   refresh-token-expiry-sec: 432000 #5(day) * 24(hour) * 60(min) * 60(sec)
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server-endpoint: http://localhost:8080
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server-endpoint: ''
