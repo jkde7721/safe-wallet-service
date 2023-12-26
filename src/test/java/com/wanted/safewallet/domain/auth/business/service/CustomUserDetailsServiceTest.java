@@ -81,9 +81,9 @@ class CustomUserDetailsServiceTest {
             .hasMessage("잘못된 계정명입니다.");
     }
 
-    @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 이메일 인증 미완료")
+    @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 메일 인증 미완료")
     @Test
-    void loadUserByUsername_noEmailConfirm() {
+    void loadUserByUsername_noMailAuth() {
         //given
         User user = anUser().role(ANONYMOUS).build();
         given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.of(user));
@@ -91,6 +91,6 @@ class CustomUserDetailsServiceTest {
         //when, then
         assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(user.getUsername()))
             .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessage("이메일 인증이 완료되지 않았습니다.");
+            .hasMessage("메일 인증이 완료되지 않았습니다.");
     }
 }

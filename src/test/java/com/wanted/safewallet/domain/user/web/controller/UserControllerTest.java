@@ -69,7 +69,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "hello12345!";
         UserJoinRequest request = new UserJoinRequest(username, password);
 

@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             .orElseGet(() -> userService.getRestoredUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("잘못된 계정명입니다.")));
         if (user.getRole() == ANONYMOUS) {
-            throw new UsernameNotFoundException("이메일 인증이 완료되지 않았습니다.");
+            throw new UsernameNotFoundException("메일 인증이 완료되지 않았습니다.");
         }
         return new CustomUserDetails(user);
     }

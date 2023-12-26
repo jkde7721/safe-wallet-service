@@ -7,11 +7,13 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import com.wanted.safewallet.domain.user.business.mapper.UserMapper;
+import com.wanted.safewallet.domain.user.business.service.UserMailCodeService;
 import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.global.config.PasswordEncoderConfig;
+import com.wanted.safewallet.global.mail.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +40,12 @@ class UserFacadeServiceTest {
     @Mock
     UserService userService;
 
+    @Mock
+    UserMailCodeService userMailCodeService;
+
+    @Mock
+    MailService mailService;
+
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -46,7 +54,7 @@ class UserFacadeServiceTest {
 
     @BeforeEach
     void init() {
-        userFacadeService = new UserFacadeService(userMapper, userService, passwordEncoder);
+        userFacadeService = new UserFacadeService(userMapper, userService, userMailCodeService, mailService, passwordEncoder);
     }
 
     @DisplayName("유저 계정명 중복 여부 확인 퍼사드 서비스 테스트 : 성공")
