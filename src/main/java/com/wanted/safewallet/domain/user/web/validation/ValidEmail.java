@@ -6,9 +6,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+@Email(message = "{user.username.email}")
+@NotBlank(message = "{user.username.notBlank}")
 @Constraint(validatedBy = EmailConstraintValidator.class)
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
