@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<div class="">
+  <div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding:32px 0 32px 0;background-color:#f1f3f5">
+      <tbody><tr>
+        <td>
+          <table align="center" width="600" border="0" cellpadding="0" cellspacing="0" style="margin:auto;padding:0 20px 0 20px;background-color:#fff">
+            <tbody><tr>
+              <td style="padding:20px 0 21px 0">
+                <table>
+                  <tbody><tr>
+                    <!-- 아래 이미지 고칠 예정 -->
+                    <td width="100"><img width="100" height="19" src="https://ci3.googleusercontent.com/meips/ADKq_NZ2tqH3KInNXZdiU0BpLSOZvcyvf5W7Qn6IXsDM-WuDV-Rnp1DY4bCn6aPuFBcn_eoHtOW84FuQi-EGfAPP61hBojOkURkqhfVzKFsi8dU0l8MRefdM3kAE3g9VQYxmB4k=s0-d-e1-ft#https://cdn.inflearn.com/assets/email_templates/assets/logo-eng-green-h.png" class="CToWUd" data-bit="iit"></td>
+                    <td width="460" style="text-align:right">
+                      <img src="https://ci3.googleusercontent.com/meips/ADKq_NZ6lsBZqeZVghlTxHsaDmiZV7Y5C276kjO0WrX82I_PbyLXxbdhJFypp-lEaozIKp4qin-vTULghkyrePAaI6EZim2hV3a17lWzeLBr8xPdfnN5wd6ORA=s0-d-e1-ft#https://cdn.inflearn.com/assets/email_templates/assets/slogan.png" height="19" style="vertical-align:bottom" class="CToWUd" data-bit="iit">
+                    </td>
+                  </tr>
+                  </tbody></table>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-bottom:1px solid #f1f3f5"></td>
+            </tr>
+
+            <tr>
+              <td style="overflow:hidden;padding:32px 0 32px 0;font-size:26px;font-weight:500;line-height:1.31;letter-spacing:-0.3px;color:#1b1c1d;word-break:break-all">회원가입을 위해 메일을 인증해 주세요.</td>
+            </tr>
+
+            <tr>
+              <td style="font-size:15px;line-height:1.47;letter-spacing:-0.3px;color:#1b1c1d">
+                안녕하세요, Safe Wallet 입니다.<br>
+                아래 메일 인증 버튼을 눌러 회원가입을 완료해주세요.
+              </td>
+            </tr>
+            <tr><td style="padding:32px 0 0 0"></td></tr>
+            <tr>
+              <td style="text-align:center">
+                <a th:href="@{{endpoint}/api/users/mail-auth(endpoint=${endpoint},email=${email},code=${code})}" style="font-size:15px;letter-spacing:-0.3px;font-weight:bold;background-color:#00c471;color:#fff;display:inline-block;box-sizing:border-box;padding:15px 20px;width:180px;height:auto;line-height:normal;text-align:center;text-decoration:none;border-radius:4px" target="_blank" >메일 인증</a>
+              </td>
+            </tr>
+            <tr><td style="padding:32px 0 0 0"></td></tr>
+
+            <tr>
+              <td style="border-top:1px solid #f1f3f5"></td>
+            </tr>
+            </tbody></table>
+        </td>
+      </tr>
+      </tbody></table>
+  </div>
+</div>
+</body>
+
+</html>

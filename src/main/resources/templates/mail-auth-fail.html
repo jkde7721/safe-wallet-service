@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<div th:text="${message}"></div>
+<div>메일 인증에 실패하였습니다.</div>
+<form th:action="@{/api/users/mail-auth}" th:object="${userMailRequest}" method="post">
+  <label th:for="email">이메일 </label>
+  <input type="text" th:field="*{email}" placeholder="회원가입 시 이메일"/>
+  <input type="submit" value="메일 인증 요청"/>
+  <p style="color: red;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+</form>
+</body>
+</html>
