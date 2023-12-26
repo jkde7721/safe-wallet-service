@@ -10,6 +10,13 @@ operation::user-controller-test/check-for-username[snippets="http-request,respon
 
 === 사용자 회원가입 API
 ==== `POST /api/users`
+
+- 메일 인증이 완료되어야 로그인 가능하므로 회원가입 후 메일 인증 필수
+- 메일 인증 링크 만료 시간은 10분
+- *메일 인증 실패하는 경우*: 인증 링크 만료 또는 조작된 링크, 회원가입하지 않은 사용자, 이미 메일 인증된 사용자
+- *인증용 메일 재발송 실패하는 경우*: 회원가입하지 않은 사용자, 이미 메일 인증된 사용자, 메일 전송 오류(서버 오류)
+- 만료 시간 이후 메일 인증 요청 시, 이메일 입력하여 인증용 메일 재발송 가능
+
 operation::user-controller-test/join-user[snippets="request-body,request-fields,response-body"]
 
 === 사용자 탈퇴 API

@@ -84,7 +84,7 @@ class AuthControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document(
                 requestFields(
                     fieldWithPath("username").description("계정명")
-                        .attributes(key("formats").value("이메일 형식 (추후 이메일 인증 기능 구현)"))
+                        .attributes(key("formats").value("이메일 형식"))
                         .attributes(key("constraints").value("회원가입한 유저의 계정명")),
                     fieldWithPath("password").description("비밀번호")
                         .attributes(key("constraints").value("회원가입한 유저의 비밀번호"))),

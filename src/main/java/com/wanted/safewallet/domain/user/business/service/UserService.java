@@ -1,5 +1,8 @@
 package com.wanted.safewallet.domain.user.business.service;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.ANONYMOUS;
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.USER;
+import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_AUTHENTICATED_MAIL;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_USERNAME;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_USER;
 import static com.wanted.safewallet.global.exception.ErrorCode.PASSWORD_ENCODING_ERROR;
@@ -28,11 +31,18 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
+    @Transactional
     public void saveUser(User user) {
         if (!user.getPassword().startsWith(ENCODED_PASSWORD_PREFIX)) {
             throw new BusinessException(PASSWORD_ENCODING_ERROR);
         }
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void upgradeToUserRole(String username) {
+        User user = getUserWithUnauthenticatedMail(username);
+        user.updateRole(USER);
     }
 
     @Transactional
@@ -59,6 +69,14 @@ public class UserService {
     public List<String> getWithdrawnUserIds() {
         LocalDateTime minDeletedDate = LocalDate.now().minusMonths(EXPIRY_MONTH).atStartOfDay();
         return userRepository.findIdsByDeletedAndDeletedDate(minDeletedDate);
+    }
+
+    public User getUserWithUnauthenticatedMail(String username) {
+        User user = getUserByUsername(username);
+        if (user.getRole() != ANONYMOUS) {
+            throw new BusinessException(ALREADY_AUTHENTICATED_MAIL);
+        }
+        return user;
     }
 
     public void checkForUsername(String username) {

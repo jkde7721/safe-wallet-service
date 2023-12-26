@@ -49,6 +49,10 @@ public class User extends BaseTime {
         return this.role.getAuthorities();
     }
 
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
     public void softDelete() {
         this.deleted = Boolean.TRUE;
         this.deletedDate = LocalDateTime.now();

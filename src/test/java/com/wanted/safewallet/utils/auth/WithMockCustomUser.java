@@ -1,5 +1,8 @@
 package com.wanted.safewallet.utils.auth;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.USER;
+
+import com.wanted.safewallet.domain.user.persistence.entity.Role;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -17,9 +20,7 @@ public @interface WithMockCustomUser {
 
     String username() default "username";
 
-    String[] roles() default { "USER" };
-
-    String[] authorities() default {};
+    Role role() default USER;
 
     String password() default "password";
 

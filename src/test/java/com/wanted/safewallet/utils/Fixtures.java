@@ -45,8 +45,8 @@ public abstract class Fixtures {
     public static UserBuilder anUser() {
         return User.builder()
             .id("userId")
-            .username("username")
-            .password("password")
+            .username("username@naver.com")
+            .password("{bcrypt}password")
             .role(USER);
     }
 }

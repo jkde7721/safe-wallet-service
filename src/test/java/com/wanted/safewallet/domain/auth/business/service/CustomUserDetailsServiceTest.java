@@ -1,5 +1,6 @@
 package com.wanted.safewallet.domain.auth.business.service;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.ANONYMOUS;
 import static com.wanted.safewallet.utils.Fixtures.anUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -68,7 +69,7 @@ class CustomUserDetailsServiceTest {
 
     @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 해당 유저 없음")
     @Test
-    void loadUserByUsername_no_user() {
+    void loadUserByUsername_noUser() {
         //given
         String username = "testUsername";
         given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.empty());
@@ -78,5 +79,18 @@ class CustomUserDetailsServiceTest {
         assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(username))
             .isInstanceOf(UsernameNotFoundException.class)
             .hasMessage("잘못된 계정명입니다.");
+    }
+
+    @DisplayName("계정명으로 유저 조회 테스트 : 실패 - 메일 인증 미완료")
+    @Test
+    void loadUserByUsername_noMailAuth() {
+        //given
+        User user = anUser().role(ANONYMOUS).build();
+        given(userService.getActiveUserByUsername(anyString())).willReturn(Optional.of(user));
+
+        //when, then
+        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(user.getUsername()))
+            .isInstanceOf(UsernameNotFoundException.class)
+            .hasMessage("메일 인증이 완료되지 않았습니다.");
     }
 }
