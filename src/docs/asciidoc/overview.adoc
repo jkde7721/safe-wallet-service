@@ -75,6 +75,14 @@
 | `FORBIDDEN`
 | 권한 없음으로 해당 지출 내역 조회 불가
 
+| `NOT_FOUND_BUDGET`
+| `NOT_FOUND`
+| 존재하지 않는 예산 내역
+
+| `FORBIDDEN_BUDGET`
+| `FORBIDDEN`
+| 권한 없음으로 해당 예산 내역 조회 불가
+
 | `ALREADY_EXISTS_USERNAME`
 | `BAD_REQUEST`
 | 회원가입 시 해당 계정명 이미 존재
@@ -86,6 +94,22 @@
 | `UNAUTHORIZED_JWT_TOKEN`
 | `UNAUTHORIZED`
 | 유효하지 않은 JWT 토큰
+
+| `PASSWORD_ENCODING_ERROR`
+| `INTERNAL_SERVER_ERROR`
+| 회원가입 시 비밀번호 암호화 오류 발생
+
+| `ALREADY_AUTHENTICATED_MAIL`
+| `BAD_REQUEST`
+| 사용자의 메일이 이미 인증됨
+
+| `EXPIRED_MAIL_AUTH`
+| `BAD_REQUEST`
+| 메일 인증 링크가 만료됨
+
+| `MAIL_SEND_ERROR`
+| `INTERNAL_SERVER_ERROR`
+| 메일 전송에 실패
 
 |===
 
