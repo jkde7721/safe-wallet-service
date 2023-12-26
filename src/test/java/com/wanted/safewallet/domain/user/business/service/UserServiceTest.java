@@ -1,5 +1,8 @@
 package com.wanted.safewallet.domain.user.business.service;
 
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.ANONYMOUS;
+import static com.wanted.safewallet.domain.user.persistence.entity.Role.USER;
+import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_AUTHENTICATED_MAIL;
 import static com.wanted.safewallet.global.exception.ErrorCode.ALREADY_EXISTS_USERNAME;
 import static com.wanted.safewallet.global.exception.ErrorCode.NOT_FOUND_USER;
 import static com.wanted.safewallet.global.exception.ErrorCode.PASSWORD_ENCODING_ERROR;
@@ -45,6 +48,21 @@ class UserServiceTest {
             .extracting("errorCode").isEqualTo(PASSWORD_ENCODING_ERROR);
     }
 
+    @DisplayName("메일 인증에 따른 유저 권한 업그레이드 서비스 테스트 : 성공")
+    @Test
+    void upgradeToUserRole() {
+        //given
+        User user = anUser().role(ANONYMOUS).build();
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+
+        //when
+        userService.upgradeToUserRole(user.getUsername());
+
+        //then
+        then(userRepository).should(times(1)).findByUsername(anyString());
+        assertThat(user.getRole()).isEqualTo(USER);
+    }
+
     @DisplayName("유저 삭제 서비스 테스트 : 성공 - Soft Delete 수행")
     @Test
     void deleteUser() {
@@ -63,7 +81,7 @@ class UserServiceTest {
     @Test
     void getRestoredUserByUsername_noInactiveUser() {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         given(userRepository.findInactiveUserByUsername(anyString())).willReturn(Optional.empty());
 
         //when
@@ -78,7 +96,7 @@ class UserServiceTest {
     void getRestoredUserByUsername_withRestoredUser() {
         //given
         User inactiveUser = anUser().deleted(true).deletedDate(LocalDateTime.now()).build();
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         given(userRepository.findInactiveUserByUsername(anyString())).willReturn(Optional.of(inactiveUser));
 
         //when
@@ -90,11 +108,24 @@ class UserServiceTest {
         assertThat(restoredUser.getDeletedDate()).isNull();
     }
 
+    @DisplayName("메일 미인증 유저 조회 서비스 테스트 : 실패 - 이미 인증된 메일")
+    @Test
+    void getUserWithUnauthenticatedMail_fail() {
+        //given
+        User user = anUser().role(USER).build();
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+
+        //when, then
+        assertThatThrownBy(() -> userService.getUserWithUnauthenticatedMail(user.getUsername()))
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode").isEqualTo(ALREADY_AUTHENTICATED_MAIL);
+    }
+
     @DisplayName("유저 계정명 중복 검사 테스트 : 실패")
     @Test
     void checkForUsername_fail() {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         given(userRepository.existsByUsername(anyString())).willReturn(true);
 
         //when, then
@@ -106,7 +137,7 @@ class UserServiceTest {
 
     @DisplayName("아이디로 유저 조회 서비스 테스트 : 실패 - 해당 유저 없음")
     @Test
-    void getUser() {
+    void getUser_fail() {
         //given
         String userId = "testUserId";
         given(userRepository.findById(anyString())).willReturn(Optional.empty());
@@ -119,9 +150,9 @@ class UserServiceTest {
 
     @DisplayName("계정명으로 유저 조회 서비스 테스트 : 실패 - 해당 유저 없음")
     @Test
-    void getUserByUsername() {
+    void getUserByUsername_fail() {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
 
         //when, then

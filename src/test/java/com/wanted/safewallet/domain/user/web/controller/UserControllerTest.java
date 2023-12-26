@@ -49,7 +49,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void checkForUsername() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         UsernameCheckResponse response = new UsernameCheckResponse(true);
         given(userFacadeService.checkForUsername(anyString())).willReturn(response);
 
@@ -82,7 +82,8 @@ class UserControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document(
                 requestFields(
                     fieldWithPath("username").description("계정명")
-                        .attributes(key("formats").value("이메일 형식 (추후 이메일 인증 기능 구현)"))
+                        .attributes(key("formats")
+                            .value("이메일 형식 (naver.com, daum.net, hanmail.net, gmail.com, hotmail.com, nate.com 만 가능)"))
                         .attributes(key("constraints").value("회원가입 전 계정명 중복 확인 필수")),
                     fieldWithPath("password").description("비밀번호")
                         .attributes(key("constraints").value(DocsPopupLinkGenerator
@@ -121,11 +122,49 @@ class UserControllerTest extends AbstractRestDocsTest {
             .andDo(print());
     }
 
+    @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 올바르지 않은 이메일 형식")
+    @Test
+    void joinUser_fail_username_incorrect_email_form() throws Exception {
+        //given
+        String username = "testUsernamenaver.com";
+        String password = "hello12345!";
+        UserJoinRequest request = new UserJoinRequest(username, password);
+
+        //when, then
+        mockMvc.perform(post("/api/users")
+                .content(asJsonString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("이메일 형식이 올바르지 않습니다.")))
+            .andDo(print());
+    }
+
+    @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 유효하지 않은 이메일")
+    @Test
+    void joinUser_fail_username_invalid_email() throws Exception {
+        //given
+        String username = "testUsername@nave.com";
+        String password = "hello12345!";
+        UserJoinRequest request = new UserJoinRequest(username, password);
+
+        //when, then
+        mockMvc.perform(post("/api/users")
+                .content(asJsonString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("유효하지 않은 이메일입니다.")))
+            .andDo(print());
+    }
+
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 비밀번호 길이")
     @Test
     void joinUser_fail_password_length() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "hi123!";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
@@ -144,7 +183,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser_fail_password_contains_character() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "hello12345hi";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
@@ -163,7 +202,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser_fail_password_contains_korean() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "hello12345!가";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
@@ -182,7 +221,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser_fail_password_contains_blank() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "hello 12345!";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
@@ -201,8 +240,8 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser_fail_password_contains_username() throws Exception {
         //given
-        String username = "testUsername";
-        String password = "testUsername12345!";
+        String username = "testUsername@naver.com";
+        String password = "testUsername@naver.com12345!";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
         //when, then
@@ -220,7 +259,7 @@ class UserControllerTest extends AbstractRestDocsTest {
     @Test
     void joinUser_fail_common_password() throws Exception {
         //given
-        String username = "testUsername";
+        String username = "testUsername@naver.com";
         String password = "password";
         UserJoinRequest request = new UserJoinRequest(username, password);
 
