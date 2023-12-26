@@ -79,10 +79,6 @@ public class UserService {
         return user;
     }
 
-    public void checkForExistingMailAuth(String username) {
-        getUserWithUnauthenticatedMail(username);
-    }
-
     public void checkForUsername(String username) {
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ALREADY_EXISTS_USERNAME);

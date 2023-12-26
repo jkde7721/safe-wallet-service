@@ -68,7 +68,7 @@ public class UserFacadeService {
 
     public void resendMailAuth(String email) {
         try {
-            userService.checkForExistingMailAuth(email);
+            userService.getUserWithUnauthenticatedMail(email);
             processMailAuthMessage(email);
         } catch (BusinessException e) {
             throw new BusinessTemplateException(e, "mail-auth-resend-fail");
