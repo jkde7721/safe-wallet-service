@@ -1,0 +1,2 @@
+[[category-type]]
+include::{snippets}/enum-docs-controller-test/get-enums/enum-fields-CategoryType.adoc[]

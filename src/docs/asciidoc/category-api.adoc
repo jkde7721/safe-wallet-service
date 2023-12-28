@@ -1,0 +1,5 @@
+== 카테고리 API
+
+=== 카테고리 목록 조회 API
+==== `GET /api/categories`
+operation::category-controller-test/get-category-list[snippets="response-body,response-fields-data"]

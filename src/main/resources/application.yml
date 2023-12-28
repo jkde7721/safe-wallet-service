@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: dev
   datasource:
     url: ${DATABASE_URL}
     password: ${DATABASE_PASSWORD}
@@ -14,11 +16,50 @@ spring:
         format_sql: true
         default_batch_fetch_size: 100
     database: mysql
+  redis:
+    host: ${REDIS_URL}
+    port: 6379
   data:
-    redis:
-      host: ${REDIS_URL}
-      port: 6379
+    web:
+      pageable:
+        one-indexed-parameters: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GOOGLE_ID}
+    password: ${GOOGLE_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+mail-auth-expiry-sec: 600
+
 logging:
   level:
     org.hibernate.sql: info
     org.hibernate.type.descriptor.sql: trace
+
+jwt:
+  prefix: 'Bearer '
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-expiry-sec: 1800 #30(min) * 60(sec)
+  refresh-token-expiry-sec: 432000 #5(day) * 24(hour) * 60(min) * 60(sec)
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server-endpoint: http://localhost:8080
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server-endpoint: ''

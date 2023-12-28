@@ -1,0 +1,26 @@
+== 예산 API
+
+=== 월별 예산 설정 API
+==== `POST /api/budgets`
+operation::budget-controller-test/set-up-budget[snippets="request-body,request-fields,response-body,response-fields-data"]
+
+=== 월별 예산 수정 API
+==== `PUT /api/budgets/{budgetId}`
+
+- 월별 예산 설정 API를 통해 설정한 예산 정보 수정
+- `예산` 을 설정한 유저만 권한
+- `budgetYearMonth` 또는 `category` 변경 시 같은 년월, 카테고리의 예산이 있다면 기존 것에 예산 금액이 추가되는 방식으로 동작
+- 없다면 해당 예산 정보만을 수정
+
+operation::budget-controller-test/update-budget[snippets="request-body,request-fields,response-body,response-fields-data"]
+
+=== 월별 예산 설계 API
+==== `GET /api/budgets/consult`
+
+- `총액` 입력 시 `카테고리` 별 예산 자동 생성
+- 현재 유저의 이전 예산 설정 내역이 존재하지 않으면 다른 유저들의 평균값 사용
+- 존재하면 현재 유저의 이전 예산 설정 내역의 평균값 사용
+- 통계 비율 10% 이하의 카테고리들은 모두 묶어 `ETC(기타)` 로 계산
+- **통계 비율에 따라 금액을 계산** ex. 식비 40만원, 주거 30만원, 기타 15만원 등
+
+operation::budget-controller-test/consult-budget[snippets="http-request,query-parameters,response-body,response-fields-data"]
