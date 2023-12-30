@@ -5,13 +5,13 @@
 === Host
 
 |===
-| Environment | Host
+| Environment | Endpoint
 
-| Local
+| Develop
 | `http://localhost:8080`
 
 | Production
-| `ec2 URL`
+| `http://ec2-3-35-128-28.ap-northeast-2.compute.amazonaws.com:8080`
 |===
 
 [[overview-http-status-code]]
