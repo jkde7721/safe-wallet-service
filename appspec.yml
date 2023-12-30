@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source:  /
-    destination: /home/ec2-user/app
+    destination: /home/ec2-user/safe-wallet
     overwrite: yes
 
 permissions:
@@ -12,7 +12,11 @@ permissions:
     group: ec2-user
 
 hooks:
+  AfterInstall:
+    - location: script/stop.sh
+      timeout: 60
+      runas: ec2-user
   ApplicationStart:
-    - location: scripts/deploy.sh
-      timeout: 300
+    - location: script/start.sh
+      timeout: 60
       runas: ec2-user
