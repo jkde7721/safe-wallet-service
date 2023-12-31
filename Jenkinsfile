@@ -8,10 +8,19 @@ pipeline {
                 url: 'https://github.com/jkde7721/safe-wallet-service.git'
             }
         }
-        stage('Test') {
+        stage('SonarQube Analysis') {
             steps {
-                sh "chmod +x ./gradlew"
-                sh "./gradlew clean test"
+                withSonarQubeEnv('SonarQube Server') {
+                    sh "chmod +x ./gradlew"
+                    sh "./gradlew test sonar"
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                   waitForQualityGate abortPipeline: true
+                }
             }
         }
         stage('Build') {
