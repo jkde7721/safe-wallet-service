@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Github Pull') {
             steps {
-                git branch: 'release/v1.0.0', //추후 수정
+                git branch: 'develop',
                 credentialsId: 'github-access-key',
                 url: 'https://github.com/jkde7721/safe-wallet-service.git'
             }
