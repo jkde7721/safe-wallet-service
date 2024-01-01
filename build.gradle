@@ -173,8 +173,8 @@ sonar {
 		property 'sonar.tests', 'src/test'
 		property 'sonar.language', 'java'
 		property 'sonar.sourceEncoding', 'UTF-8'
-		property 'sonar.coverage.jacoco.xmlReportPaths', '${buildDir}/reports/jacoco.xml'
-		property 'sonar.java.binaries', '${buildDir}/classes'
+		property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco.xml'
+		property 'sonar.java.binaries', 'build/classes'
 		property 'sonar.test.inclusions', '**/*Test.java'
 		property 'sonar.profile', 'Sonar way'
 	}
