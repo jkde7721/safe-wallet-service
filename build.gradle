@@ -133,7 +133,13 @@ jacocoTestReport {
 	}
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, excludes: [] + QDomains)
+			fileTree(dir: it, excludes: [] + QDomains + [
+					'**/*Application*',
+					'**/*Exception*',
+					'**/*Mapper*',
+					'**/global/**',
+					'**/*Repository*' //일단 제외
+			])
 		}))
 	}
 
@@ -161,7 +167,13 @@ jacocoTestCoverageVerification {
 				value = 'COVEREDRATIO'
 				minimum = 0.00 //추후 적절한 값으로 수정
 			}
-			excludes = [] + QDomains
+			excludes = [] + QDomains + [
+					'*.*Application',
+					'*.*Exception',
+					'*.*Mapper',
+					'*.global.*',
+					'*.*Repository*' //일단 제외
+			]
 		}
 	}
 }
