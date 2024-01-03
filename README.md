@@ -9,29 +9,38 @@
 
 ### 사용 기술 
 
-Spring Boot, Querydsl, MySQL, Redis, JWT
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/f7c72d69-f8bc-4fb7-b5e7-31232d5a67e0" width="90%"/>
 
 <br/>
 
 ### DB 설계
 
-<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/e3acb62d-ddde-40eb-92ef-dcf64fb16de0" width="60%"/>
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/262d36be-1466-425e-a7ee-63248fd787f5" width="90%"/>
+
+### CI/CD 파이프라인
+
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/e5d9eb9d-ea2d-4403-8fe6-e8d2483df039" width="90%"/>
 
 <br/>
 
-### API 명세
+### [API 명세](http://ec2-3-35-128-28.ap-northeast-2.compute.amazonaws.com:8080/docs/index.html)
 
 <br/>
 
 ### 구현 시 고려사항 
 
-| 고려사항 | 정리 블로그 |
-| ------- | ------------ |
+| 고려사항                         | 정리 블로그                                                                          |
+|------------------------------|---------------------------------------------------------------------------------|
+| 날짜 데이터 요청 및 응답에 대한 역직렬화, 직렬화 | [날짜 데이터를 요청 및 응답으로 주고 받는 여러 가지 방법](https://daeun21dev.tistory.com/38)           |
+| Facade 디자인 패턴 적용             | [Controller - Service 계층 리팩토링 with Facade 패턴](https://daeun21dev.tistory.com/40) |
+ | DB 연관관계가 있는 데이터 삭제 방법        | 작성 예정                                                                           | 
+| CI/CD 파이프라인 구축               | 작성 예정                                                                           |
+| Passay 비밀번호 검증기 | 작성 예정                                                                           |
 
 <br/>
 
 ### 프로젝트 관리 Jira 칸반 보드
 
-<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/140741b6-2a11-4f5f-8d1d-ba3a7ee6bb66" width="80%"/>
+<img src="https://github.com/jkde7721/safe-wallet-service/assets/65665065/140741b6-2a11-4f5f-8d1d-ba3a7ee6bb66" width="90%"/>
 
 <br/>
