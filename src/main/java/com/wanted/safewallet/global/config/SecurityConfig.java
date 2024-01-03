@@ -12,6 +12,7 @@ import com.wanted.safewallet.domain.auth.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -42,6 +43,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/api/auth/**", "/api/users/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/docs/index.html").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(
