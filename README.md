@@ -23,7 +23,9 @@
 
 <br/>
 
-### [API 명세](http://ec2-3-35-128-28.ap-northeast-2.compute.amazonaws.com:8080/docs/index.html)
+### API 명세
+
+[Safe Wallet API 문서](http://ec2-3-35-128-28.ap-northeast-2.compute.amazonaws.com:8080/docs/index.html)
 
 <br/>
 
