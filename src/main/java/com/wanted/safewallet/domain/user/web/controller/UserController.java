@@ -9,10 +9,9 @@ import com.wanted.safewallet.global.dto.response.aop.CommonResponseContent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +37,7 @@ public class UserController {
         userFacadeService.joinUser(request);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping
     public void deactivateUser(@CurrentUserId String userId) {
         userFacadeService.deactivateUser(userId);
