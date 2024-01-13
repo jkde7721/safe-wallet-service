@@ -2,7 +2,10 @@ package com.wanted.safewallet.domain.user.web.controller;
 
 import com.wanted.safewallet.domain.user.business.facade.UserFacadeService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserMailRequest;
+import com.wanted.safewallet.global.exception.BusinessException;
+import com.wanted.safewallet.global.exception.BusinessTemplateException;
 import jakarta.validation.Valid;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -27,7 +30,12 @@ public class UserMailController {
      */
     @GetMapping
     public String authenticateMail(@RequestParam String email, @RequestParam String code) {
-        userFacadeService.authenticateMail(email, code);
+        try {
+            userFacadeService.authenticateMail(email, code);
+        } catch (BusinessException e) {
+            throw new BusinessTemplateException(
+                e, Map.of("userMailRequest", new UserMailRequest(email)), "mail-auth-fail");
+        }
         return "mail-auth-success";
     }
 
@@ -43,7 +51,11 @@ public class UserMailController {
         if (bindingResult.hasFieldErrors()) {
             return "mail-auth-fail";
         }
-        userFacadeService.resendMailAuth(request.getEmail());
+        try {
+            userFacadeService.resendMailAuth(request.getEmail());
+        } catch (BusinessException e) {
+            throw new BusinessTemplateException(e, "mail-auth-resend-fail");
+        }
         return "mail-auth-resend-success";
     }
 }

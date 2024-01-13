@@ -7,10 +7,7 @@ import com.wanted.safewallet.domain.user.business.service.UserMailCodeService;
 import com.wanted.safewallet.domain.user.business.service.UserService;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
-import com.wanted.safewallet.domain.user.web.dto.request.UserMailRequest;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
-import com.wanted.safewallet.global.exception.BusinessException;
-import com.wanted.safewallet.global.exception.BusinessTemplateException;
 import com.wanted.safewallet.global.mail.dto.MailMessage;
 import com.wanted.safewallet.global.mail.service.MailService;
 import java.util.Map;
@@ -57,22 +54,13 @@ public class UserFacadeService {
 
     @Transactional
     public void authenticateMail(String email, String code) {
-        try {
-            userMailCodeService.validateMailCode(email, code);
-            userService.upgradeToUserRole(email);
-        } catch (BusinessException e) {
-            throw new BusinessTemplateException(
-                e, Map.of("userMailRequest", new UserMailRequest(email)), "mail-auth-fail");
-        }
+        userMailCodeService.validateMailCode(email, code);
+        userService.upgradeToUserRole(email);
     }
 
     public void resendMailAuth(String email) {
-        try {
-            userService.getUserWithUnauthenticatedMail(email);
-            processMailAuthMessage(email);
-        } catch (BusinessException e) {
-            throw new BusinessTemplateException(e, "mail-auth-resend-fail");
-        }
+        userService.getUserWithUnauthenticatedMail(email);
+        processMailAuthMessage(email);
     }
 
     private void processMailAuthMessage(String toEmail) {

@@ -3,6 +3,7 @@ package com.wanted.safewallet.domain.user.web.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
+import org.springframework.util.StringUtils;
 
 public class EmailConstraintValidator implements ConstraintValidator<ValidEmail, String> {
 
@@ -11,6 +12,9 @@ public class EmailConstraintValidator implements ConstraintValidator<ValidEmail,
 
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context) {
+        if (!StringUtils.hasText(email)) {
+            return false;
+        }
         for (String provider : emailProviders) {
             if (email.endsWith(provider)) {
                 return true;
