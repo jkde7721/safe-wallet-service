@@ -25,6 +25,7 @@ import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator;
 import com.wanted.safewallet.docs.common.DocsPopupLinkGenerator.DocsPopupInfo;
 import com.wanted.safewallet.domain.user.business.facade.UserFacadeService;
 import com.wanted.safewallet.domain.user.web.dto.request.UserJoinRequest;
+import com.wanted.safewallet.domain.user.web.dto.request.UserMailRequest;
 import com.wanted.safewallet.domain.user.web.dto.response.UsernameCheckResponse;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import org.junit.jupiter.api.DisplayName;
@@ -103,6 +104,28 @@ class UserControllerTest extends AbstractRestDocsTest {
             .andDo(restDocs.document());
     }
 
+    @DisplayName("유저 인증 메일 재발송 테스트 : 성공")
+    @Test
+    void resendMailAuth() throws Exception {
+        //given
+        String email = "email@naver.com";
+        UserMailRequest request = new UserMailRequest(email);
+
+        //when, then
+        restDocsMockMvc.perform(post("/api/users/mail-auth-api")
+                .content(asJsonString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(restDocs.document(
+                requestFields(
+                    fieldWithPath("email").description("회원가입 시 계정명")
+                        .attributes(key("formats")
+                            .value("이메일 형식 (naver.com, daum.net, hanmail.net, gmail.com, hotmail.com, nate.com 만 가능)"))
+                        .attributes(key("constraints").value("회원가입 후 인증되지 않은 이메일")))
+            ));
+    }
+
     @DisplayName("유저 회원가입 컨트롤러 테스트 : 실패 - 계정명 공백")
     @Test
     void joinUser_fail_username_blank() throws Exception {
@@ -118,7 +141,7 @@ class UserControllerTest extends AbstractRestDocsTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf()))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("계정명이 공백일 수 없습니다.")))
+            .andExpect(jsonPath("$.message", containsString("유효하지 않은 이메일입니다.")))
             .andDo(print());
     }
 
