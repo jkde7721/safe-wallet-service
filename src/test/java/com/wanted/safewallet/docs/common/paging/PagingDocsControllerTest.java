@@ -6,12 +6,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
+import com.wanted.safewallet.global.dto.response.aop.PageStore;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 
+@Import(PageStore.class)
 @WithMockCustomUser
 @WebMvcTest(PagingDocsController.class)
 class PagingDocsControllerTest extends AbstractRestDocsTest {

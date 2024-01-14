@@ -13,6 +13,7 @@ import com.wanted.safewallet.docs.common.AbstractRestDocsTest;
 import com.wanted.safewallet.domain.category.persistence.entity.CategoryType;
 import com.wanted.safewallet.domain.expenditure.business.enums.FinanceStatus;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
+import com.wanted.safewallet.global.dto.response.aop.PageStore;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,11 +22,13 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+@Import(PageStore.class)
 @WithMockCustomUser
 @WebMvcTest(EnumDocsController.class)
 class EnumDocsControllerTest extends AbstractRestDocsTest {
