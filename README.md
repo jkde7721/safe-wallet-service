@@ -36,8 +36,8 @@
 | 날짜 데이터 요청 및 응답에 대한 역직렬화, 직렬화 | [날짜 데이터를 요청 및 응답으로 주고 받는 여러 가지 방법](https://daeun21dev.tistory.com/38)            |
 | Facade 디자인 패턴 적용             | [Controller - Service 계층 리팩토링 with Facade 패턴](https://daeun21dev.tistory.com/40) |
  | FK 제약 조건이 걸린 테이블 행 삭제 방법     | [부모 엔티티 삭제 시 FK 제약 조건이 걸린 자식 엔티티 처리 방법](https://daeun21dev.tistory.com/41)       | 
-| CI/CD 파이프라인 구축               | 작성 예정                                                                            |
-| Passay 비밀번호 검증기              | 작성 예정                                                                            |
+| 전역적인 CommonResponse 적용 방법    | [AOP로 공통 응답 형식 처리하기](https://daeun21dev.tistory.com/43)                                                                             |
+| REST Pagination 구현 방법        | [Link 헤더를 이용한 REST Pagination 구현](https://daeun21dev.tistory.com/44)                                                                             |
 
 <br/>
 
