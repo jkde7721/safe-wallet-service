@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.wanted.safewallet.domain.user.business.facade.UserFacadeService;
+import com.wanted.safewallet.global.dto.response.aop.PageStore;
 import com.wanted.safewallet.global.exception.BusinessException;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import org.junit.jupiter.api.DisplayName;
@@ -18,9 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+@Import(PageStore.class)
 @WithMockCustomUser
 @WebMvcTest(UserMailController.class)
 class UserMailControllerTest {

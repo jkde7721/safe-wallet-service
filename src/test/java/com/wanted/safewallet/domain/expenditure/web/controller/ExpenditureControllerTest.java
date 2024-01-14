@@ -25,6 +25,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
@@ -39,6 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
@@ -64,6 +67,7 @@ import com.wanted.safewallet.domain.expenditure.web.dto.response.YesterdayExpend
 import com.wanted.safewallet.domain.expenditure.web.dto.response.ExpenditureAmountOfCategoryResponse;
 import com.wanted.safewallet.domain.expenditure.web.enums.StatsCriteria;
 import com.wanted.safewallet.global.dto.response.PageResponse;
+import com.wanted.safewallet.global.dto.response.aop.PageStore;
 import com.wanted.safewallet.utils.auth.WithMockCustomUser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -74,10 +78,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+@Import(PageStore.class)
 @WithMockCustomUser
 @WebMvcTest(ExpenditureController.class)
 class ExpenditureControllerTest extends AbstractRestDocsTest {
@@ -87,6 +96,9 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    PageStore pageStore;
 
     @DisplayName("지출 내역 상세 조회 컨트롤러 테스트 : 성공")
     @Test
@@ -143,7 +155,7 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         ExpenditureResponse.builder().expenditureId(1L).amount(21000L)
                             .categoryId(1L).type(CategoryType.FOOD).title("점심 커피챗").build())).build()))
             .paging(PageResponse.builder()
-                .pageNumber(1).pageSize(3).numberOfElements(3).totalPages(4).totalElements(12L)
+                .pageNumber(2).pageSize(3).numberOfElements(3).totalPages(4).totalElements(12L)
                 .first(true).last(false).empty(false).build())
             .build();
         LocalDate startDate = LocalDate.of(2023, 11, 1);
@@ -153,9 +165,11 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
         Long maxAmount = 50000L;
         given(expenditureFacadeService.searchExpenditure(anyString(), any(ExpenditureSearchRequest.class),
             any(Pageable.class))).willReturn(response);
+        pageStore.setPage(PageableExecutionUtils.getPage(List.of(), PageRequest.of(1, 3), () -> 12));
 
         //when, then
         restDocsMockMvc.perform(get("/api/expenditures")
+                .param("page", "2").param("size", "3")
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .param("categories", collectionToCommaDelimitedString(categories))
@@ -164,8 +178,13 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data").exists())
+            .andExpect(header().exists(HttpHeaders.LINK))
             .andDo(restDocs.document(
                 queryParameters(
+                    parameterWithName("page").description("조회 페이지 (첫 페이지는 1)").optional()
+                        .attributes(key("default").value("1")),
+                    parameterWithName("size").description("조회 페이지 크기").optional()
+                        .attributes(key("default").value("20")),
                     parameterWithName("startDate").description("지출 조회 시작 날짜").optional()
                         .attributes(key("formats").value("yyyy-MM-dd"))
                         .attributes(key("default").value("현재 날짜 기준 1달 전")),
@@ -183,6 +202,10 @@ class ExpenditureControllerTest extends AbstractRestDocsTest {
                         .attributes(key("default").value("1000,000원")),
                     parameterWithName("excepts").description("지출 합계 제외 지출 id").optional()
                         .attributes(key("default").value("조회된 모든 지출을 합계에 포함"))),
+
+                responseHeaders(
+                    headerWithName(HttpHeaders.LINK).description("페이징 관련 링크 (첫 페이지|이전 페이지|다음 페이지|마지막 페이지)")
+                        .attributes(key("formats").value("<URI>; rel=\"[first|prev|next|last]\""))),
 
                 responseFields(
                     beneathPath("data").withSubsectionId("data"),

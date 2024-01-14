@@ -32,6 +32,7 @@ import com.wanted.safewallet.domain.auth.config.AuthTestConfig;
 import com.wanted.safewallet.domain.auth.utils.JwtProperties;
 import com.wanted.safewallet.domain.auth.web.dto.request.LoginRequest;
 import com.wanted.safewallet.domain.user.persistence.entity.User;
+import com.wanted.safewallet.global.dto.response.aop.PageStore;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Import(AuthTestConfig.class)
+@Import({AuthTestConfig.class, PageStore.class})
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends AbstractRestDocsTest {
 
