@@ -14,7 +14,7 @@ operation::expenditure-controller-test/get-expenditure-details[snippets="respons
 - 조회된 모든 내용의 `지출 합계`, `카테고리 별 지출 합계` 반환
 - `지출일`, `지출 금액`, `지출 id` 를 기준으로 내림차순 정렬
 
-operation::expenditure-controller-test/search-expenditure[snippets="http-request,query-parameters,response-body,response-fields-data"]
+operation::expenditure-controller-test/search-expenditure[snippets="http-request,query-parameters,http-response,response-headers,response-fields-data"]
 
 === 지출 합계 제외 API
 ==== `GET /api/expenditures/excepts`
